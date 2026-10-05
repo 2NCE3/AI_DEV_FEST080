@@ -37,6 +37,15 @@ export default function Home() {
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [aiTrained, setAiTrained] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     // Train local AI model on mount
@@ -237,6 +246,8 @@ export default function Home() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
+          isDarkMode={isDarkMode}
+          onToggleTheme={() => setIsDarkMode((d) => !d)}
         />
 
         {/* Dynamic View Container */}

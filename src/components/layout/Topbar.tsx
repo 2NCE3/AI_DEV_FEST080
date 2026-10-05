@@ -11,6 +11,8 @@ import {
   Zap,
   Menu,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 interface TopbarProps {
@@ -21,6 +23,8 @@ interface TopbarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onToggleSidebar: () => void;
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -31,6 +35,8 @@ export const Topbar: React.FC<TopbarProps> = ({
   searchQuery,
   setSearchQuery,
   onToggleSidebar,
+  isDarkMode,
+  onToggleTheme,
 }) => {
   const [showHelp, setShowHelp] = useState(false);
 
@@ -89,6 +95,16 @@ export const Topbar: React.FC<TopbarProps> = ({
           <span>Live · 24h</span>
           <ChevronDown size={13} className="text-gray-400 flex-shrink-0" aria-hidden="true" />
         </div>
+
+        {/* Theme Toggle */}
+        <button
+          onClick={onToggleTheme}
+          className="icon-btn"
+          title="Toggle Dark Mode"
+          aria-label="Toggle Dark Mode"
+        >
+          {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
 
         {/* Help */}
         <button

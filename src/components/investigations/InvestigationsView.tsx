@@ -85,7 +85,7 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
         {/* Meta & Filters */}
         <div className="table-meta">
           <div className="field w-80">
-            <Search size={14} className="text-gray-400 shrink-0" />
+            <Search size={14} className="text-subtle shrink-0" />
             <input
               type="text"
               placeholder="Search case ID, customer, reason, or analyst..."
@@ -96,7 +96,7 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500 font-medium">
+            <div className="text-xs text-subtle font-medium">
               Showing {filteredCases.length} open cases
             </div>
           </div>
@@ -142,17 +142,17 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                       {c.riskLevel}
                     </span>
                   </td>
-                  <td className="font-mono text-gray-800 font-semibold">{c.customer}</td>
-                  <td className="amount font-bold text-gray-900">
+                  <td className="font-mono text-ink font-semibold">{c.customer}</td>
+                  <td className="amount font-bold text-ink">
                     ৳{c.amount.toLocaleString()}
                   </td>
-                  <td className="text-gray-700 max-w-xs truncate">{c.reason}</td>
+                  <td className="text-ink max-w-xs truncate">{c.reason}</td>
                   <td>
                     <div className="flex items-center gap-1.5">
                       <span className="analyst-avatar text-emerald-900 bg-emerald-100">
                         {c.analyst[0]}
                       </span>
-                      <span className="text-xs text-gray-800">{c.analyst}</span>
+                      <span className="text-xs text-ink">{c.analyst}</span>
                     </div>
                   </td>
                   <td>
@@ -166,7 +166,7 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                       {c.status}
                     </span>
                   </td>
-                  <td className="text-gray-500 text-xs">{c.updated}</td>
+                  <td className="text-subtle text-xs">{c.updated}</td>
                   <td className="text-right">
                     <button
                       onClick={(e) => {

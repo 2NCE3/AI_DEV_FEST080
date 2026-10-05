@@ -56,10 +56,14 @@ upay-Sentinel/
 │   │   ├── layout/         # Topbar, Sidebar, Navigation
 │   │   ├── overview/       # Dashboard KPI Cards & Charts
 │   │   ├── transactions/   # Transaction Monitoring List & Detail Drawer
+│   │   ├── network/        # Fraud Network Intelligence & Node Graphs
 │   │   ├── investigations/ # Deep-dive Investigation View & Sentinel Assistant Chat
-│   │   └── simulation/     # Attack Simulator Modal
+│   │   ├── simulation/     # Attack Simulator Modal
+│   │   └── ui/             # Reusable UI elements (AppTour walkthrough, Settings)
 │   ├── lib/                # Utilities and API logic
-│   │   ├── data.ts         # Mock data for dashboard & transactions
+│   │   ├── data.ts         # Mock dataset for dashboard, transactions, and ML training
+│   │   ├── fraud-engine.ts # Rule-based deterministic scoring logic
+│   │   ├── ml-engine.ts    # TensorFlow.js neural network for AI Overdrive scoring
 │   │   └── gemini.ts       # Core logic for calling the Gemini API & Fallback behaviors
 │   └── types/              # TypeScript interface definitions
 ```
@@ -86,6 +90,14 @@ Inside an active investigation, analysts can chat with the AI.
 To demonstrate the platform's capabilities, the topbar includes a "Simulate Attack" button (lightning bolt icon).
 - This opens a modal where you can inject synthetic fraud vectors (e.g., a Mule Network Surge, Account Takeover, or Micro-structuring Burst).
 - Injecting a transaction instantly adds it to the monitoring feed, calculates a risk score, and allows you to open a full AI investigation on it.
+
+#### 5. Local Machine Learning Engine (`ml-engine.ts`)
+The platform uses **TensorFlow.js** to train a lightweight sequential neural network directly in the browser upon startup.
+- It leverages the dataset in `data.ts` to recognize patterns (velocity flags, location anomalies, new devices).
+- When new transactions stream in, the ML model provides a probabilistic "AI Overdrive" score that can override legacy heuristic rules if it identifies hidden risk factors.
+
+#### 6. Guided App Tour (`AppTour.tsx`)
+A built-in interactive walkthrough (powered by `react-joyride`) guides new users through the platform, blurring the background to focus on key areas such as the Transaction Monitor, Simulator, and Network Intelligence views.
 
 ---
 

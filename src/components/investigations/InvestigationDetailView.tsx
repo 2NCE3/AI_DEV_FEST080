@@ -93,7 +93,7 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
             <Activity size={18} />
           </div>
           <span>Transactions</span>
-          <b className="text-gray-900">27</b>
+          <b className="text-ink">27</b>
         </div>
 
         <div>
@@ -114,7 +114,7 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
             <DollarSign size={18} />
           </div>
           <span>Potential Exposure</span>
-          <b className="text-gray-900">৳{exposure.toLocaleString()}</b>
+          <b className="text-ink">৳{exposure.toLocaleString()}</b>
         </div>
       </div>
 
@@ -146,8 +146,8 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
         <div className="col-span-7 space-y-4">
           {/* AI Investigation Summary Card */}
           <div className="card-base case-overview p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <h2 className="text-sm font-bold text-gray-900">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <h2 className="text-sm font-bold text-ink">
                 AI Automated Investigation Summary
               </h2>
               <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
@@ -155,7 +155,7 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
               </span>
             </div>
 
-            <p className="text-xs text-gray-700 leading-relaxed mt-3">
+            <p className="text-xs text-ink leading-relaxed mt-3">
               Customer <b>{customer}</b> performed an unusually large transfer of{" "}
               <b>৳48,500</b> from newly registered device <b>DEV-8821</b> at 02:13 AM.
               The recipient <b>U-8831</b> is topologically connected to previously flagged
@@ -163,7 +163,7 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
               high probability of account takeover and illicit money-mule layering.
             </p>
 
-            <div className="summary-sources mt-3 pt-3 border-t border-gray-100">
+            <div className="summary-sources mt-3 pt-3 border-t border-line">
               <span>Grounded in telemetry:</span>
               <b>27 historical transactions</b>
               <b>3 distinct devices</b>
@@ -173,14 +173,14 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
 
           {/* Chronological Evidence Timeline Card */}
           <div className="card-base timeline-card p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
               <div>
-                <h2 className="text-sm font-bold text-gray-900">Evidence Timeline</h2>
-                <p className="text-xs text-gray-500">
+                <h2 className="text-sm font-bold text-ink">Evidence Timeline</h2>
+                <p className="text-xs text-subtle">
                   Chronological progression of risk markers
                 </p>
               </div>
-              <span className="text-[11px] font-mono text-gray-400">
+              <span className="text-[11px] font-mono text-subtle">
                 UTC+6 / Dhaka Time
               </span>
             </div>
@@ -193,7 +193,7 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
                     ev.isCritical ? "bg-rose-50/70 border border-rose-100" : ""
                   }`}
                 >
-                  <span className="text-[11px] text-gray-400 font-mono w-16 shrink-0 pt-0.5">
+                  <span className="text-[11px] text-subtle font-mono w-16 shrink-0 pt-0.5">
                     {ev.time}
                   </span>
                   <div
@@ -202,10 +202,10 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
                     }`}
                   />
                   <div className="text-xs flex-1">
-                    <b className={ev.isCritical ? "text-rose-900" : "text-gray-900"}>
+                    <b className={ev.isCritical ? "text-rose-900" : "text-ink"}>
                       {ev.title}
                     </b>
-                    <p className="text-gray-600 mt-0.5">{ev.description}</p>
+                    <p className="text-muted mt-0.5">{ev.description}</p>
                   </div>
                 </div>
               ))}
@@ -220,10 +220,10 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
               </div>
               <div>
                 <div className="eyebrow text-emerald-800">RECOMMENDED INTERVENTION</div>
-                <h4 className="text-xs font-bold text-gray-900">
+                <h4 className="text-xs font-bold text-ink">
                   Manual Verification & Recipient Settlement Hold
                 </h4>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-muted">
                   Verify customer identity via outbound biometric challenge and freeze recipient
                   wallet U-8831.
                 </p>
@@ -247,7 +247,7 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
 
       {/* Persistent Bottom Action Bar */}
       <div className="action-bar select-none">
-        <div className="flex items-center gap-2 text-xs text-gray-600">
+        <div className="flex items-center gap-2 text-xs text-muted">
           <ShieldAlert size={16} className="text-amber-600" />
           <span>
             <b>Human Oversight Required:</b> High-impact account sanctions require analyst confirmation.

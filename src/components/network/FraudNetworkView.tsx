@@ -52,11 +52,11 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg p-1 text-xs">
+          <div className="flex items-center gap-1.5 bg-surface border border-line rounded-lg p-1 text-xs">
             <button
               onClick={() => setFilterType("all")}
               className={`px-2.5 py-1 rounded font-medium ${
-                filterType === "all" ? "bg-emerald-50 text-emerald-800" : "text-gray-600"
+                filterType === "all" ? "bg-emerald-50 text-emerald-800" : "text-muted"
               }`}
             >
               All Nodes
@@ -64,7 +64,7 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
             <button
               onClick={() => setFilterType("mule")}
               className={`px-2.5 py-1 rounded font-medium ${
-                filterType === "mule" ? "bg-rose-50 text-rose-700" : "text-gray-600"
+                filterType === "mule" ? "bg-rose-50 text-rose-700" : "text-muted"
               }`}
             >
               Mule Syndicate Only
@@ -197,11 +197,14 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
                     className={nodeClass}
                     transform={`translate(${node.x} ${node.y})`}
                     onClick={() => handleNodeClick(node)}
-                    onMouseEnter={() => handleNodeClick(node)}
+                    style={{ cursor: "pointer" }}
                   >
-                    <circle r={isSelected ? 28 : node.clusterId === 17 ? 24 : 20} />
+                    <circle r={isSelected ? 28 : node.clusterId === 17 ? 24 : 20}>
+                      <title>{node.label} - Risk: {node.risk}</title>
+                    </circle>
                     <text textAnchor="middle" y="4">
                       {node.type === "device" ? "DEV" : node.type === "merchant" ? "M" : "U"}
+                      <title>{node.label} - Risk: {node.risk}</title>
                     </text>
                     <text className="node-label" textAnchor="middle" y={isSelected ? 42 : 36}>
                       {node.label}
@@ -235,21 +238,21 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
 
             {/* Stats Metrics */}
             <div className="cluster-stats">
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <b className="text-gray-900 text-lg">17</b>
-                <span className="text-[11px] text-gray-500">Linked Wallets</span>
+              <div className="p-3 bg-appBg rounded-lg">
+                <b className="text-ink text-lg">17</b>
+                <span className="text-[11px] text-subtle">Linked Wallets</span>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <b className="text-gray-900 text-lg">43</b>
-                <span className="text-[11px] text-gray-500">Transactions</span>
+              <div className="p-3 bg-appBg rounded-lg">
+                <b className="text-ink text-lg">43</b>
+                <span className="text-[11px] text-subtle">Transactions</span>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <b className="text-gray-900 text-lg">8</b>
-                <span className="text-[11px] text-gray-500">Shared Devices</span>
+              <div className="p-3 bg-appBg rounded-lg">
+                <b className="text-ink text-lg">8</b>
+                <span className="text-[11px] text-subtle">Shared Devices</span>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <b className="text-gray-900 text-lg">৳2.8M</b>
-                <span className="text-[11px] text-gray-500">Aggregate Volume</span>
+              <div className="p-3 bg-appBg rounded-lg">
+                <b className="text-ink text-lg">৳2.8M</b>
+                <span className="text-[11px] text-subtle">Aggregate Volume</span>
               </div>
             </div>
 
@@ -269,7 +272,7 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
                 <span>Selected Entity: {selectedNode.label}</span>
                 <span className="badge badge-critical text-[9px]">{selectedNode.risk}</span>
               </div>
-              <p className="text-xs text-gray-700 mt-2">{selectedNode.details}</p>
+              <p className="text-xs text-ink mt-2">{selectedNode.details}</p>
               <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => onNavigate("customers")}
@@ -289,14 +292,14 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
 
             {/* Top Indicators Checklist */}
             <div className="indicators mt-4">
-              <h4 className="text-xs font-bold text-gray-900 mb-2">Syndicate Key Indicators</h4>
+              <h4 className="text-xs font-bold text-ink mb-2">Syndicate Key Indicators</h4>
               {[
                 "Shared device DEV-8821 across victim & recipient accounts",
                 "Rapid fund hopping (< 180 seconds between hops)",
                 "Layering to terminal liquidation node U-9288",
                 "Nocturnal burst transactions past 02:00 AM",
               ].map((indicator, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-xs text-gray-700 py-1.5">
+                <div key={idx} className="flex items-center gap-2 text-xs text-ink py-1.5">
                   <span className="w-4 h-4 rounded-full bg-amber-100 text-amber-800 font-bold text-[9px] flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
@@ -320,8 +323,8 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
       {/* Network Timeline Mini Card */}
       <div className="card-base timeline-mini p-4 flex items-center gap-6">
         <div className="w-52 shrink-0">
-          <h4 className="text-xs font-bold text-gray-900">Network Hourly Velocity</h4>
-          <span className="text-[11px] text-gray-400">Transactions across cluster entities</span>
+          <h4 className="text-xs font-bold text-ink">Network Hourly Velocity</h4>
+          <span className="text-[11px] text-subtle">Transactions across cluster entities</span>
         </div>
         <div className="flex-1 flex flex-col justify-center">
           <div className="timeline-bars h-12 flex items-end gap-1">
@@ -336,7 +339,7 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
               )
             )}
           </div>
-          <div className="flex justify-between text-[10px] text-gray-400 font-mono pt-1">
+          <div className="flex justify-between text-[10px] text-subtle font-mono pt-1">
             <span>12:00 AM</span>
             <span>06:00 AM</span>
             <span>12:00 PM</span>

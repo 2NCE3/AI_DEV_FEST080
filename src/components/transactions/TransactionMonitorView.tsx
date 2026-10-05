@@ -83,7 +83,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
           <button
             onClick={onToggleStreaming}
             className={`btn text-xs flex items-center gap-1.5 ${
-              isStreaming ? "btn-secondary text-emerald-700" : "btn-secondary text-gray-600"
+              isStreaming ? "btn-secondary text-emerald-700" : "btn-secondary text-muted"
             }`}
           >
             {isStreaming ? (
@@ -120,7 +120,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
       <div className="grid grid-cols-12 gap-2 text-xs">
         {/* Search */}
         <div className="col-span-3 field">
-          <Search size={14} className="text-gray-400 shrink-0" />
+          <Search size={14} className="text-subtle shrink-0" />
           <input
             type="text"
             placeholder="Search txn, user, device..."
@@ -216,7 +216,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
               setSelectedDevice("All");
               setCurrentPage(1);
             }}
-            className="filter-button w-full justify-center text-xs hover:bg-gray-50"
+            className="filter-button w-full justify-center text-xs hover:bg-appBg"
             title="Reset Filters"
           >
             <Filter size={13} />
@@ -230,13 +230,13 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
         {/* Table Meta bar */}
         <div className="table-meta">
           <div className="flex items-center gap-2">
-            <b className="text-gray-900 text-sm">Live Transactions</b>
-            <span className="text-gray-400 text-xs flex items-center gap-1">
+            <b className="text-ink text-sm">Live Transactions</b>
+            <span className="text-subtle text-xs flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Real-time Ingestion Stream
             </span>
           </div>
-          <span className="text-xs text-gray-500 font-medium">
+          <span className="text-xs text-subtle font-medium">
             Showing {filtered.length} matching transactions
           </span>
         </div>
@@ -262,7 +262,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="text-center py-10 text-gray-400">
+                  <td colSpan={11} className="text-center py-10 text-subtle">
                     No transactions match the selected filters.
                   </td>
                 </tr>
@@ -288,24 +288,24 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                         {txn.riskLevel}
                       </span>
                     </td>
-                    <td className="mono font-semibold text-gray-900">{txn.id}</td>
+                    <td className="mono font-semibold text-ink">{txn.id}</td>
                     <td className="link font-mono">{txn.customer}</td>
-                    <td className="amount font-bold text-gray-900">
+                    <td className="amount font-bold text-ink">
                       ৳{txn.amount.toLocaleString()}
                     </td>
-                    <td className="text-gray-600">{txn.time}</td>
+                    <td className="text-muted">{txn.time}</td>
                     <td>
                       <span
                         className={
                           txn.isNewDevice
                             ? "text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded text-[11px]"
-                            : "text-gray-600 font-mono text-[11px]"
+                            : "text-muted font-mono text-[11px]"
                         }
                       >
                         {txn.device}
                       </span>
                     </td>
-                    <td className="text-gray-700">{txn.location}</td>
+                    <td className="text-ink">{txn.location}</td>
                     <td className="link font-mono">{txn.recipient}</td>
                     <td>
                       <div
@@ -341,7 +341,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                           e.stopPropagation();
                           onSelectTransaction(txn);
                         }}
-                        className="text-gray-400 hover:text-emerald-700 p-1"
+                        className="text-subtle hover:text-emerald-700 p-1"
                         title="View Details"
                       >
                         <MoreVertical size={16} />
@@ -374,7 +374,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                 className={`w-7 h-7 rounded-md text-xs font-semibold ${
                   currentPage === num
                     ? "bg-[#0e9f67] text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                    : "bg-white text-ink hover:bg-appBg border border-line"
                 }`}
               >
                 {num}

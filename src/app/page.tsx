@@ -35,6 +35,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [unreadAlerts, setUnreadAlerts] = useState<number>(3);
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [aiTrained, setAiTrained] = useState<boolean>(false);
 
   useEffect(() => {
@@ -221,7 +222,8 @@ export default function Home() {
         unreadAlertsCount={unreadAlerts}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        onSettingsClick={() => setIsTourOpen(true)}
+        onSettingsClick={() => setIsSettingsOpen(true)}
+        onTourClick={() => setIsTourOpen(true)}
       />
 
       {/* Main Shell */}
@@ -359,6 +361,45 @@ export default function Home() {
         run={isTourOpen} 
         onFinish={() => setIsTourOpen(false)} 
       />
+
+      {isSettingsOpen && (
+        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-fadeIn">
+          <div className="bg-surface border border-line rounded-xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-ink mb-4">System Settings</h3>
+            <p className="text-sm text-subtle mb-6">
+              Adjust AI confidence thresholds, configure notification alerts, and manage integration keys.
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ink">AI Auto-Mitigation</span>
+                <input type="checkbox" className="toggle" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ink">Email Notifications</span>
+                <input type="checkbox" className="toggle" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ink">Webhook Integration</span>
+                <input type="checkbox" className="toggle" />
+              </div>
+            </div>
+            <div className="mt-8 flex justify-end gap-3">
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="btn btn-secondary text-sm"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="btn btn-primary text-sm"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,28 +10,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        navy: "#10261f",
-        ink: "#17231f",
-        muted: "#65736e",
-        subtle: "#8b9692",
-        line: "#e3e9e6",
-        surface: "#ffffff",
-        appBg: "#f5f8f6",
+        navy: "var(--navy)",
+        ink: "var(--ink)",
+        muted: "var(--muted)",
+        subtle: "var(--subtle)",
+        line: "var(--line)",
+        surface: "var(--surface)",
+        appBg: "var(--bg)",
         upay: {
-          DEFAULT: "#0e9f67",
-          dark: "#087c50",
-          soft: "#e8f7f0",
-          light: "#54d59d",
+          DEFAULT: "var(--green)",
+          dark: "var(--green-dark)",
+          soft: "var(--green-soft)",
+          light: "var(--green-mid)",
         },
         risk: {
-          critical: "#dc3f4d",
-          criticalSoft: "#fdecef",
-          high: "#e8752e",
-          highSoft: "#fff1e7",
-          medium: "#b7790b",
-          mediumSoft: "#fff7df",
-          low: "#0e9f67",
-          lowSoft: "#e8f7f0",
+          critical: "var(--red)",
+          criticalSoft: "var(--red-soft)",
+          high: "var(--orange)",
+          highSoft: "var(--orange-soft)",
+          medium: "var(--amber)",
+          mediumSoft: "var(--amber-soft)",
+          low: "var(--green)",
+          lowSoft: "var(--green-soft)",
         },
       },
       fontFamily: {
@@ -38,9 +39,9 @@ export default {
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        card: "0 1px 3px rgba(16, 38, 31, 0.05), 0 1px 2px rgba(16, 38, 31, 0.03)",
-        drawer: "-10px 0 40px rgba(16, 38, 31, 0.12)",
-        subtle: "0 2px 8px rgba(16, 38, 31, 0.04)",
+        card: "var(--shadow-card)",
+        drawer: "var(--shadow-lg)",
+        subtle: "var(--shadow-md)",
       },
     },
   },

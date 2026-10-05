@@ -6,6 +6,8 @@
 /.next/
 /out/
 
+/.agents
+
 # Production
 /build
 /dist

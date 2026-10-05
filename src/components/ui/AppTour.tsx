@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Joyride, STATUS, Step } from "react-joyride";
+import Joyride, { STATUS, Step } from "react-joyride";
 
 interface AppTourProps {
   run: boolean;

@@ -84,13 +84,13 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       <div className="grid grid-cols-4 gap-3.5">
         {analyticsKpis.map((kpi, i) => (
           <div key={i} className="card-base p-4.5">
-            <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
+            <div className="flex items-center justify-between text-xs text-subtle font-medium">
               <span>{kpi.title}</span>
               <div className={`w-8 h-8 rounded-lg ${kpi.bg} flex items-center justify-center shrink-0`}>
                 {kpi.icon}
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mt-2 tracking-tight">
+            <div className="text-2xl font-bold text-ink mt-2 tracking-tight">
               {kpi.value}
             </div>
             <div className="text-[11px] text-emerald-700 font-medium mt-1 flex items-center gap-1">
@@ -105,12 +105,12 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       <div className="grid grid-cols-12 gap-4">
         {/* Card 1: Fraud by Transaction Type */}
         <div className="col-span-6 card-base p-5">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div>
-              <h2 className="text-sm font-bold text-gray-900">Fraud by Transaction Type</h2>
-              <p className="text-xs text-gray-500">Frequency of high-risk vector attempts</p>
+              <h2 className="text-sm font-bold text-ink">Fraud by Transaction Type</h2>
+              <p className="text-xs text-subtle">Frequency of high-risk vector attempts</p>
             </div>
-            <span className="text-[11px] text-gray-400 font-mono">Last 30 Days</span>
+            <span className="text-[11px] text-subtle font-mono">Last 30 Days</span>
           </div>
 
           <div className="mt-4 space-y-3.5 text-xs">
@@ -127,12 +127,12 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                 className="space-y-1 cursor-pointer group"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-medium group-hover:text-emerald-800 transition-colors">
+                  <span className="text-ink font-medium group-hover:text-emerald-800 transition-colors">
                     {item.type}
                   </span>
-                  <b className="font-mono text-gray-900">{item.pct}%</b>
+                  <b className="font-mono text-ink">{item.pct}%</b>
                 </div>
-                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-appBg rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${item.barClass}`}
                     style={{ width: `${item.pct}%` }}
@@ -145,52 +145,52 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
         {/* Card 2: Investigation Outcomes */}
         <div className="col-span-6 card-base p-5">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div>
-              <h2 className="text-sm font-bold text-gray-900">Investigation Case Outcomes</h2>
-              <p className="text-xs text-gray-500">Resolution distribution across 1,248 cases</p>
+              <h2 className="text-sm font-bold text-ink">Investigation Case Outcomes</h2>
+              <p className="text-xs text-subtle">Resolution distribution across 1,248 cases</p>
             </div>
-            <span className="text-[11px] text-gray-400 font-mono">1,248 Total Cases</span>
+            <span className="text-[11px] text-subtle font-mono">1,248 Total Cases</span>
           </div>
 
           <div className="flex items-center gap-6 mt-4 py-2">
             {/* Outcome Donut */}
             <div className="w-32 h-32 rounded-full conic-gradient-custom relative shrink-0 shadow-xs flex items-center justify-center bg-gradient-to-tr from-rose-500 via-amber-500 to-emerald-500 p-2">
               <div className="w-20 h-20 bg-white rounded-full flex flex-col items-center justify-center text-center shadow-inner">
-                <b className="text-sm font-bold text-gray-900 leading-tight">1,248</b>
-                <span className="text-[9.5px] text-gray-400">Resolved</span>
+                <b className="text-sm font-bold text-ink leading-tight">1,248</b>
+                <span className="text-[9.5px] text-subtle">Resolved</span>
               </div>
             </div>
 
             {/* Outcome Breakdown List */}
             <div className="flex-1 space-y-2.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-gray-700">
+                <span className="flex items-center gap-1.5 text-ink">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
                   Confirmed Fraud (Funds Blocked)
                 </span>
-                <b className="font-mono text-gray-900">42% (524)</b>
+                <b className="font-mono text-ink">42% (524)</b>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-gray-700">
+                <span className="flex items-center gap-1.5 text-ink">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                   False Positive (Model tuned)
                 </span>
-                <b className="font-mono text-gray-900">28% (350)</b>
+                <b className="font-mono text-ink">28% (350)</b>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-gray-700">
+                <span className="flex items-center gap-1.5 text-ink">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   Customer Verified (Biometric Pass)
                 </span>
-                <b className="font-mono text-gray-900">19% (237)</b>
+                <b className="font-mono text-ink">19% (237)</b>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-gray-700">
+                <span className="flex items-center gap-1.5 text-ink">
                   <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
                   Pending Additional Evidence
                 </span>
-                <b className="font-mono text-gray-900">11% (137)</b>
+                <b className="font-mono text-ink">11% (137)</b>
               </div>
             </div>
           </div>
@@ -198,12 +198,12 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
         {/* Card 3: Model Performance Metrics */}
         <div className="col-span-12 card-base p-5">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div>
-              <h2 className="text-sm font-bold text-gray-900">
+              <h2 className="text-sm font-bold text-ink">
                 Machine Learning Model Performance & Telemetry
               </h2>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-subtle">
                 Cross-validated evaluation benchmarks on held-out test split (120,000 synthetic records)
               </p>
             </div>
@@ -219,15 +219,15 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               { metric: "F1 Score", score: "95.4%", sub: "Harmonic mean of precision & recall", width: "95.4%" },
               { metric: "ROC-AUC", score: "98.2%", sub: "High separation between normal and fraud", width: "98.2%" },
             ].map((m) => (
-              <div key={m.metric} className="p-3.5 bg-gray-50 rounded-xl border border-gray-100 space-y-1.5">
+              <div key={m.metric} className="p-3.5 bg-appBg rounded-xl border border-line space-y-1.5">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-gray-500 font-semibold">{m.metric}</span>
-                  <b className="text-gray-900 text-sm font-bold font-mono">{m.score}</b>
+                  <span className="text-subtle font-semibold">{m.metric}</span>
+                  <b className="text-ink text-sm font-bold font-mono">{m.score}</b>
                 </div>
-                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-line rounded-full overflow-hidden">
                   <div className="h-full bg-[#0e9f67] rounded-full" style={{ width: m.width }} />
                 </div>
-                <span className="text-[10px] text-gray-400 block">{m.sub}</span>
+                <span className="text-[10px] text-subtle block">{m.sub}</span>
               </div>
             ))}
           </div>
@@ -235,24 +235,24 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
 
         {/* Card 4: Real-time AI Model Monitoring & Drift */}
         <div className="col-span-12 card-base p-5">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
                 <Sparkles size={15} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-gray-900">
+                <h3 className="text-sm font-bold text-ink">
                   Real-time AI Model Drift & Service Monitoring
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-subtle">
                   Continuous distribution Kolmogorov-Smirnov test against reference baselines
                 </p>
               </div>
             </div>
-            <span className="text-xs text-gray-400 font-mono">Telemetry interval: 10s</span>
+            <span className="text-xs text-subtle font-mono">Telemetry interval: 10s</span>
           </div>
 
-          <div className="grid grid-cols-4 gap-4 mt-4 divide-x divide-gray-100">
+          <div className="grid grid-cols-4 gap-4 mt-4 divide-x divide-line">
             {[
               { service: "Real-time Risk Engine", model: "XGBoost Classifier", drift: "0.012 (No drift)", status: "Optimal" },
               { service: "Anomaly Detection", model: "Isolation Forest + Autoencoder", drift: "0.018 (Stable)", status: "Optimal" },
@@ -260,10 +260,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
               { service: "Investigation Copilot", model: "Google Gemini 1.5 Pro", drift: "Grounding verified", status: "Optimal" },
             ].map((s, idx) => (
               <div key={s.service} className={`text-xs space-y-1 ${idx > 0 ? "pl-4" : ""}`}>
-                <b className="text-gray-900 block">{s.service}</b>
-                <span className="text-[11px] text-gray-400 block font-mono">{s.model}</span>
+                <b className="text-ink block">{s.service}</b>
+                <span className="text-[11px] text-subtle block font-mono">{s.model}</span>
                 <div className="pt-1 flex items-center justify-between">
-                  <span className="text-[10px] text-gray-500">Drift score:</span>
+                  <span className="text-[10px] text-subtle">Drift score:</span>
                   <span className="text-emerald-700 font-semibold font-mono text-[11px]">{s.drift}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold pt-0.5">

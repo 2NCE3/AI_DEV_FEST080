@@ -14,6 +14,9 @@ import {
   BarChart3,
   Settings,
   X,
+  Moon,
+  Sun,
+  HelpCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -23,6 +26,7 @@ interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
   onSettingsClick?: () => void;
+  onTourClick?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -32,7 +36,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpen = false,
   onClose,
   onSettingsClick,
+  onTourClick,
 }) => {
+  const [isDark, setIsDark] = React.useState(false);
+
+  React.useEffect(() => {
+    // Check initial
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleTheme = () => {
+    const isNowDark = document.documentElement.classList.toggle("dark");
+    setIsDark(isNowDark);
+  };
+
   const navItems: { id: NavigationPage; label: string; icon: React.ReactNode }[] = [
     { id: "overview",      label: "Overview",            icon: <LayoutGrid  size={17} /> },
     { id: "transactions",  label: "Transaction Monitor", icon: <Activity    size={17} /> },
@@ -137,14 +154,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <b>Arman Hossen</b>
               <small>Senior Fraud Analyst</small>
             </div>
-            <button
-              title="Start App Tour"
-              onClick={onSettingsClick}
-              className="btn-settings text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
-              aria-label="Settings"
-            >
-              <Settings size={15} />
-            </button>
+            <div className="flex flex-col gap-1">
+              <button
+                title="Toggle Dark Theme (Orange Accent)"
+                onClick={toggleTheme}
+                className="text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0"
+                aria-label="Toggle Theme"
+              >
+                {isDark ? <Sun size={15} /> : <Moon size={15} />}
+              </button>
+              <button
+                title="Start App Tour"
+                onClick={onTourClick}
+                className="text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0"
+                aria-label="Start Tour"
+              >
+                <HelpCircle size={15} />
+              </button>
+              <button
+                title="System Settings"
+                onClick={onSettingsClick}
+                className="btn-settings text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
+                aria-label="Settings"
+              >
+                <Settings size={15} />
+              </button>
+            </div>
           </div>
         </div>
       </aside>

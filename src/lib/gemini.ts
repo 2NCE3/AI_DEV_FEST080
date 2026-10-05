@@ -52,8 +52,8 @@ Return only valid JSON with this shape:
   "confidence": 95
 }`;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      let res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -63,6 +63,20 @@ Return only valid JSON with this shape:
           }),
         }
       );
+
+      if (!res.ok) {
+        res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: "application/json" },
+            }),
+          }
+        );
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -78,6 +92,9 @@ Return only valid JSON with this shape:
             isAiGenerated: true,
           };
         }
+      } else {
+        const errText = await res.text();
+        console.warn(`Gemini API error (Status ${res.status}):`, errText);
       }
     } catch (err) {
       console.warn("Gemini API call failed, falling back to local synthesis:", err);
@@ -133,8 +150,8 @@ Return JSON:
   "confidence": 95
 }`;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      let res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -144,6 +161,20 @@ Return JSON:
           }),
         }
       );
+
+      if (!res.ok) {
+        res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { responseMimeType: "application/json" },
+            }),
+          }
+        );
+      }
 
       if (res.ok) {
         const data = await res.json();

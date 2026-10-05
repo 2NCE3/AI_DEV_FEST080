@@ -83,17 +83,17 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
           <button
             onClick={onToggleStreaming}
             className={`btn text-xs flex items-center gap-1.5 ${
-              isStreaming ? "btn-secondary text-emerald-700" : "btn-secondary text-muted"
+              isStreaming ? "btn-secondary text-upay-dark" : "btn-secondary text-muted"
             }`}
           >
             {isStreaming ? (
               <>
-                <Pause size={14} className="text-amber-600" />
+                <Pause size={14} className="text-risk-high" />
                 <span>Pause Live Stream</span>
               </>
             ) : (
               <>
-                <Play size={14} className="text-emerald-600" />
+                <Play size={14} className="text-upay-DEFAULT" />
                 <span>Resume Live Stream</span>
               </>
             )}
@@ -232,7 +232,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
           <div className="flex items-center gap-2">
             <b className="text-ink text-sm">Live Transactions</b>
             <span className="text-subtle text-xs flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-upay-DEFAULT" />
               Real-time Ingestion Stream
             </span>
           </div>
@@ -271,7 +271,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                   <tr
                     key={txn.id}
                     onClick={() => onSelectTransaction(txn)}
-                    className="hover:bg-emerald-50/30 transition-colors"
+                    className="hover:bg-appBg transition-colors cursor-pointer"
                   >
                     <td>
                       <span
@@ -298,7 +298,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                       <span
                         className={
                           txn.isNewDevice
-                            ? "text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded text-[11px]"
+                            ? "text-risk-critical font-bold bg-risk-criticalSoft px-2 py-0.5 rounded text-[11px]"
                             : "text-muted font-mono text-[11px]"
                         }
                       >
@@ -311,12 +311,12 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
                           txn.riskLevel === "Critical"
-                            ? "bg-rose-100 text-rose-700"
+                            ? "bg-risk-criticalSoft text-risk-critical"
                             : txn.riskLevel === "High"
-                            ? "bg-amber-100 text-amber-800"
+                            ? "bg-risk-highSoft text-risk-high"
                             : txn.riskLevel === "Medium"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-emerald-100 text-emerald-800"
+                            ? "bg-risk-mediumSoft text-risk-medium"
+                            : "bg-risk-lowSoft text-risk-low"
                         }`}
                       >
                         {txn.riskScore}
@@ -326,10 +326,10 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                       <span
                         className={`px-2 py-1 rounded text-[11px] font-medium ${
                           txn.status === "Investigating"
-                            ? "bg-rose-50 text-rose-700 border border-rose-200"
+                            ? "bg-risk-criticalSoft text-risk-critical"
                             : txn.status === "Flagged"
-                            ? "bg-amber-50 text-amber-700 border border-amber-200"
-                            : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            ? "bg-risk-highSoft text-risk-high"
+                            : "bg-risk-lowSoft text-risk-low"
                         }`}
                       >
                         {txn.status}
@@ -341,7 +341,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                           e.stopPropagation();
                           onSelectTransaction(txn);
                         }}
-                        className="text-subtle hover:text-emerald-700 p-1"
+                        className="text-subtle hover:text-upay-dark p-1"
                         title="View Details"
                       >
                         <MoreVertical size={16} />
@@ -373,8 +373,8 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
                 onClick={() => setCurrentPage(num)}
                 className={`w-7 h-7 rounded-md text-xs font-semibold ${
                   currentPage === num
-                    ? "bg-[#0e9f67] text-white"
-                    : "bg-white text-ink hover:bg-appBg border border-line"
+                    ? "bg-upay-DEFAULT text-white"
+                    : "bg-surface text-ink hover:bg-appBg border border-line"
                 }`}
               >
                 {num}

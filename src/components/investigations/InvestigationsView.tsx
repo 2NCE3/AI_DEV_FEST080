@@ -123,10 +123,10 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                 <tr
                   key={c.id}
                   onClick={() => onSelectCase(c)}
-                  className="hover:bg-emerald-50/30 transition-colors"
+                  className="hover:bg-appBg transition-colors cursor-pointer"
                 >
-                  <td className="mono font-bold text-emerald-800 flex items-center gap-1.5">
-                    <Briefcase size={14} className="text-emerald-700" />
+                  <td className="mono font-bold text-upay-dark flex items-center gap-1.5">
+                    <Briefcase size={14} className="text-upay-DEFAULT" />
                     <span>{c.id}</span>
                   </td>
                   <td>
@@ -149,7 +149,7 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                   <td className="text-ink max-w-xs truncate">{c.reason}</td>
                   <td>
                     <div className="flex items-center gap-1.5">
-                      <span className="analyst-avatar text-emerald-900 bg-emerald-100">
+                      <span className="analyst-avatar text-upay-dark bg-upay-soft">
                         {c.analyst[0]}
                       </span>
                       <span className="text-xs text-ink">{c.analyst}</span>
@@ -159,8 +159,8 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                     <span
                       className={`status text-xs font-semibold ${
                         c.status === "Investigating"
-                          ? "text-rose-700 bg-rose-50 border border-rose-200"
-                          : "text-amber-700 bg-amber-50 border border-amber-200"
+                          ? "text-risk-critical bg-risk-criticalSoft"
+                          : "text-risk-high bg-risk-highSoft"
                       }`}
                     >
                       {c.status}

@@ -186,7 +186,7 @@ export const AlertCenterView: React.FC<AlertCenterViewProps> = ({
         <div className="col-span-4 card-base p-5 flex flex-col justify-between h-fit space-y-4">
           <div>
             <h3 className="text-sm font-bold text-gray-900 pb-2 border-b border-gray-100">
-              Today's Triage Summary
+              Today&apos;s Triage Summary
             </h3>
 
             <div className="text-center py-4 border-b border-gray-100">

@@ -1,0 +1,302 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { NavigationPage, Transaction, InvestigationCase } from "@/types";
+import { initialTransactions, investigationCases, alertsList } from "@/lib/data";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Topbar } from "@/components/layout/Topbar";
+import { OverviewView } from "@/components/overview/OverviewView";
+import { TransactionMonitorView } from "@/components/transactions/TransactionMonitorView";
+import { TransactionDrawer } from "@/components/transactions/TransactionDrawer";
+import { RiskIntelligenceView } from "@/components/risk/RiskIntelligenceView";
+import { FraudNetworkView } from "@/components/network/FraudNetworkView";
+import { InvestigationsView } from "@/components/investigations/InvestigationsView";
+import { InvestigationDetailView } from "@/components/investigations/InvestigationDetailView";
+import { CustomerIntelligenceView } from "@/components/customers/CustomerIntelligenceView";
+import { AlertCenterView } from "@/components/alerts/AlertCenterView";
+import { AnalyticsView } from "@/components/analytics/AnalyticsView";
+import { SimulationModal } from "@/components/simulation/SimulationModal";
+import { ReportExportModal } from "@/components/report/ReportExportModal";
+import { Toast } from "@/components/ui/Toast";
+import { scoreTransaction } from "@/lib/fraud-engine";
+
+export default function Home() {
+  const [currentPage, setCurrentPage] = useState<NavigationPage>("overview");
+  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [selectedDrawerTxn, setSelectedDrawerTxn] = useState<Transaction | null>(null);
+  const [selectedCase, setSelectedCase] = useState<InvestigationCase>(investigationCases[0]);
+  const [isStreaming, setIsStreaming] = useState<boolean>(true);
+  const [toastMessage, setToastMessage] = useState<string>("");
+  const [isSimModalOpen, setIsSimModalOpen] = useState<boolean>(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [unreadAlerts, setUnreadAlerts] = useState<number>(3);
+
+  const showNotification = (msg: string) => {
+    setToastMessage(msg);
+  };
+
+  const handleNavigate = (page: NavigationPage) => {
+    setCurrentPage(page);
+    setSelectedDrawerTxn(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Background stream simulator (generates a safe or minor transaction every 15s if enabled)
+  useEffect(() => {
+    if (!isStreaming) return;
+
+    const interval = setInterval(() => {
+      const locations = ["Dhaka", "Chattogram", "Sylhet", "Rajshahi", "Khulna"];
+      const types = ["Wallet Transfer", "Cash Out", "Merchant Pay", "Add Money", "Mobile Recharge"] as const;
+      const isAnomalous = Math.random() < 0.15; // 15% probability of an anomaly
+
+      const randomAmount = isAnomalous
+        ? Math.floor(Math.random() * 45000) + 25000
+        : Math.floor(Math.random() * 4000) + 500;
+
+      const randomCustNum = Math.floor(Math.random() * 9000) + 1000;
+      const randomRecipNum = Math.floor(Math.random() * 9000) + 1000;
+      const randomDev = isAnomalous
+        ? `DEV-${Math.floor(Math.random() * 9000) + 1000}`
+        : "DEV-2211";
+
+      const newTxnPartial: Partial<Transaction> = {
+        id: `TXN-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+        customer: `U-${randomCustNum}`,
+        recipient: isAnomalous ? "U-8831" : `U-${randomRecipNum}`,
+        amount: randomAmount,
+        type: types[Math.floor(Math.random() * types.length)],
+        device: randomDev,
+        isNewDevice: isAnomalous,
+        location: locations[Math.floor(Math.random() * locations.length)],
+        isNewLocation: isAnomalous,
+        time: new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+
+      const scoreResult = scoreTransaction(newTxnPartial);
+
+      const completeTxn: Transaction = {
+        ...newTxnPartial,
+        id: newTxnPartial.id!,
+        customer: newTxnPartial.customer!,
+        recipient: newTxnPartial.recipient!,
+        amount: newTxnPartial.amount!,
+        type: newTxnPartial.type!,
+        device: newTxnPartial.device!,
+        isNewDevice: newTxnPartial.isNewDevice!,
+        location: newTxnPartial.location!,
+        isNewLocation: newTxnPartial.isNewLocation!,
+        time: newTxnPartial.time!,
+        timestamp: Date.now(),
+        riskScore: scoreResult.riskScore,
+        riskLevel: scoreResult.riskLevel,
+        status:
+          scoreResult.riskLevel === "Critical"
+            ? "Investigating"
+            : scoreResult.riskLevel === "High"
+            ? "Flagged"
+            : "Approved",
+        flags: scoreResult.flags,
+      };
+
+      setTransactions((prev) => [completeTxn, ...prev.slice(0, 49)]);
+
+      if (scoreResult.riskLevel === "Critical") {
+        setUnreadAlerts((prev) => prev + 1);
+        showNotification(
+          `Critical Risk Detected: ৳${completeTxn.amount.toLocaleString()} on ${completeTxn.customer} (Score: ${scoreResult.riskScore})`
+        );
+      }
+    }, 12000);
+
+    return () => clearInterval(interval);
+  }, [isStreaming]);
+
+  // Inject attack / custom transaction handler
+  const handleInjectTransaction = (txnData: Partial<Transaction>) => {
+    const scoreResult = scoreTransaction(txnData);
+
+    const injected: Transaction = {
+      id: txnData.id || `TXN-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+      customer: txnData.customer || "U-1042",
+      recipient: txnData.recipient || "U-8831",
+      amount: txnData.amount || 48500,
+      type: txnData.type || "Wallet Transfer",
+      device: txnData.device || "DEV-8821",
+      isNewDevice: txnData.isNewDevice ?? true,
+      location: txnData.location || "Dhaka",
+      isNewLocation: txnData.isNewLocation ?? false,
+      time: txnData.time || "Just now",
+      timestamp: Date.now(),
+      riskScore: scoreResult.riskScore,
+      riskLevel: scoreResult.riskLevel,
+      status:
+        scoreResult.riskLevel === "Critical"
+          ? "Investigating"
+          : scoreResult.riskLevel === "High"
+          ? "Flagged"
+          : "Approved",
+      flags:
+        txnData.flags && txnData.flags.length > 0
+          ? txnData.flags
+          : scoreResult.flags,
+    };
+
+    setTransactions((prev) => [injected, ...prev]);
+
+    if (injected.riskLevel === "Critical") {
+      setUnreadAlerts((prev) => prev + 1);
+    }
+
+    showNotification(
+      `Injected ${injected.riskLevel} Transaction: ৳${injected.amount.toLocaleString()} (Score: ${injected.riskScore}/100)`
+    );
+
+    // Open drawer directly so the judge can immediately inspect the scoring!
+    setSelectedDrawerTxn(injected);
+  };
+
+  return (
+    <div className="app flex min-h-screen bg-[#f5f8f6]">
+      {/* Persistent Left Sidebar */}
+      <Sidebar
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        unreadAlertsCount={unreadAlerts}
+      />
+
+      {/* Main Shell */}
+      <div className="main-shell flex-1">
+        {/* Topbar */}
+        <Topbar
+          onOpenSimulation={() => setIsSimModalOpen(true)}
+          onOpenReport={() => setIsReportModalOpen(true)}
+          unreadCount={unreadAlerts}
+          onNavigateAlerts={() => handleNavigate("alerts")}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+        />
+
+        {/* Dynamic View Container */}
+        <main className="flex-1 p-7 max-w-[1600px] w-full mx-auto">
+          {currentPage === "overview" && (
+            <OverviewView
+              onNavigate={handleNavigate}
+              onOpenTransactionDrawer={(txn) => setSelectedDrawerTxn(txn)}
+              transactions={transactions}
+              onOpenReport={() => setIsReportModalOpen(true)}
+            />
+          )}
+
+          {currentPage === "transactions" && (
+            <TransactionMonitorView
+              transactions={transactions}
+              onSelectTransaction={(txn) => setSelectedDrawerTxn(txn)}
+              isStreaming={isStreaming}
+              onToggleStreaming={() => {
+                setIsStreaming(!isStreaming);
+                showNotification(
+                  isStreaming ? "Live simulation paused" : "Live simulation streaming resumed"
+                );
+              }}
+              onOpenSimulation={() => setIsSimModalOpen(true)}
+            />
+          )}
+
+          {currentPage === "risk" && (
+            <RiskIntelligenceView
+              onNavigate={handleNavigate}
+              onNotify={showNotification}
+            />
+          )}
+
+          {currentPage === "network" && (
+            <FraudNetworkView
+              onNavigate={handleNavigate}
+              onOpenCase={() => handleNavigate("investigation")}
+              onNotify={showNotification}
+            />
+          )}
+
+          {currentPage === "investigations" && (
+            <InvestigationsView
+              onSelectCase={(c) => {
+                setSelectedCase(c);
+                handleNavigate("investigation");
+              }}
+              onNewCaseModal={() => {
+                showNotification("New case wizard initiated. Auto-filling risk telemetry.");
+                handleNavigate("investigation");
+              }}
+            />
+          )}
+
+          {currentPage === "investigation" && (
+            <InvestigationDetailView
+              caseData={selectedCase}
+              onNavigate={handleNavigate}
+              onNotify={showNotification}
+            />
+          )}
+
+          {currentPage === "customers" && (
+            <CustomerIntelligenceView
+              onNavigate={handleNavigate}
+              onOpenCase={() => handleNavigate("investigation")}
+            />
+          )}
+
+          {currentPage === "alerts" && (
+            <AlertCenterView
+              onNavigate={handleNavigate}
+              onOpenCase={() => handleNavigate("investigation")}
+              onNotify={showNotification}
+            />
+          )}
+
+          {currentPage === "analytics" && (
+            <AnalyticsView
+              onNavigate={handleNavigate}
+              onOpenReport={() => setIsReportModalOpen(true)}
+            />
+          )}
+        </main>
+      </div>
+
+      {/* Slide-out Transaction Detail Drawer */}
+      <TransactionDrawer
+        transaction={selectedDrawerTxn}
+        onClose={() => setSelectedDrawerTxn(null)}
+        onOpenInvestigation={(txn) => {
+          setSelectedDrawerTxn(null);
+          handleNavigate("investigation");
+          showNotification(`Opened Investigation workspace for ${txn.id}`);
+        }}
+      />
+
+      {/* Simulation / Attack Injector Modal */}
+      <SimulationModal
+        isOpen={isSimModalOpen}
+        onClose={() => setIsSimModalOpen(false)}
+        onInjectTransaction={handleInjectTransaction}
+      />
+
+      {/* Export Report / Compliance Modal */}
+      <ReportExportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onNotify={showNotification}
+      />
+
+      {/* Toast Notification Container */}
+      <Toast
+        message={toastMessage}
+        onClose={() => setToastMessage("")}
+      />
+    </div>
+  );
+}

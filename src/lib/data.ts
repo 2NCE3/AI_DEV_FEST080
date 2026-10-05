@@ -170,6 +170,41 @@ export const initialTransactions: Transaction[] = [
     status: "Investigating",
     flags: ["Shared high-risk device DEV-8821", "Mule hub target wallet U-4412"],
   },
+  // Expanded Dataset Entries:
+  {
+    id: "TXN-99XB",
+    customer: "U-9182",
+    recipient: "U-9901",
+    amount: 98000,
+    time: "03:45 AM",
+    timestamp: Date.now() - 4 * 60 * 1000,
+    type: "Wallet Transfer",
+    device: "DEV-9901",
+    isNewDevice: true,
+    location: "Sylhet",
+    isNewLocation: true,
+    riskLevel: "Critical",
+    riskScore: 98,
+    status: "Investigating",
+    flags: ["Sim swap detected", "Max limit transfer", "Unrecognized IP address"],
+  },
+  {
+    id: "TXN-11CA",
+    customer: "U-1283",
+    recipient: "M-5501",
+    amount: 45000,
+    time: "08:15 PM",
+    timestamp: Date.now() - 300 * 60 * 1000,
+    type: "Merchant Pay",
+    device: "DEV-1283",
+    isNewDevice: false,
+    location: "Dhaka",
+    isNewLocation: false,
+    riskLevel: "Medium",
+    riskScore: 65,
+    status: "Flagged",
+    flags: ["Unusual merchant category", "Spike in evening volume"],
+  }
 ];
 
 export const riskFactorsTXN8F42: RiskFactor[] = [
@@ -314,6 +349,25 @@ export const investigationCases: InvestigationCase[] = [
     recommendation: "Request agent verification photo and transaction receipt.",
     confidence: 74,
   },
+  // Added Case
+  {
+    id: "INV-1055",
+    riskLevel: "Critical",
+    customer: "U-9182",
+    amount: 98000,
+    reason: "SIM Swap & Maximum Limit Drain",
+    analyst: "Unassigned",
+    status: "Investigating",
+    updated: "Just now",
+    createdTime: "Today at 03:46 AM",
+    exposure: 98000,
+    transactionsCount: 1,
+    networkConnections: 2,
+    riskScore: 98,
+    summary: "Complete account drain detected following a carrier SIM swap event in Sylhet. High priority critical alert.",
+    recommendation: "Freeze immediately. Reverse transaction and notify carrier.",
+    confidence: 99,
+  }
 ];
 
 export const evidenceTimelineINV1042: TimelineEvent[] = [
@@ -401,6 +455,10 @@ export const networkNodes: NetworkNode[] = [
   { id: "U-1028", label: "U-1028", type: "customer", risk: "normal", x: 815, y: 75, details: "Legitimate Freelancer Account" },
   { id: "DEV-1074", label: "DEV-1074", type: "device", risk: "normal", x: 825, y: 390, details: "Authorized Mobile Terminal" },
   { id: "AG-3091", label: "AG-3091 (Agent)", type: "agent", risk: "High", x: 260, y: 410, clusterId: 17, details: "Suspicious High-Volume Cash-Out Agent" },
+  // Expanded Network Nodes
+  { id: "U-9901", label: "U-9901", type: "recipient", risk: "Critical", x: 200, y: 100, clusterId: 99, details: "Known Fraudster Hub" },
+  { id: "U-9182", label: "U-9182", type: "customer", risk: "Critical", x: 250, y: 180, clusterId: 99, details: "Victim of SIM Swap" },
+  { id: "DEV-9901", label: "DEV-9901", type: "device", risk: "Critical", x: 100, y: 150, clusterId: 99, details: "Rogue Device from Emulator" },
 ];
 
 export const networkEdges: NetworkEdge[] = [
@@ -419,6 +477,10 @@ export const networkEdges: NetworkEdge[] = [
   { source: "U-9288", target: "U-1028", amount: 5000, type: "transfer" },
   { source: "U-2198", target: "DEV-1074", type: "shared_device" },
   { source: "U-1042", target: "AG-3091", amount: 30000, isHot: true, type: "agent_cashout" },
+  // Expanded Network Edges
+  { source: "U-9182", target: "U-9901", amount: 98000, isHot: true, type: "transfer" },
+  { source: "DEV-9901", target: "U-9182", isHot: true, type: "shared_device" },
+  { source: "DEV-9901", target: "U-9901", isHot: true, type: "shared_device" },
 ];
 
 export const alertsList: AlertItem[] = [
@@ -431,6 +493,17 @@ export const alertsList: AlertItem[] = [
     iconType: "network",
     confidence: 94,
     relatedId: "INV-1042",
+    unread: true,
+  },
+  {
+    id: "ALT-1049",
+    severity: "Critical",
+    title: "SIM Swap Fraud Vector Detected",
+    description: "SIM swapped on customer U-9182 10 minutes prior to a full balance drain of ৳98,000.",
+    timeAgo: "1 minute ago",
+    iconType: "shield",
+    confidence: 99,
+    relatedId: "INV-1055",
     unread: true,
   },
   {

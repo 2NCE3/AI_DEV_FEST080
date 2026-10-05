@@ -197,6 +197,7 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
                     className={nodeClass}
                     transform={`translate(${node.x} ${node.y})`}
                     onClick={() => handleNodeClick(node)}
+                    onMouseEnter={() => handleNodeClick(node)}
                   >
                     <circle r={isSelected ? 28 : node.clusterId === 17 ? 24 : 20} />
                     <text textAnchor="middle" y="4">

@@ -136,9 +136,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
         {kpiData.map((kpi, index) => (
-          <div key={index} className="card-base p-4.5 hover:shadow-md transition-shadow">
+          <div key={index} className="card-base p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
               <span>{kpi.label}</span>
               <div className={`w-7 h-7 rounded-lg ${kpi.bg} flex items-center justify-center shrink-0`}>
@@ -168,9 +168,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       </div>
 
       {/* Live Risk Activity and Risk Distribution */}
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Live Risk Chart */}
-        <div className="col-span-8 card-base p-5">
+        <div className="col-span-full lg:col-span-8 card-base p-5">
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <div>
               <h2 className="text-sm font-bold text-gray-900">Live Risk Activity</h2>
@@ -270,7 +270,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         </div>
 
         {/* Risk Distribution Donut */}
-        <div className="col-span-4 card-base p-5 flex flex-col justify-between">
+        <div className="col-span-full lg:col-span-4 card-base p-5 flex flex-col justify-between">
           <div>
             <h2 className="text-sm font-bold text-gray-900">Risk Distribution</h2>
             <p className="text-xs text-gray-500">MFS portfolio categorization (24h)</p>
@@ -328,9 +328,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
       </div>
 
       {/* Bottom 3 Columns */}
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4">
         {/* Col 1: Recent Critical Alerts */}
-        <div className="col-span-5 card-base p-5">
+        <div className="col-span-full md:col-span-1 xl:col-span-5 card-base p-5">
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <h2 className="text-sm font-bold text-gray-900">Recent Critical Alerts</h2>
             <button
@@ -376,7 +376,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         </div>
 
         {/* Col 2: AI Insights */}
-        <div className="col-span-4 card-base p-5 flex flex-col justify-between">
+        <div className="col-span-full md:col-span-1 xl:col-span-4 card-base p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h2 className="text-sm font-bold text-gray-900">AI Intelligence Insights</h2>
@@ -432,7 +432,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
         </div>
 
         {/* Col 3: System Health */}
-        <div className="col-span-3 card-base p-5 flex flex-col justify-between">
+        <div className="col-span-full md:col-span-full xl:col-span-3 card-base p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h2 className="text-sm font-bold text-gray-900">System Health</h2>

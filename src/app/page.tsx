@@ -18,6 +18,7 @@ import { AnalyticsView } from "@/components/analytics/AnalyticsView";
 import { SimulationModal } from "@/components/simulation/SimulationModal";
 import { ReportExportModal } from "@/components/report/ReportExportModal";
 import { Toast } from "@/components/ui/Toast";
+import { AppTour } from "@/components/ui/AppTour";
 import { scoreTransaction } from "@/lib/fraud-engine";
 
 export default function Home() {
@@ -26,11 +27,13 @@ export default function Home() {
   const [selectedDrawerTxn, setSelectedDrawerTxn] = useState<Transaction | null>(null);
   const [selectedCase, setSelectedCase] = useState<InvestigationCase>(investigationCases[0]);
   const [isStreaming, setIsStreaming] = useState<boolean>(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const [isSimModalOpen, setIsSimModalOpen] = useState<boolean>(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [unreadAlerts, setUnreadAlerts] = useState<number>(3);
+  const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
 
   const showNotification = (msg: string) => {
     setToastMessage(msg);
@@ -161,12 +164,14 @@ export default function Home() {
   };
 
   return (
-    <div className="app flex min-h-screen bg-[#f5f8f6]">
+    <div className="app flex min-h-screen bg-[#f4f7f5]">
       {/* Persistent Left Sidebar */}
       <Sidebar
         currentPage={currentPage}
         onNavigate={handleNavigate}
         unreadAlertsCount={unreadAlerts}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       {/* Main Shell */}
@@ -179,10 +184,11 @@ export default function Home() {
           onNavigateAlerts={() => handleNavigate("alerts")}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
         />
 
         {/* Dynamic View Container */}
-        <main className="flex-1 p-7 max-w-[1600px] w-full mx-auto">
+        <main className="flex-1 p-5 md:p-7 max-w-[1600px] w-full mx-auto">
           {currentPage === "overview" && (
             <OverviewView
               onNavigate={handleNavigate}
@@ -296,6 +302,12 @@ export default function Home() {
       <Toast
         message={toastMessage}
         onClose={() => setToastMessage("")}
+      />
+
+      {/* Onboarding / App Tour */}
+      <AppTour 
+        run={isTourOpen} 
+        onFinish={() => setIsTourOpen(false)} 
       />
     </div>
   );

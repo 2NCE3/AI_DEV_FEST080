@@ -20,6 +20,7 @@ import { ReportExportModal } from "@/components/report/ReportExportModal";
 import { Toast } from "@/components/ui/Toast";
 import { AppTour } from "@/components/ui/AppTour";
 import { scoreTransaction } from "@/lib/fraud-engine";
+import { fraudMLInstance } from "@/lib/ml-engine";
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<NavigationPage>("overview");
@@ -34,6 +35,15 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [unreadAlerts, setUnreadAlerts] = useState<number>(3);
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
+  const [aiTrained, setAiTrained] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Train local AI model on mount
+    fraudMLInstance.trainModel(initialTransactions).then(() => {
+      setAiTrained(true);
+      showNotification("🧠 Neural Network trained on mock transactions!");
+    });
+  }, []);
 
   const showNotification = (msg: string) => {
     setToastMessage(msg);
@@ -80,39 +90,61 @@ export default function Home() {
         }),
       };
 
-      const scoreResult = scoreTransaction(newTxnPartial);
+      let scoreResult = scoreTransaction(newTxnPartial);
+      
+      // Predict with our local TensorFlow.js model in the background stream
+      if (fraudMLInstance.isTrained) {
+        fraudMLInstance.predict(newTxnPartial).then((aiProb) => {
+          const aiScore = Math.round(aiProb * 100);
+          if (aiScore > scoreResult.riskScore) {
+            scoreResult.riskScore = aiScore;
+            if (aiScore >= 85) scoreResult.riskLevel = "Critical";
+            else if (aiScore >= 70) scoreResult.riskLevel = "High";
+            else if (aiScore >= 45) scoreResult.riskLevel = "Medium";
+            if (!scoreResult.flags.includes("🤖 Local AI Neural Net flagged anomaly")) {
+              scoreResult.flags.unshift("🤖 Local AI Neural Net flagged anomaly");
+            }
+          }
+          
+          finalizeStreamingTransaction(scoreResult);
+        });
+      } else {
+        finalizeStreamingTransaction(scoreResult);
+      }
 
-      const completeTxn: Transaction = {
-        ...newTxnPartial,
-        id: newTxnPartial.id!,
-        customer: newTxnPartial.customer!,
-        recipient: newTxnPartial.recipient!,
-        amount: newTxnPartial.amount!,
-        type: newTxnPartial.type!,
-        device: newTxnPartial.device!,
-        isNewDevice: newTxnPartial.isNewDevice!,
-        location: newTxnPartial.location!,
-        isNewLocation: newTxnPartial.isNewLocation!,
-        time: newTxnPartial.time!,
-        timestamp: Date.now(),
-        riskScore: scoreResult.riskScore,
-        riskLevel: scoreResult.riskLevel,
-        status:
-          scoreResult.riskLevel === "Critical"
-            ? "Investigating"
-            : scoreResult.riskLevel === "High"
-            ? "Flagged"
-            : "Approved",
-        flags: scoreResult.flags,
-      };
+      function finalizeStreamingTransaction(scoreResult: any) {
+        const completeTxn: Transaction = {
+          ...newTxnPartial,
+          id: newTxnPartial.id!,
+          customer: newTxnPartial.customer!,
+          recipient: newTxnPartial.recipient!,
+          amount: newTxnPartial.amount!,
+          type: newTxnPartial.type!,
+          device: newTxnPartial.device!,
+          isNewDevice: newTxnPartial.isNewDevice!,
+          location: newTxnPartial.location!,
+          isNewLocation: newTxnPartial.isNewLocation!,
+          time: newTxnPartial.time!,
+          timestamp: Date.now(),
+          riskScore: scoreResult.riskScore,
+          riskLevel: scoreResult.riskLevel,
+          status:
+            scoreResult.riskLevel === "Critical"
+              ? "Investigating"
+              : scoreResult.riskLevel === "High"
+              ? "Flagged"
+              : "Approved",
+          flags: scoreResult.flags,
+        };
 
-      setTransactions((prev) => [completeTxn, ...prev.slice(0, 49)]);
+        setTransactions((prev) => [completeTxn, ...prev.slice(0, 49)]);
 
-      if (scoreResult.riskLevel === "Critical") {
-        setUnreadAlerts((prev) => prev + 1);
-        showNotification(
-          `Critical Risk Detected: ৳${completeTxn.amount.toLocaleString()} on ${completeTxn.customer} (Score: ${scoreResult.riskScore})`
-        );
+        if (scoreResult.riskLevel === "Critical") {
+          setUnreadAlerts((prev) => prev + 1);
+          showNotification(
+            `Critical Risk Detected: ৳${completeTxn.amount.toLocaleString()} on ${completeTxn.customer} (Score: ${scoreResult.riskScore})`
+          );
+        }
       }
     }, 12000);
 
@@ -120,8 +152,25 @@ export default function Home() {
   }, [isStreaming]);
 
   // Inject attack / custom transaction handler
-  const handleInjectTransaction = (txnData: Partial<Transaction>) => {
-    const scoreResult = scoreTransaction(txnData);
+  const handleInjectTransaction = async (txnData: Partial<Transaction>) => {
+    let scoreResult = scoreTransaction(txnData);
+
+    // 🧠 AI Overdrive: If our TFJS model predicts higher risk, we override the rules engine!
+    if (aiTrained) {
+      const aiProb = await fraudMLInstance.predict(txnData);
+      const aiScore = Math.round(aiProb * 100);
+      
+      if (aiScore > scoreResult.riskScore) {
+        scoreResult.riskScore = aiScore;
+        if (aiScore >= 85) scoreResult.riskLevel = "Critical";
+        else if (aiScore >= 70) scoreResult.riskLevel = "High";
+        else if (aiScore >= 45) scoreResult.riskLevel = "Medium";
+        
+        if (!scoreResult.flags.includes("🤖 Local AI Neural Net flagged anomaly")) {
+          scoreResult.flags.unshift("🤖 Local AI Neural Net flagged anomaly");
+        }
+      }
+    }
 
     const injected: Transaction = {
       id: txnData.id || `TXN-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
@@ -144,9 +193,9 @@ export default function Home() {
           ? "Flagged"
           : "Approved",
       flags:
-        txnData.flags && txnData.flags.length > 0
+        txnData.flags && txnData.flags.length > 0 && scoreResult.flags.length === 0
           ? txnData.flags
-          : scoreResult.flags,
+          : [...(txnData.flags || []), ...scoreResult.flags],
     };
 
     setTransactions((prev) => [injected, ...prev]);

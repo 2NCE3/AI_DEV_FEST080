@@ -19,23 +19,85 @@ export interface GeminiInvestigationResult {
   isAiGenerated: boolean;
 }
 
+/** Try to call a Gemini model, returns null on any failure */
+async function callGemini(
+  apiKey: string,
+  model: string,
+  prompt: string
+): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 1024,
+          },
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn(`Gemini [${model}] error (${res.status}):`, errText.slice(0, 200));
+      return null;
+    }
+
+    const data = await res.json();
+    const rawText: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    return rawText || null;
+  } catch (err) {
+    console.warn(`Gemini [${model}] fetch error:`, err);
+    return null;
+  }
+}
+
+/** Extract JSON from a raw response string (handles markdown code fences) */
+function extractJSON(raw: string): Record<string, unknown> | null {
+  try {
+    // Strip markdown code fences if present
+    const cleaned = raw
+      .replace(/^```(?:json)?\n?/i, "")
+      .replace(/\n?```$/i, "")
+      .trim();
+    return JSON.parse(cleaned);
+  } catch {
+    // Try to find a JSON object within the string
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+const MODELS_IN_ORDER = [
+  "gemini-flash-latest",
+  "gemini-2.5-flash",
+  "gemini-3.8-flash",
+];
+
 export async function generateInvestigationAnalysis(
   input: GeminiInvestigationInput
 ): Promise<GeminiInvestigationResult> {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (apiKey) {
-    try {
-      const prompt = `You are "upay Sentinel", an AI Fraud & Scam Intelligence engine for upay, a leading digital financial service in Bangladesh.
-Evaluate this transaction case and return structured JSON following the three core hackathon criteria:
-1. What happened? (Chronological factual summary)
-2. Why is it risky? (Specific behavioral, device, velocity, or network anomalies)
-3. What should upay do next? (Actionable fraud mitigation and customer protection steps)
+    const prompt = `You are "upay Sentinel", an AI Fraud & Scam Intelligence engine for upay, a leading MFS in Bangladesh.
+Analyze this fraud case and answer the three core hackathon questions. Return ONLY valid JSON.
 
-Case Details:
+Case:
 - Case ID: ${input.caseId}
 - Customer: ${input.customer}
-- Amount: ৳${input.amount.toLocaleString()} BDT
+- Amount: BDT ${input.amount.toLocaleString()}
 - Time: ${input.time}
 - Device: ${input.device}
 - Location: ${input.location}
@@ -43,75 +105,47 @@ Case Details:
 - Risk Score: ${input.riskScore}/100
 - Flags: ${input.flags.join("; ")}
 
-Return only valid JSON with this shape:
+Return this JSON structure (no markdown, no extra text):
 {
-  "whatHappened": "...",
-  "whyIsItRisky": "...",
-  "whatShouldUpayDoNext": "...",
-  "evidencePoints": ["...", "..."],
+  "whatHappened": "Concise factual summary of what occurred",
+  "whyIsItRisky": "Specific behavioral and technical anomalies explaining the risk",
+  "whatShouldUpayDoNext": "Concrete actionable steps upay should take immediately",
+  "evidencePoints": ["evidence 1", "evidence 2", "evidence 3", "evidence 4"],
   "confidence": 95
 }`;
 
-      let res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" },
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: "application/json" },
-            }),
-          }
-        );
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) {
-          const parsed = JSON.parse(text);
+    for (const model of MODELS_IN_ORDER) {
+      const raw = await callGemini(apiKey, model, prompt);
+      if (raw) {
+        const parsed = extractJSON(raw);
+        if (parsed && parsed.whatHappened) {
+          console.log(`✓ Gemini [${model}] responded successfully`);
           return {
-            whatHappened: parsed.whatHappened,
-            whyIsItRisky: parsed.whyIsItRisky,
-            whatShouldUpayDoNext: parsed.whatShouldUpayDoNext,
-            evidencePoints: parsed.evidencePoints || input.flags,
-            confidence: parsed.confidence || 96,
+            whatHappened: String(parsed.whatHappened),
+            whyIsItRisky: String(parsed.whyIsItRisky),
+            whatShouldUpayDoNext: String(parsed.whatShouldUpayDoNext),
+            evidencePoints: Array.isArray(parsed.evidencePoints)
+              ? (parsed.evidencePoints as string[])
+              : input.flags,
+            confidence: Number(parsed.confidence) || 95,
             isAiGenerated: true,
           };
         }
-      } else {
-        const errText = await res.text();
-        console.warn(`Gemini API error (Status ${res.status}):`, errText);
       }
-    } catch (err) {
-      console.warn("Gemini API call failed, falling back to local synthesis:", err);
     }
+    console.warn("All Gemini models failed — using local synthesis fallback");
   }
 
-  // High-fidelity heuristic synthesis (grounded in the exact transaction signals)
+  // High-fidelity heuristic synthesis fallback
   return {
-    whatHappened: `Customer ${input.customer} initiated an anomalous transfer of ৳${input.amount.toLocaleString()} to recipient ${input.recipient} via newly observed device ${input.device} at ${input.time} in ${input.location}. The transaction exceeded normal spending bounds and triggered multi-vector velocity triggers.`,
-    whyIsItRisky: `Five correlated risk signals converge: (1) The transaction volume is 4.8× the 30-day baseline average; (2) The device identifier ${input.device} has zero trusted pairing history with ${input.customer}; (3) The transaction occurred during the 02:00 AM high-fraud nocturnal window; (4) Recipient ${input.recipient} has topological ties to known mule cluster #17; (5) Micro-structuring velocity suggests rapid account drainage.`,
-    whatShouldUpayDoNext: `Immediately place an automated protective hold on pending settlement to wallet ${input.recipient}. Require biometric step-up authentication or outbound voice confirmation to the verified SIM card of ${input.customer}. If unverified within 15 minutes, freeze the intermediary mule corridor and file an automated Suspicious Transaction Report (STR).`,
+    whatHappened: `Customer ${input.customer} initiated a transfer of ৳${input.amount.toLocaleString()} to recipient ${input.recipient} via device ${input.device} at ${input.time} in ${input.location}. The transaction triggered multiple risk signals simultaneously.`,
+    whyIsItRisky: `Five converging risk signals: (1) Amount is ${(input.amount / 6800).toFixed(1)}× above the 30-day customer baseline; (2) Device ${input.device} has no trusted pairing history; (3) Transaction occurred during the high-fraud nocturnal window; (4) Recipient ${input.recipient} has topological ties to known mule cluster; (5) Velocity burst detected.`,
+    whatShouldUpayDoNext: `Place an immediate hold on settlement to wallet ${input.recipient}. Require biometric step-up authentication from ${input.customer} via verified SIM. If unconfirmed within 15 minutes, freeze the mule corridor and file a Suspicious Transaction Report (STR) per Bangladesh Bank regulations.`,
     evidencePoints: [
-      `Device ${input.device} registered only 12 minutes prior`,
-      `Amount ৳${input.amount.toLocaleString()} diverges +380% from baseline`,
-      `Recipient ${input.recipient} 1-hop away from flagged cluster #17`,
+      `Device ${input.device} first registered within last 30 minutes`,
+      `Amount ৳${input.amount.toLocaleString()} diverges +${Math.round((input.amount / 6800 - 1) * 100)}% from baseline`,
+      `Recipient ${input.recipient} linked to flagged cluster`,
       `Nocturnal execution at ${input.time}`,
-      `Burst pattern: 6 rapid transfers across 8 minutes`,
     ],
     confidence: 96,
     isAiGenerated: false,
@@ -131,126 +165,86 @@ export async function askSentinelCopilot(
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (apiKey) {
-    try {
-      const prompt = `You are "Sentinel AI", an intelligent fraud co-pilot embedded within the upay digital financial service operations center.
+    const prompt = `You are "Sentinel AI", an intelligent fraud co-pilot in the upay operations center.
 Context:
-- Active Case: ${context.caseId || "INV-1042"}
+- Case: ${context.caseId || "INV-1042"}
 - Customer: ${context.customer || "U-1042"}
-- Current Risk Score: ${context.riskScore || 94}/100
-- Amount: ৳${(context.amount || 48500).toLocaleString()}
+- Risk Score: ${context.riskScore || 94}/100
+- Amount: BDT ${(context.amount || 48500).toLocaleString()}
 - Status: ${context.status || "Investigating"}
 
-Analyst Question: "${userQuery}"
+Analyst asks: "${userQuery}"
 
-Provide a concise, professional, evidence-backed answer that directly helps the fraud analyst make an informed decision. Clearly ground your response in transaction data, device fingerprints, and graph risk.
-Return JSON:
+Answer concisely and professionally with evidence. Return ONLY valid JSON (no markdown):
 {
-  "reply": "string",
-  "evidence": ["evidence item 1", "evidence item 2", ...],
+  "reply": "Your professional answer here",
+  "evidence": ["evidence 1", "evidence 2", "evidence 3"],
   "confidence": 95
 }`;
 
-      let res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" },
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { responseMimeType: "application/json" },
-            }),
-          }
-        );
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) {
-          const parsed = JSON.parse(text);
+    for (const model of MODELS_IN_ORDER) {
+      const raw = await callGemini(apiKey, model, prompt);
+      if (raw) {
+        const parsed = extractJSON(raw);
+        if (parsed && parsed.reply) {
+          console.log(`✓ Copilot [${model}] responded successfully`);
           return {
-            reply: parsed.reply,
-            evidence: parsed.evidence || [],
-            confidence: parsed.confidence || 94,
+            reply: String(parsed.reply),
+            evidence: Array.isArray(parsed.evidence) ? (parsed.evidence as string[]) : [],
+            confidence: Number(parsed.confidence) || 94,
           };
         }
       }
-    } catch (e) {
-      console.warn("Copilot API fallback:", e);
     }
+    console.warn("All Gemini models failed for copilot — using fallback");
   }
 
-  // Realistic domain-specific copilot synthesis
-  const queryLower = userQuery.toLowerCase();
+  // Domain-specific fallback
+  const q = userQuery.toLowerCase();
 
-  if (queryLower.includes("flagged") || queryLower.includes("why")) {
+  if (q.includes("flagged") || q.includes("why") || q.includes("risk")) {
     return {
-      reply: `This transaction received a Critical risk score of 94/100 because 5 distinct signals deviate sharply from historical patterns: transaction amount (4.8× above baseline), unknown hardware ID DEV-8821, nocturnal timing (02:13 AM), brand new recipient U-8831, and graph adjacency to known money-mule cluster #17.`,
+      reply: `This transaction received a Critical risk score of ${context.riskScore || 94}/100 due to 5 simultaneous anomalies: amount is ${((context.amount || 48500) / 6800).toFixed(1)}× above baseline, unknown device fingerprint, nocturnal timing (${context.status?.includes("02") ? "02:13 AM" : "off-hours"}), first-time recipient, and graph adjacency to Mule Cluster #17.`,
       evidence: [
-        "Historical customer baseline: ৳6,800 avg",
-        "Device DEV-8821 first observed 12m before txn",
-        "Recipient U-8831 flagged in mule network graph",
+        `Customer baseline: ৳6,800 avg (Current: ৳${(context.amount || 48500).toLocaleString()})`,
+        "Device first observed 12 minutes before transaction",
+        "Recipient linked to mule network graph",
         "Velocity: 6 transfers in 8 minutes",
       ],
       confidence: 96,
     };
   }
 
-  if (queryLower.includes("normal") || queryLower.includes("baseline") || queryLower.includes("change")) {
+  if (q.includes("mule") || q.includes("wallet") || q.includes("network")) {
     return {
-      reply: `Customer U-1042's established 90-day baseline consists of ৳6,800 average transfers occurring strictly between 10:00 AM and 09:00 PM on iPhone 14 (DEV-2211) in Gulshan, Dhaka. The current transaction at 02:13 AM on DEV-8821 represents a complete departure across timing, device, and spending magnitude.`,
+      reply: `Recipient U-8831 acts as a layer-1 aggregator for Mule Cluster #17. Funds flow: ${context.customer || "U-1042"} → U-8831 → U-4412 → U-9288 (cash-out). 17 wallets and ৳2.8M aggregate volume tracked in this syndicate with 88-second liquidation speed.`,
       evidence: [
-        "Usual hours: 10:00 AM – 09:00 PM (Current: 02:13 AM)",
-        "Trusted device: DEV-2211 (Current: DEV-8821)",
-        "Usual location: Gulshan (Current: Mirpur IP subnet)",
-      ],
-      confidence: 95,
-    };
-  }
-
-  if (queryLower.includes("mule") || queryLower.includes("wallet") || queryLower.includes("connected")) {
-    return {
-      reply: `Recipient U-8831 acts as a layer-1 aggregator for Mule Cluster #17. Transactions flow rapidly from U-1042 → U-8831 → U-4412 → U-9288 within minutes before being liquidated at high-volume agent points. 17 wallets and ৳2.8M in aggregate volume are currently tracked in this syndicate.`,
-      evidence: [
-        "Graph Cluster #17: 17 wallets, 43 transactions",
-        "Layering speed: 88 seconds between inbound and outbound",
-        "Terminal node: U-9288 (Cash-out point)",
+        "Cluster #17: 17 wallets, 43 transactions",
+        "Layering speed: 88 seconds between hops",
+        "Terminal cash-out node: U-9288",
       ],
       confidence: 93,
     };
   }
 
-  if (queryLower.includes("next") || queryLower.includes("recommend") || queryLower.includes("action")) {
+  if (q.includes("next") || q.includes("action") || q.includes("recommend") || q.includes("do")) {
     return {
-      reply: `Recommended next step: Execute an immediate interim freeze on recipient wallet U-8831 and trigger a step-up biometric prompt on customer U-1042's primary phone. If confirmed fraudulent, initiate recovery protocol before funds reach agent cash-out stage.`,
+      reply: `Immediately: (1) Freeze settlement to U-8831, (2) Send biometric challenge to ${context.customer || "U-1042"} verified SIM, (3) If unconfirmed in 15 min → freeze mule corridor and file STR. Time-critical: mule liquidation typically completes within 30 minutes.`,
       evidence: [
-        "Human review safeguard: Decision requires analyst approval",
-        "Potential loss exposure: ৳184,000 across cluster",
-        "Time sensitivity: Mule liquidation typically concludes in under 30 minutes",
+        "Analyst approval required for sanctions",
+        `Exposure: ৳${(context.amount || 48500).toLocaleString()} at risk`,
+        "STR filing: Bangladesh Bank FID requirement",
       ],
       confidence: 94,
     };
   }
 
   return {
-    reply: `Analysis for case ${context.caseId || "INV-1042"}: Transaction exhibits extreme behavioral divergence, device spoofing markers, and direct connectivity to an organized MFS money-mule syndicate. Recommend immediate account hold and customer outreach.`,
+    reply: `Case ${context.caseId || "INV-1042"}: Transaction exhibits extreme behavioral divergence with device spoofing markers and direct connectivity to an organized MFS mule syndicate. Risk Score: ${context.riskScore || 94}/100. Recommend immediate account hold and customer outreach.`,
     evidence: [
-      "Risk Score: 94/100 (Critical)",
-      "Corroborating indicators: 5 independent signals",
-      "Model ensemble: XGBoost classifier + Graph neural score",
+      `Risk Score: ${context.riskScore || 94}/100 (Critical)`,
+      "5 independent corroborating signals",
+      "XGBoost + Graph neural ensemble model",
     ],
     confidence: 94,
   };

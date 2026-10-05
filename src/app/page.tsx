@@ -172,6 +172,7 @@ export default function Home() {
         unreadAlertsCount={unreadAlerts}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        onSettingsClick={() => setIsTourOpen(true)}
       />
 
       {/* Main Shell */}

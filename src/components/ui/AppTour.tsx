@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Joyride, { CallBackProps, STATUS, Step } from "react-joyride";
+import { Joyride, STATUS, Step } from "react-joyride";
 
 interface AppTourProps {
   run: boolean;
@@ -17,19 +17,18 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
           <h3 className="font-bold text-lg text-emerald-900 mb-2">Welcome to upay Sentinel 🛡️</h3>
           <p className="text-sm text-gray-700">
             This AI-powered intelligence platform detects and mitigates fraud in real-time. 
-            Let's take a quick tour of the key features.
+            Let&apos;s take a quick tour of the key features.
           </p>
         </div>
       ),
       placement: "center",
-      disableBeacon: true,
     },
     {
       target: ".nav-overview",
       content: (
         <div>
           <h3 className="font-bold text-md text-emerald-900">Overview Dashboard</h3>
-          <p className="text-sm text-gray-700">Get a high-level bird's-eye view of total network health, active alerts, and real-time transaction velocities.</p>
+          <p className="text-sm text-gray-700">Get a high-level bird&apos;s-eye view of total network health, active alerts, and real-time transaction velocities.</p>
         </div>
       ),
       placement: "right",
@@ -76,7 +75,7 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
     },
   ]);
 
-  const handleJoyrideCallback = (data: CallBackProps) => {
+  const handleJoyrideCallback = (data: any) => {
     const { status } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
@@ -90,19 +89,19 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       steps={steps}
       run={run}
       continuous
-      showProgress
-      showSkipButton
-      callback={handleJoyrideCallback}
+      onEvent={handleJoyrideCallback}
+      options={{
+        primaryColor: '#10b981', // emerald-500
+        zIndex: 10000,
+        showProgress: true,
+        buttons: ['back', 'close', 'primary', 'skip'],
+      }}
       styles={{
-        options: {
-          primaryColor: '#10b981', // emerald-500
-          zIndex: 10000,
-        },
         tooltip: {
           borderRadius: '12px',
           padding: '20px',
         },
-        buttonNext: {
+        buttonPrimary: {
           backgroundColor: '#059669', // emerald-600
           borderRadius: '8px',
         },

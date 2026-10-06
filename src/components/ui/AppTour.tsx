@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Joyride, { STATUS, Step } from "react-joyride";
+import dynamic from "next/dynamic";
+import { STATUS, Step } from "react-joyride";
+
+const Joyride = dynamic(() => import("react-joyride").then((mod) => mod.Joyride), { ssr: false });
 
 interface AppTourProps {
   run: boolean;

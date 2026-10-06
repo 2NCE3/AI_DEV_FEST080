@@ -223,7 +223,7 @@ export default function Home() {
   };
 
   return (
-    <div className="app flex min-h-screen bg-[#f4f7f5]">
+    <div className="app flex min-h-screen bg-[var(--bg)]">
       {/* Persistent Left Sidebar */}
       <Sidebar
         currentPage={currentPage}

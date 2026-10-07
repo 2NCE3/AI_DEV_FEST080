@@ -59,82 +59,78 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       value: `${(metrics.accuracy * 100).toFixed(1)}%`,
       change: "Held-out test split (100 samples)",
       positive: true,
-      icon: <ShieldCheck size={18} className="text-emerald-500" />,
-      bg: "bg-emerald-500/10 border border-emerald-500/20",
+      icon: <ShieldCheck size={16} className="text-emerald-400" />,
     },
     {
       title: "False Positive Rate",
       value: `${(metrics.falsePositiveRate * 100).toFixed(1)}%`,
       change: "Target < 3.5% (Bangladesh Bank)",
       positive: true,
-      icon: <Activity size={18} className="text-amber-500" />,
-      bg: "bg-amber-500/10 border border-amber-500/20",
+      icon: <Activity size={16} className="text-amber-400" />,
     },
     {
       title: "Precision / Recall",
       value: `${(metrics.precision * 100).toFixed(1)}% / ${(metrics.recall * 100).toFixed(1)}%`,
       change: `F1 Score: ${metrics.f1Score.toFixed(3)}`,
       positive: true,
-      icon: <Brain size={18} className="text-sky-500" />,
-      bg: "bg-sky-500/10 border border-sky-500/20",
+      icon: <Brain size={16} className="text-sky-400" />,
     },
     {
       title: "Capital Protected",
       value: `৳ ${(318.5 + cases.reduce((sum, c) => sum + (c.exposure || 0), 0) / 1000000).toFixed(1)}M`,
       change: "Estimated gross loss avoided",
       positive: true,
-      icon: <DollarSign size={18} className="text-emerald-500" />,
-      bg: "bg-emerald-500/10 border border-emerald-500/20",
+      icon: <DollarSign size={16} className="text-emerald-400" />,
     },
   ];
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-4 animate-fadeIn">
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <div className="eyebrow flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-            AI DEV FEST 2026 &bull; MODEL BENCHMARKING &bull; ZERO FABRICATED METRICS
+          <div className="eyebrow flex items-center gap-1.5 text-brand-subtle">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            MODEL BENCHMARKING &bull; GENUINE CONFUSION MATRIX EVALUATION
           </div>
-          <h1 className="page-title text-ink">Fraud Analytics &amp; Model Evaluation</h1>
-          <p className="page-subtitle text-muted">
+          <h1 className="page-title text-brand-text">Model Analytics &amp; Evaluation</h1>
+          <p className="page-subtitle text-brand-muted">
             Inspect live performance metrics, test dataset confusion matrix, and responsible AI governance.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleRunEvaluation}
             disabled={isEvaluating}
             className="btn btn-secondary text-xs flex items-center gap-1.5"
           >
-            <RefreshCw size={14} className={isEvaluating ? "animate-spin" : ""} />
+            <RefreshCw size={13} className={isEvaluating ? "animate-spin" : ""} />
             <span>{isEvaluating ? "Evaluating..." : "Re-evaluate Benchmark"}</span>
           </button>
           <button
             onClick={onOpenReport}
             className="btn btn-primary text-xs flex items-center gap-1.5"
           >
-            <FileDown size={14} />
+            <FileDown size={13} />
             <span>Export SAR Compliance Dossier</span>
           </button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {analyticsKpis.map((kpi, i) => (
-          <div key={i} className="card-base p-4.5 border border-line">
-            <div className="flex items-center justify-between text-xs text-muted font-medium">
+          <div key={i} className="card-base p-3.5 border border-brand-border bg-brand-surface">
+            <div className="flex items-center justify-between text-xs text-brand-muted font-medium">
               <span>{kpi.title}</span>
-              <div className={`w-8 h-8 rounded-xl ${kpi.bg} flex items-center justify-center shrink-0`}>
+              <div className="w-7 h-7 rounded bg-brand-elevated border border-brand-border flex items-center justify-center shrink-0">
                 {kpi.icon}
               </div>
             </div>
-            <div className="text-2xl font-black text-ink mt-2 tracking-tight font-mono">
+            <div className="text-xl font-bold text-brand-text mt-2 font-mono">
               {kpi.value}
             </div>
-            <div className="text-[11px] text-muted font-medium mt-1 flex items-center gap-1">
+            <div className="text-[11px] text-brand-subtle mt-1 flex items-center gap-1">
               <span>{kpi.change}</span>
             </div>
           </div>
@@ -142,79 +138,81 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       </div>
 
       {/* Live Confusion Matrix & Model Evaluation Section */}
-      <div className="card-base p-6 border-2 border-amber-500/30 bg-gradient-to-br from-surface to-amber-500/5 shadow-md">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-line gap-2">
+      <div className="card-base p-5 border border-brand-border bg-brand-surface">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-3 border-b border-brand-border gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="p-1 rounded bg-amber-500 text-slate-950 font-black text-[10px] tracking-wider uppercase">
-                Grounded Evaluation
+              <span className="px-1.5 py-0.5 rounded bg-brand-elevated text-upay-gold border border-brand-border font-mono font-bold text-[10px] tracking-wider uppercase">
+                HELD-OUT BENCHMARK
               </span>
-              <h2 className="text-sm font-bold text-ink">
-                Held-Out Benchmark Confusion Matrix (100 Samples)
+              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
+                Evaluation Confusion Matrix (100 Samples)
               </h2>
             </div>
-            <p className="text-xs text-muted mt-0.5">
+            <p className="text-[11px] text-brand-muted mt-0.5">
               Strictly computed on a held-out test dataset: 30 fraudulent attack vectors (ATO, Mule, Velocity, SIM swap) and 70 legitimate transactions.
             </p>
           </div>
-          <span className="text-[11px] font-mono text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-            Zero Hardcoded Metrics &bull; Deterministic Code
+          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            Deterministic Pipeline &bull; Zero Fabricated AI
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-4">
           {/* 2x2 Confusion Matrix Grid */}
-          <div className="col-span-12 lg:col-span-6 space-y-3">
-            <h3 className="text-xs font-bold text-ink uppercase tracking-wider">Confusion Matrix</h3>
-            <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="lg:col-span-6 space-y-2.5">
+            <h3 className="text-[10px] font-bold text-brand-subtle uppercase tracking-wider font-mono">
+              2&times;2 CONFUSION MATRIX GRID
+            </h3>
+            <div className="grid grid-cols-2 gap-2.5 text-center">
               {/* True Positive */}
-              <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 space-y-1">
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold block">
+              <div className="p-3.5 rounded border border-emerald-500/30 bg-emerald-500/10 space-y-1">
+                <span className="text-[10.5px] text-emerald-400 font-bold block font-mono">
                   TRUE POSITIVE (TP)
                 </span>
-                <span className="text-3xl font-black text-ink font-mono block">
+                <span className="text-2xl font-bold text-brand-text font-mono block">
                   {metrics.truePositives}
                 </span>
-                <span className="text-[10px] text-muted block">
+                <span className="text-[10px] text-brand-muted block">
                   Fraudulent attacks correctly intercepted
                 </span>
               </div>
 
               {/* False Positive */}
-              <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 space-y-1">
-                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold block">
+              <div className="p-3.5 rounded border border-amber-500/30 bg-amber-500/10 space-y-1">
+                <span className="text-[10.5px] text-amber-400 font-bold block font-mono">
                   FALSE POSITIVE (FP)
                 </span>
-                <span className="text-3xl font-black text-ink font-mono block">
+                <span className="text-2xl font-bold text-brand-text font-mono block">
                   {metrics.falsePositives}
                 </span>
-                <span className="text-[10px] text-muted block">
+                <span className="text-[10px] text-brand-muted block">
                   Legitimate transactions incorrectly flagged
                 </span>
               </div>
 
               {/* False Negative */}
-              <div className="p-4 rounded-xl border border-rose-500/30 bg-rose-500/10 space-y-1">
-                <span className="text-[11px] text-rose-600 dark:text-rose-400 font-bold block">
+              <div className="p-3.5 rounded border border-rose-500/30 bg-rose-500/10 space-y-1">
+                <span className="text-[10.5px] text-rose-400 font-bold block font-mono">
                   FALSE NEGATIVE (FN)
                 </span>
-                <span className="text-3xl font-black text-ink font-mono block">
+                <span className="text-2xl font-bold text-brand-text font-mono block">
                   {metrics.falseNegatives}
                 </span>
-                <span className="text-[10px] text-muted block">
+                <span className="text-[10px] text-brand-muted block">
                   Fraudulent attacks missed by engine
                 </span>
               </div>
 
               {/* True Negative */}
-              <div className="p-4 rounded-xl border border-sky-500/30 bg-sky-500/10 space-y-1">
-                <span className="text-[11px] text-sky-600 dark:text-sky-400 font-bold block">
+              <div className="p-3.5 rounded border border-sky-500/30 bg-sky-500/10 space-y-1">
+                <span className="text-[10.5px] text-sky-400 font-bold block font-mono">
                   TRUE NEGATIVE (TN)
                 </span>
-                <span className="text-3xl font-black text-ink font-mono block">
+                <span className="text-2xl font-bold text-brand-text font-mono block">
                   {metrics.trueNegatives}
                 </span>
-                <span className="text-[10px] text-muted block">
+                <span className="text-[10px] text-brand-muted block">
                   Legitimate transactions correctly approved
                 </span>
               </div>
@@ -222,62 +220,64 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           </div>
 
           {/* Derived Formula Verification */}
-          <div className="col-span-12 lg:col-span-6 space-y-3">
-            <h3 className="text-xs font-bold text-ink uppercase tracking-wider">
-              Mathematical Derivation &amp; Formulas
+          <div className="lg:col-span-6 space-y-2.5">
+            <h3 className="text-[10px] font-bold text-brand-subtle uppercase tracking-wider font-mono">
+              MATHEMATICAL DERIVATION &amp; FORMULAS
             </h3>
-            <div className="p-4 rounded-xl border border-line bg-surface/60 space-y-2.5 text-xs">
-              <div className="flex justify-between items-center py-1 border-b border-line">
-                <span className="text-muted">Precision = TP / (TP + FP)</span>
-                <b className="font-mono text-ink">{(metrics.precision * 100).toFixed(1)}%</b>
+            <div className="p-3.5 rounded border border-brand-border bg-brand-elevated space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1 border-b border-brand-border">
+                <span className="text-brand-muted font-mono text-[11px]">Precision = TP / (TP + FP)</span>
+                <b className="font-mono text-brand-text">{(metrics.precision * 100).toFixed(1)}%</b>
               </div>
-              <div className="flex justify-between items-center py-1 border-b border-line">
-                <span className="text-muted">Recall (Sensitivity) = TP / (TP + FN)</span>
-                <b className="font-mono text-ink">{(metrics.recall * 100).toFixed(1)}%</b>
+              <div className="flex justify-between items-center py-1 border-b border-brand-border">
+                <span className="text-brand-muted font-mono text-[11px]">Recall (Sensitivity) = TP / (TP + FN)</span>
+                <b className="font-mono text-brand-text">{(metrics.recall * 100).toFixed(1)}%</b>
               </div>
-              <div className="flex justify-between items-center py-1 border-b border-line">
-                <span className="text-muted">F1 Score = 2 &times; (P &times; R) / (P + R)</span>
-                <b className="font-mono text-ink">{metrics.f1Score.toFixed(4)}</b>
+              <div className="flex justify-between items-center py-1 border-b border-brand-border">
+                <span className="text-brand-muted font-mono text-[11px]">F1 Score = 2 &times; (P &times; R) / (P + R)</span>
+                <b className="font-mono text-brand-text">{metrics.f1Score.toFixed(4)}</b>
               </div>
-              <div className="flex justify-between items-center py-1 border-b border-line">
-                <span className="text-muted">Accuracy = (TP + TN) / Total (100)</span>
-                <b className="font-mono text-ink">{(metrics.accuracy * 100).toFixed(1)}%</b>
+              <div className="flex justify-between items-center py-1 border-b border-brand-border">
+                <span className="text-brand-muted font-mono text-[11px]">Accuracy = (TP + TN) / Total (100)</span>
+                <b className="font-mono text-brand-text">{(metrics.accuracy * 100).toFixed(1)}%</b>
               </div>
               <div className="flex justify-between items-center py-1">
-                <span className="text-muted">False Positive Rate (FPR) = FP / (FP + TN)</span>
-                <b className="font-mono text-emerald-500">{(metrics.falsePositiveRate * 100).toFixed(1)}%</b>
+                <span className="text-brand-muted font-mono text-[11px]">False Positive Rate (FPR) = FP / (FP + TN)</span>
+                <b className="font-mono text-emerald-400">{(metrics.falsePositiveRate * 100).toFixed(1)}%</b>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-muted flex items-start gap-2">
-              <Scale size={16} className="text-amber-500 shrink-0 mt-0.5" />
+            <div className="p-2.5 rounded bg-brand-elevated border border-brand-border text-[11px] text-brand-muted flex items-start gap-2">
+              <Scale size={14} className="text-upay-gold shrink-0 mt-0.5" />
               <span>
-                <b>Fintech Tradeoff Analysis:</b> Optimizing recall protects customers from financial loss; controlling FPR prevents merchant transaction abandonment.
+                <b className="text-brand-text">Fintech Tradeoff Analysis:</b> Optimizing recall protects customer deposits from irrevocable loss; keeping FPR &lt; 1% preserves normal customer transaction flows.
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 4 Cards Grid */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Card 1: Fraud by Transaction Type */}
-        <div className="col-span-12 lg:col-span-6 card-base p-5 border border-line">
-          <div className="flex items-center justify-between pb-3 border-b border-line">
+      {/* Breakdown Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+        {/* Fraud by Transaction Type */}
+        <div className="lg:col-span-6 card-base p-4 border border-brand-border bg-brand-surface">
+          <div className="flex items-center justify-between pb-2.5 border-b border-brand-border">
             <div>
-              <h2 className="text-sm font-bold text-ink">Fraud by Transaction Type</h2>
-              <p className="text-xs text-subtle">Frequency of high-risk vector attempts</p>
+              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
+                Fraud by Channel &amp; Type
+              </h2>
+              <p className="text-[11px] text-brand-muted">Frequency of attack vectors in recent stream</p>
             </div>
-            <span className="text-[11px] text-subtle font-mono">Telemetry Data</span>
+            <span className="text-[10px] text-brand-subtle font-mono">Stream Data</span>
           </div>
 
-          <div className="mt-4 space-y-3.5 text-xs">
+          <div className="mt-3 space-y-2.5 text-xs">
             {[
               { type: "Wallet Transfer (P2P)", pct: 78, barClass: "bg-rose-500" },
-              { type: "Cash Out (Agent Points)", pct: 61, barClass: "bg-amber-500" },
-              { type: "Merchant Payment", pct: 38, barClass: "bg-yellow-500" },
-              { type: "Add Money (Bank to Wallet)", pct: 24, barClass: "bg-emerald-500" },
-              { type: "Mobile Recharge", pct: 12, barClass: "bg-teal-500" },
+              { type: "Cash Out (Agent Network)", pct: 61, barClass: "bg-orange-500" },
+              { type: "Merchant Payment", pct: 38, barClass: "bg-amber-500" },
+              { type: "Add Money (Bank Gateway)", pct: 24, barClass: "bg-emerald-500" },
+              { type: "Mobile Recharge", pct: 12, barClass: "bg-sky-500" },
             ].map((item) => (
               <div
                 key={item.type}
@@ -285,12 +285,12 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                 className="space-y-1 cursor-pointer group"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-ink font-medium group-hover:text-amber-500 transition-colors">
+                  <span className="text-brand-text font-medium group-hover:text-upay-gold transition-colors text-[11.5px]">
                     {item.type}
                   </span>
-                  <b className="font-mono text-ink">{item.pct}%</b>
+                  <b className="font-mono text-brand-text text-xs">{item.pct}%</b>
                 </div>
-                <div className="h-2 w-full bg-appBg rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-brand-elevated rounded-full overflow-hidden border border-brand-border">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${item.barClass}`}
                     style={{ width: `${item.pct}%` }}
@@ -301,79 +301,81 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
           </div>
         </div>
 
-        {/* Card 2: Investigation Outcomes */}
-        <div className="col-span-12 lg:col-span-6 card-base p-5 border border-line">
-          <div className="flex items-center justify-between pb-3 border-b border-line">
+        {/* Investigation Outcomes */}
+        <div className="lg:col-span-6 card-base p-4 border border-brand-border bg-brand-surface">
+          <div className="flex items-center justify-between pb-2.5 border-b border-brand-border">
             <div>
-              <h2 className="text-sm font-bold text-ink">Investigation Case Outcomes</h2>
-              <p className="text-xs text-subtle">Resolution distribution across active cases</p>
+              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
+                Investigation Case Outcomes
+              </h2>
+              <p className="text-[11px] text-brand-muted">Resolution distribution across active cases</p>
             </div>
-            <span className="text-[11px] text-subtle font-mono">{cases.length} Total Cases</span>
+            <span className="text-[10px] text-brand-subtle font-mono">{cases.length} Total Cases</span>
           </div>
 
-          <div className="flex items-center gap-6 mt-4 py-2">
-            <div className="w-32 h-32 rounded-full conic-gradient-custom relative shrink-0 shadow-xs flex items-center justify-center bg-gradient-to-tr from-rose-500 via-amber-500 to-emerald-500 p-2">
-              <div className="w-20 h-20 bg-surface rounded-full flex flex-col items-center justify-center text-center shadow-inner">
-                <b className="text-sm font-bold text-ink leading-tight font-mono">{cases.length}</b>
-                <span className="text-[9.5px] text-subtle">Live Cases</span>
+          <div className="flex items-center gap-5 mt-3 py-1">
+            <div className="w-24 h-24 rounded-full border-4 border-brand-border relative shrink-0 flex items-center justify-center bg-brand-elevated">
+              <div className="text-center">
+                <b className="text-base font-bold text-brand-text leading-tight font-mono">{cases.length}</b>
+                <span className="text-[9px] text-brand-muted block">Cases</span>
               </div>
             </div>
 
-            <div className="flex-1 space-y-2.5 text-xs">
+            <div className="flex-1 space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-ink">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                  Investigating / Under Hold
+                <span className="flex items-center gap-1.5 text-brand-muted">
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  Investigating / Hold
                 </span>
-                <b className="font-mono text-ink">{cases.filter((c) => c.status === "Investigating").length}</b>
+                <b className="font-mono text-brand-text">{cases.filter((c) => c.status === "Investigating").length}</b>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-ink">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                  Pending 2FA Review
+                <span className="flex items-center gap-1.5 text-brand-muted">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  Pending 2FA Challenge
                 </span>
-                <b className="font-mono text-ink">{cases.filter((c) => c.status === "Pending Review").length}</b>
+                <b className="font-mono text-brand-text">{cases.filter((c) => c.status === "Pending Review").length}</b>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-ink">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  Resolved / Released
+                <span className="flex items-center gap-1.5 text-brand-muted">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  Resolved / Safe
                 </span>
-                <b className="font-mono text-ink">{cases.filter((c) => c.status === "Resolved").length}</b>
+                <b className="font-mono text-brand-text">{cases.filter((c) => c.status === "Resolved").length}</b>
               </div>
               <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-ink">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-700" />
-                  Escalated to Legal
+                <span className="flex items-center gap-1.5 text-brand-muted">
+                  <span className="w-2 h-2 rounded-full bg-red-600" />
+                  Escalated to AML
                 </span>
-                <b className="font-mono text-ink">{cases.filter((c) => c.status === "Escalated").length}</b>
+                <b className="font-mono text-brand-text">{cases.filter((c) => c.status === "Escalated").length}</b>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Card 3: Responsible AI & Security Framework */}
-        <div className="col-span-12 card-base p-5 border border-line">
-          <div className="flex items-center justify-between pb-3 border-b border-line">
+        {/* Responsible AI Framework */}
+        <div className="lg:col-span-12 card-base p-4 border border-brand-border bg-brand-surface">
+          <div className="flex items-center justify-between pb-2.5 border-b border-brand-border">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-500 flex items-center justify-center">
-                <Sparkles size={15} />
+              <div className="w-6 h-6 rounded bg-brand-elevated text-upay-gold border border-brand-border flex items-center justify-center">
+                <Sparkles size={13} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-ink">
+                <h3 className="text-xs font-bold text-brand-text uppercase tracking-wide">
                   Responsible AI &amp; Ethical Governance Matrix
                 </h3>
-                <p className="text-xs text-subtle">
+                <p className="text-[11px] text-brand-muted">
                   Compliance with Bangladesh Bank MFS guidelines and Responsible AI principles
                 </p>
               </div>
             </div>
             <span className="badge badge-low flex items-center gap-1">
-              <CheckCircle2 size={11} /> COMPLIANCE AUDITED
+              <CheckCircle2 size={10} /> COMPLIANCE AUDITED
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 divide-y md:divide-y-0 md:divide-x divide-line">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-3 divide-y sm:divide-y-0 sm:divide-x divide-brand-border">
             {[
               {
                 pillar: "Human in the Loop",
@@ -396,10 +398,10 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                 desc: "If LLM API is unavailable, deterministic rule engine and local TF.js model sustain full scoring.",
               },
             ].map((p, idx) => (
-              <div key={p.pillar} className={`text-xs space-y-1 ${idx > 0 ? "md:pl-4" : ""} pt-2 md:pt-0`}>
-                <b className="text-ink block text-xs">{p.pillar}</b>
-                <span className="text-[11px] font-mono text-amber-500 block font-semibold">{p.rule}</span>
-                <p className="text-[11px] text-muted leading-snug pt-1">{p.desc}</p>
+              <div key={p.pillar} className={`text-xs space-y-1 ${idx > 0 ? "sm:pl-3" : ""} pt-2 sm:pt-0`}>
+                <b className="text-brand-text block text-xs">{p.pillar}</b>
+                <span className="text-[10.5px] font-mono text-upay-gold block font-semibold">{p.rule}</span>
+                <p className="text-[11px] text-brand-muted leading-snug pt-0.5">{p.desc}</p>
               </div>
             ))}
           </div>

@@ -43,7 +43,7 @@ function SentinelAppShell() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -133,7 +133,7 @@ function SentinelAppShell() {
       />
 
       {/* Main Shell */}
-      <div className="main-shell flex-1">
+      <div className="main-wrapper flex-1">
         {/* Topbar */}
         <Topbar
           onOpenSimulation={() => setIsSimModalOpen(true)}
@@ -267,38 +267,47 @@ function SentinelAppShell() {
       <AppTour run={isTourOpen} onFinish={() => setIsTourOpen(false)} />
 
       {isSettingsOpen && (
-        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center animate-fadeIn">
-          <div className="bg-surface border border-line rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-bold text-ink mb-4">System Settings</h3>
-            <p className="text-sm text-subtle mb-6">
+        <div className="fixed inset-0 bg-[#0B0F14]/80 backdrop-blur-md z-50 flex items-center justify-center animate-fadeIn p-4">
+          <div className="bg-brand-surface border border-brand-border rounded-lg shadow-modal w-full max-w-md p-6">
+            <h3 className="text-base font-semibold text-brand-text mb-2">System & Engine Settings</h3>
+            <p className="text-xs text-brand-muted mb-6 leading-relaxed">
               Adjust AI confidence thresholds, configure notification alerts, and manage integration keys.
             </p>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-ink">AI Auto-Mitigation</span>
-                <input type="checkbox" className="toggle" defaultChecked />
+              <div className="flex items-center justify-between py-2 border-b border-brand-border">
+                <div>
+                  <div className="text-xs font-semibold text-brand-text">AI Auto-Mitigation Safeguard</div>
+                  <div className="text-[11px] text-brand-subtle">Automatically block transactions exceeding Risk Score 90</div>
+                </div>
+                <input type="checkbox" className="h-4 w-4 rounded bg-brand-elevated border-brand-border text-emerald-500 focus:ring-emerald-500" defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-ink">Email Notifications</span>
-                <input type="checkbox" className="toggle" defaultChecked />
+              <div className="flex items-center justify-between py-2 border-b border-brand-border">
+                <div>
+                  <div className="text-xs font-semibold text-brand-text">Operations Center Alerts</div>
+                  <div className="text-[11px] text-brand-subtle">Dispatch real-time webhooks for CRITICAL tier anomalies</div>
+                </div>
+                <input type="checkbox" className="h-4 w-4 rounded bg-brand-elevated border-brand-border text-emerald-500 focus:ring-emerald-500" defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-ink">Webhook Integration</span>
-                <input type="checkbox" className="toggle" />
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <div className="text-xs font-semibold text-brand-text">Bangladesh Bank BFIU Mirror</div>
+                  <div className="text-[11px] text-brand-subtle">Stream automated AML SAR drafts to secure regulator endpoint</div>
+                </div>
+                <input type="checkbox" className="h-4 w-4 rounded bg-brand-elevated border-brand-border text-emerald-500 focus:ring-emerald-500" />
               </div>
             </div>
-            <div className="mt-8 flex justify-end gap-3">
+            <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-brand-border">
               <button
                 onClick={() => setIsSettingsOpen(false)}
-                className="btn btn-secondary text-sm"
+                className="btn-secondary text-xs"
               >
                 Close
               </button>
               <button
                 onClick={() => setIsSettingsOpen(false)}
-                className="btn btn-primary text-sm"
+                className="btn-primary text-xs"
               >
-                Save Changes
+                Save Configuration
               </button>
             </div>
           </div>

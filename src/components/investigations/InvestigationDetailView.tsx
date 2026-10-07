@@ -22,6 +22,7 @@ import {
   History,
   Lock,
   PauseCircle,
+  KeyRound,
 } from "lucide-react";
 
 interface InvestigationDetailViewProps {
@@ -74,32 +75,35 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
     label: string
   ) => {
     executeAnalystAction(caseId, action);
-    onNotify(`Action executed: ${label}. Immutable audit event logged.`);
+    onNotify(`Action executed: ${label}. Immutable audit record logged.`);
   };
 
   return (
     <div className="space-y-4 pb-24 animate-fadeIn">
-      {/* Breadcrumb */}
+      {/* Breadcrumb Navigation */}
       <div className="case-breadcrumb">
-        <span onClick={() => onNavigate("investigations")} className="cursor-pointer hover:underline">
+        <span onClick={() => onNavigate("investigations")} className="cursor-pointer hover:underline text-brand-muted hover:text-brand-text">
           Investigations
         </span>
-        <ChevronRight size={13} />
-        <b>{caseId}</b>
+        <ChevronRight size={12} className="text-brand-subtle" />
+        <b className="text-brand-text font-mono">{caseId}</b>
       </div>
 
       {/* Case Header */}
       <div className="page-header">
         <div>
-          <div className="eyebrow">CASE DOSSIER &bull; AUDIT VERIFIED</div>
-          <h1 className="page-title">Investigation {caseId}</h1>
-          <p className="page-subtitle">
-            Created {activeCase.createdTime} &middot; Last updated {activeCase.updated} by {activeCase.analyst}
+          <div className="eyebrow flex items-center gap-1.5 text-brand-subtle">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            CASE DOSSIER &bull; AUDIT VERIFIED
+          </div>
+          <h1 className="page-title text-brand-text">Investigation {caseId}</h1>
+          <p className="page-subtitle text-brand-muted">
+            Opened {activeCase.createdTime} &middot; Last updated {activeCase.updated} by {activeCase.analyst}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <span
-            className={`badge text-xs px-2.5 py-1 ${
+            className={`badge text-xs px-2.5 py-0.5 ${
               activeCase.riskLevel === "Critical"
                 ? "badge-critical"
                 : activeCase.riskLevel === "High"
@@ -107,157 +111,155 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
                 : "badge-medium"
             }`}
           >
-            {activeCase.riskLevel.toUpperCase()}
+            {activeCase.riskLevel.toUpperCase()} PRIORITY
           </span>
           <span className="case-status text-xs">
-            <i className={activeCase.status === "Resolved" ? "bg-emerald-500" : "bg-amber-500"} />
-            <span>Status: {activeCase.status}</span>
+            <i className={activeCase.status === "Resolved" ? "bg-emerald-400" : "bg-amber-400"} />
+            <span className="font-mono text-xs">Status: {activeCase.status}</span>
           </span>
         </div>
       </div>
 
       {/* Top 5-Item KPI Exposure Grid */}
-      <div className="card-base case-summary">
+      <div className="card-base case-summary border border-brand-border">
         <div>
           <div className="summary-icon">
-            <Users size={18} />
+            <Users size={16} />
           </div>
           <span>Customer Wallet</span>
           <b
             onClick={() => onNavigate("customers")}
-            className="text-emerald-800 hover:underline cursor-pointer"
+            className="text-sky-400 hover:underline cursor-pointer font-mono text-sm"
           >
             {customer}
           </b>
         </div>
 
         <div>
-          <div className="summary-icon si1">
-            <ShieldAlert size={18} />
+          <div className="summary-icon text-rose-500">
+            <ShieldAlert size={16} />
           </div>
-          <span>Risk Score</span>
-          <b className="text-rose-600">{riskScore} / 100</b>
+          <span>Calculated Risk</span>
+          <b className="text-rose-400 font-mono text-sm">{riskScore} / 100</b>
         </div>
 
         <div>
-          <div className="summary-icon">
-            <Activity size={18} />
+          <div className="summary-icon text-amber-500">
+            <Activity size={16} />
           </div>
-          <span>Transactions</span>
-          <b className="text-ink">{activeCase.transactionsCount}</b>
+          <span>Transaction Count</span>
+          <b className="text-brand-text font-mono text-sm">{activeCase.transactionsCount} Txns</b>
         </div>
 
         <div>
-          <div className="summary-icon">
-            <Share2 size={18} />
+          <div className="summary-icon text-sky-400">
+            <Share2 size={16} />
           </div>
-          <span>Syndicate Links</span>
+          <span>Syndicate Ties</span>
           <b
             onClick={() => onNavigate("network")}
-            className="text-emerald-800 hover:underline cursor-pointer"
+            className="text-sky-400 hover:underline cursor-pointer font-mono text-sm"
           >
             {activeCase.networkConnections} Nodes
           </b>
         </div>
 
         <div>
-          <div className="summary-icon si2">
-            <DollarSign size={18} />
+          <div className="summary-icon text-emerald-400">
+            <DollarSign size={16} />
           </div>
-          <span>Capital at Risk</span>
-          <b className="text-rose-600 font-mono">৳{exposure.toLocaleString()}</b>
+          <span>Capital Exposure</span>
+          <b className="text-brand-text font-mono text-sm">৳{exposure.toLocaleString()}</b>
         </div>
       </div>
 
       {/* Tab Selector */}
-      <div className="flex items-center gap-2 border-b border-line pb-2">
+      <div className="flex items-center gap-1 border-b border-brand-border pb-1">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
             activeTab === "overview"
-              ? "bg-amber-500 text-slate-950 shadow-sm"
-              : "text-muted hover:text-ink"
+              ? "bg-brand-elevated text-brand-text border border-brand-border"
+              : "text-brand-muted hover:text-brand-text"
           }`}
         >
           Evidence Overview
         </button>
         <button
           onClick={() => setActiveTab("timeline")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+          className={`px-3 py-1.5 rounded text-xs font-semibold transition-all ${
             activeTab === "timeline"
-              ? "bg-amber-500 text-slate-950 shadow-sm"
-              : "text-muted hover:text-ink"
+              ? "bg-brand-elevated text-brand-text border border-brand-border"
+              : "text-brand-muted hover:text-brand-text"
           }`}
         >
           Incident Telemetry Timeline
         </button>
         <button
           onClick={() => setActiveTab("audit")}
-          className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1.5 ${
             activeTab === "audit"
-              ? "bg-amber-500 text-slate-950 shadow-sm"
-              : "text-muted hover:text-ink"
+              ? "bg-brand-elevated text-brand-text border border-brand-border"
+              : "text-brand-muted hover:text-brand-text"
           }`}
         >
-          <History size={13} />
+          <History size={12} />
           <span>Audit Trail ({caseAuditEvents.length})</span>
         </button>
       </div>
 
-      {/* Main 2-Column Dossier Workspace */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Left Column: Dossier Details / Audit Tab */}
-        <div className="col-span-7 space-y-4">
+      {/* Main 2-Column Workstation Workspace */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+        {/* Left Column: Dossier Details / Timeline / Audit Tab */}
+        <div className="lg:col-span-7 space-y-3.5">
           {activeTab === "overview" && (
             <>
               {/* Executive Summary Card */}
-              <div className="card-base p-5 space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-line">
-                  <div className="eyebrow">EXECUTIVE SUMMARY</div>
-                  <span className="text-xs text-subtle font-mono">Reason: {activeCase.reason}</span>
+              <div className="card-base p-4 space-y-2 border border-brand-border">
+                <div className="flex items-center justify-between pb-2 border-b border-brand-border">
+                  <div className="eyebrow text-brand-subtle">EXECUTIVE INCIDENT SUMMARY</div>
+                  <span className="text-[11px] text-brand-subtle font-mono">Reason: {activeCase.reason}</span>
                 </div>
-                <p className="text-xs text-ink leading-relaxed">{activeCase.summary}</p>
+                <p className="text-xs text-brand-text leading-relaxed">{activeCase.summary}</p>
               </div>
 
               {/* Multi-Signal Breakdown Card */}
-              <div className="card-base p-5 space-y-3">
-                <div className="eyebrow pb-2 border-b border-line">STRUCTURED RISK EVIDENCE</div>
-                <div className="space-y-3">
+              <div className="card-base p-4 space-y-2.5 border border-brand-border">
+                <div className="eyebrow text-brand-subtle pb-2 border-b border-brand-border">
+                  STRUCTURED RISK EVIDENCE SIGNALS
+                </div>
+                <div className="space-y-2">
                   {[
                     {
-                      signal: "Transaction Amount Spike",
-                      desc: "Amount is 4.8× above the customer's 30-day baseline median of ৳6,800.",
+                      signal: "Transaction Amount Velocity Spike",
+                      desc: "Amount is 4.8× above customer 30-day baseline median of ৳6,800.",
                       score: 92,
-                      deviated: true,
                     },
                     {
-                      signal: "Hardware Device Fingerprint",
-                      desc: "Device DEV-8821 first observed 12 minutes prior to transfer. Zero historical link to wallet.",
+                      signal: "Hardware Fingerprint Mismatch",
+                      desc: "Device DEV-8821 first observed 12 minutes prior to transfer with zero wallet pairing history.",
                       score: 78,
-                      deviated: true,
                     },
                     {
-                      signal: "Topological Mule Network Proximity",
-                      desc: "Recipient wallet U-8831 is an intermediary conduit linked to Mule Syndicate Cluster #17.",
+                      signal: "Topological Mule Cluster Proximity",
+                      desc: "Beneficiary wallet U-8831 is an intermediary conduit linked to Mule Syndicate Cluster #17.",
                       score: 91,
-                      deviated: true,
                     },
                     {
-                      signal: "Nocturnal Dormant Hours",
+                      signal: "Nocturnal Dormant Hours Execution",
                       desc: "Executed at 02:13 AM. User has zero historic transactions between 11:30 PM and 7:00 AM.",
                       score: 74,
-                      deviated: true,
                     },
                   ].map((s, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl border border-line bg-surface/50 flex items-start justify-between gap-3"
+                      className="p-2.5 rounded border border-brand-border bg-brand-elevated flex items-start justify-between gap-3"
                     >
                       <div>
-                        <b className="text-xs text-ink block">{s.signal}</b>
-                        <p className="text-[11px] text-muted mt-0.5 leading-snug">{s.desc}</p>
+                        <b className="text-xs text-brand-text block">{s.signal}</b>
+                        <p className="text-[11px] text-brand-muted mt-0.5 leading-snug">{s.desc}</p>
                       </div>
-                      <span className="badge badge-critical text-[10px] shrink-0 font-mono">
+                      <span className="badge badge-critical text-[9.5px] shrink-0 font-mono">
                         {s.score}/100
                       </span>
                     </div>
@@ -268,24 +270,26 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
           )}
 
           {activeTab === "timeline" && (
-            <div className="card-base p-5">
-              <div className="eyebrow pb-3 border-b border-line">CHRONOLOGICAL INCIDENT TELEMETRY</div>
-              <div className="space-y-3.5 mt-3">
+            <div className="card-base p-4 border border-brand-border">
+              <div className="eyebrow text-brand-subtle pb-2.5 border-b border-brand-border">
+                CHRONOLOGICAL INCIDENT TELEMETRY
+              </div>
+              <div className="space-y-3 mt-3">
                 {evidenceTimelineINV1042.map((ev, i) => (
-                  <div key={i} className="flex items-start gap-3 relative pb-2">
-                    <span className="text-[10px] text-subtle font-mono w-14 shrink-0 pt-0.5">
+                  <div key={i} className="flex items-start gap-2.5 relative pb-2">
+                    <span className="text-[10px] text-brand-subtle font-mono w-14 shrink-0 pt-0.5">
                       {ev.time}
                     </span>
                     <span
-                      className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${
-                        ev.isCritical ? "bg-rose-600 ring-2 ring-rose-200" : "bg-emerald-500"
+                      className={`w-2 h-2 rounded-full mt-1 shrink-0 ${
+                        ev.isCritical ? "bg-rose-500" : "bg-emerald-500"
                       }`}
                     />
                     <div className="text-xs flex-1">
-                      <b className={ev.isCritical ? "text-rose-900 dark:text-rose-300" : "text-ink"}>
+                      <b className={ev.isCritical ? "text-rose-400 font-semibold" : "text-brand-text"}>
                         {ev.title}
                       </b>
-                      <p className="text-muted mt-0.5">{ev.description}</p>
+                      <p className="text-brand-muted text-[11px] mt-0.5">{ev.description}</p>
                     </div>
                   </div>
                 ))}
@@ -294,31 +298,31 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
           )}
 
           {activeTab === "audit" && (
-            <div className="card-base p-5 space-y-3">
-              <div className="flex items-center justify-between pb-3 border-b border-line">
+            <div className="card-base p-4 space-y-2.5 border border-brand-border">
+              <div className="flex items-center justify-between pb-2 border-b border-brand-border">
                 <div>
-                  <div className="eyebrow">IMMUTABLE SESSION AUDIT TRAIL</div>
-                  <h3 className="text-xs font-bold text-ink">Compliance &amp; Human Decision Log</h3>
+                  <div className="eyebrow text-brand-subtle">IMMUTABLE SESSION AUDIT TRAIL</div>
+                  <h3 className="text-xs font-bold text-brand-text uppercase tracking-wide">Human Decision &amp; Action Log</h3>
                 </div>
-                <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                   Tamper-Evident Session Log
                 </span>
               </div>
 
               {caseAuditEvents.length === 0 ? (
-                <p className="text-xs text-muted py-6 text-center">
-                  No explicit analyst interventions logged yet for this case. Use the action bar below to log decisions.
+                <p className="text-xs text-brand-subtle py-8 text-center">
+                  No analyst interventions recorded yet for this case. Use the action bar below to log verified decisions.
                 </p>
               ) : (
-                <div className="divide-y divide-line">
+                <div className="divide-y divide-brand-border">
                   {caseAuditEvents.map((event) => (
-                    <div key={event.id} className="py-2.5 space-y-1">
+                    <div key={event.id} className="py-2 space-y-0.5">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-ink font-mono">{event.actor}</span>
-                        <span className="text-subtle font-mono text-[10px]">{event.timestamp}</span>
+                        <span className="font-bold text-brand-text font-mono">{event.actor}</span>
+                        <span className="text-brand-subtle font-mono text-[9.5px]">{event.timestamp}</span>
                       </div>
-                      <p className="text-xs text-muted leading-snug">{event.details}</p>
-                      <span className="text-[9.5px] font-mono text-subtle block">
+                      <p className="text-xs text-brand-muted leading-snug">{event.details}</p>
+                      <span className="text-[9.5px] font-mono text-brand-subtle block">
                         ID: {event.id} &middot; Type: {event.eventType}
                       </span>
                     </div>
@@ -329,29 +333,29 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
           )}
 
           {/* AI Recommended Intervention Banner */}
-          <div className="card-base p-4 flex items-center justify-between gap-4 border border-amber-500/30 bg-amber-500/5">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0">
-                <Sparkles size={18} />
+          <div className="card-base p-3.5 flex items-center justify-between gap-3 border border-brand-border bg-brand-elevated">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded bg-brand-surface text-upay-gold border border-brand-border flex items-center justify-center shrink-0">
+                <Sparkles size={16} />
               </div>
               <div>
-                <div className="eyebrow text-amber-500">RECOMMENDED INTERVENTION</div>
-                <h4 className="text-xs font-bold text-ink">
-                  Recipient Settlement Hold &amp; Biometric Step-Up
+                <div className="eyebrow text-upay-gold text-[9.5px]">RECOMMENDED INTERVENTION</div>
+                <h4 className="text-xs font-bold text-brand-text">
+                  Settlement Quarantine &amp; Biometric Challenge
                 </h4>
-                <p className="text-xs text-muted">
+                <p className="text-[11px] text-brand-muted mt-0.5">
                   {activeCase.recommendation}
                 </p>
               </div>
             </div>
-            <span className="confidence-pill text-xs font-bold shrink-0">
+            <span className="px-2 py-0.5 rounded bg-brand-surface text-brand-text text-[10px] font-bold font-mono shrink-0 border border-brand-border">
               {activeCase.confidence}% Confidence
             </span>
           </div>
         </div>
 
-        {/* Right Column: Sentinel AI Investigation Assistant */}
-        <div className="col-span-5">
+        {/* Right Column: Sentinel Copilot Assistant */}
+        <div className="lg:col-span-5">
           <SentinelAssistant
             caseId={caseId}
             customer={customer}
@@ -361,46 +365,47 @@ export const InvestigationDetailView: React.FC<InvestigationDetailViewProps> = (
       </div>
 
       {/* Persistent Bottom Action Bar with Human Oversight Safeguards */}
-      <div className="action-bar select-none fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-line px-6 py-3.5 flex items-center justify-between shadow-xl">
-        <div className="flex items-center gap-2 text-xs text-muted">
-          <ShieldAlert size={16} className="text-amber-500 shrink-0" />
+      <div className="action-bar select-none fixed bottom-0 left-0 right-0 z-40 bg-brand-surface/95 backdrop-blur-md border-t border-brand-border px-5 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs text-brand-muted">
+          <ShieldAlert size={15} className="text-upay-gold shrink-0" />
           <span>
-            <b>Human Oversight Required:</b> High-impact account sanctions require analyst confirmation. Autonomous financial blocks prohibited.
+            <b className="text-brand-text">Human-in-the-Loop Safeguard:</b> High-impact account sanctions require verified analyst confirmation.
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <button
-            onClick={() => handleAction("MARK_SAFE", "Marked as False Positive / Safe")}
+            onClick={() => handleAction("MARK_SAFE", "Case dismissed as benign / false positive")}
             className="btn btn-secondary text-xs"
           >
             Mark False Positive
           </button>
           <button
-            onClick={() => handleAction("STEP_UP", "Biometric step-up challenge dispatched")}
-            className="btn btn-secondary text-xs"
+            onClick={() => handleAction("STEP_UP", "Biometric step-up challenge dispatched to customer")}
+            className="btn btn-secondary text-xs flex items-center gap-1"
           >
-            Request Biometric 2FA
+            <KeyRound size={12} />
+            <span>Request Biometric 2FA</span>
           </button>
           <button
-            onClick={() => handleAction("HOLD", "Settlement hold placed on recipient")}
-            className="btn text-xs bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 flex items-center gap-1.5"
+            onClick={() => handleAction("HOLD", "Outgoing settlement hold placed on recipient")}
+            className="btn text-xs bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 flex items-center gap-1"
           >
-            <PauseCircle size={14} />
+            <PauseCircle size={13} />
             <span>Hold Settlement</span>
           </button>
           <button
-            onClick={() => handleAction("ESCALATE", "Escalated to AML Committee & Legal")}
-            className="btn btn-danger text-xs flex items-center gap-1.5"
+            onClick={() => handleAction("ESCALATE", "Escalated to AML & Regulatory Committee")}
+            className="btn btn-danger text-xs flex items-center gap-1"
           >
-            <AlertTriangle size={14} />
+            <AlertTriangle size={13} />
             <span>Escalate Case</span>
           </button>
           <button
-            onClick={() => handleAction("RELEASE", "Case closed and resolved")}
-            className="btn btn-primary text-xs flex items-center gap-1.5"
+            onClick={() => handleAction("RELEASE", "Case finalized and resolved")}
+            className="btn btn-primary text-xs flex items-center gap-1"
           >
-            <CheckCircle2 size={14} />
+            <CheckCircle2 size={13} />
             <span>Close Case</span>
           </button>
         </div>

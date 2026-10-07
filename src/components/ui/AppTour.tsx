@@ -17,10 +17,10 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       target: "body",
       content: (
         <div>
-          <h3 className="font-bold text-lg text-emerald-900 mb-2">Welcome to upay Sentinel 🛡️</h3>
-          <p className="text-sm text-gray-700">
-            This AI-powered intelligence platform detects and mitigates fraud in real-time. 
-            Let&apos;s take a quick tour of the key features.
+          <h3 className="font-semibold text-sm text-brand-text mb-1">Welcome to upay Sentinel 🛡️</h3>
+          <p className="text-xs text-brand-muted leading-relaxed">
+            Enterprise Trust & Risk Intelligence platform detecting mobile financial fraud in real time. 
+            Let&apos;s tour the primary operational surfaces.
           </p>
         </div>
       ),
@@ -30,8 +30,8 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       target: ".nav-overview",
       content: (
         <div>
-          <h3 className="font-bold text-md text-emerald-900">Overview Dashboard</h3>
-          <p className="text-sm text-gray-700">Get a high-level bird&apos;s-eye view of total network health, active alerts, and real-time transaction velocities.</p>
+          <h3 className="font-semibold text-sm text-brand-text mb-1">Executive Overview Console</h3>
+          <p className="text-xs text-brand-muted leading-relaxed">High-level operational health, alert distribution, 24h risk velocity, and authorized test scenario triggers.</p>
         </div>
       ),
       placement: "right",
@@ -40,8 +40,8 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       target: ".nav-transactions",
       content: (
         <div>
-          <h3 className="font-bold text-md text-emerald-900">Transaction Monitor</h3>
-          <p className="text-sm text-gray-700">Watch live transactions flow through the system. Our machine learning engine scores them in milliseconds.</p>
+          <h3 className="font-semibold text-sm text-brand-text mb-1">Transaction Stream Monitor</h3>
+          <p className="text-xs text-brand-muted leading-relaxed">Inspect live transactions scored under 2ms by our 12-factor hybrid risk engine.</p>
         </div>
       ),
       placement: "right",
@@ -50,8 +50,8 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       target: ".btn-simulate",
       content: (
         <div>
-          <h3 className="font-bold text-md text-emerald-900">Simulate Attack</h3>
-          <p className="text-sm text-gray-700">Use this to inject a synthetic fraudulent transaction (like an Account Takeover) and watch Sentinel catch it live.</p>
+          <h3 className="font-semibold text-sm text-brand-text mb-1">Risk Scenario Testing Lab</h3>
+          <p className="text-xs text-brand-muted leading-relaxed">Inject synthetic attack vectors (Account Takeover, Velocity Burst, Mule Structuring) to evaluate engine response live.</p>
         </div>
       ),
       placement: "bottom",
@@ -60,8 +60,8 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       target: ".nav-network",
       content: (
         <div>
-          <h3 className="font-bold text-md text-emerald-900">Fraud Network Intelligence</h3>
-          <p className="text-sm text-gray-700">Analyze topological graphs linking multiple wallets through shared devices and money mule hubs.</p>
+          <h3 className="font-semibold text-sm text-brand-text mb-1">Fraud Network Intelligence</h3>
+          <p className="text-xs text-brand-muted leading-relaxed">Interactive topological graph revealing syndicate syndication, device fingerprint sharing, and mule hub clusters.</p>
         </div>
       ),
       placement: "right",
@@ -70,8 +70,8 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       target: ".nav-investigations",
       content: (
         <div>
-          <h3 className="font-bold text-md text-emerald-900">AI Investigation Copilot</h3>
-          <p className="text-sm text-gray-700">Chat with the Gemini AI Copilot to analyze case files, draft subpoenas, and get recommendations instantly.</p>
+          <h3 className="font-semibold text-sm text-brand-text mb-1">AI Analyst Workstation</h3>
+          <p className="text-xs text-brand-muted leading-relaxed">Review prioritized case dossiers, examine TreeSHAP attributions, and collaborate with the Gemini Risk Copilot.</p>
         </div>
       ),
       placement: "right",
@@ -94,23 +94,47 @@ export const AppTour: React.FC<AppTourProps> = ({ run, onFinish }) => {
       continuous
       onEvent={handleJoyrideCallback}
       options={{
-        primaryColor: '#10b981', // emerald-500
+        primaryColor: '#10B981',
         zIndex: 10000,
         showProgress: true,
         buttons: ['back', 'close', 'primary', 'skip'],
       }}
       styles={{
+        overlay: {
+          backgroundColor: 'rgba(11, 15, 20, 0.75)',
+        },
         tooltip: {
-          borderRadius: '12px',
-          padding: '20px',
+          borderRadius: '8px',
+          padding: '16px',
+          backgroundColor: '#11161D',
+          color: '#F4F7FA',
+          border: '1px solid #252D37',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.8)',
+        },
+        tooltipContent: {
+          padding: '0 0 12px 0',
         },
         buttonPrimary: {
-          backgroundColor: '#059669', // emerald-600
-          borderRadius: '8px',
+          backgroundColor: '#10B981',
+          borderRadius: '6px',
+          fontSize: '11px',
+          fontWeight: 600,
+          padding: '6px 12px',
+          color: '#0B0F14',
         },
         buttonBack: {
-          color: '#059669',
-        }
+          color: '#9AA6B2',
+          fontSize: '11px',
+          fontWeight: 500,
+          marginRight: '8px',
+        },
+        buttonSkip: {
+          color: '#627282',
+          fontSize: '11px',
+        },
+        buttonClose: {
+          color: '#9AA6B2',
+        },
       }}
     />
   );

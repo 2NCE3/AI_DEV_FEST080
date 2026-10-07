@@ -7,13 +7,14 @@ import {
   HelpCircle,
   Bell,
   FileDown,
-  Sparkles,
   Zap,
   Menu,
   X,
   Moon,
   Sun,
   Shield,
+  Activity,
+  Cpu,
 } from "lucide-react";
 
 interface TopbarProps {
@@ -49,65 +50,71 @@ export const Topbar: React.FC<TopbarProps> = ({
         onClick={onToggleSidebar}
         aria-label="Toggle navigation menu"
       >
-        <Menu size={18} />
+        <Menu size={16} />
       </button>
 
       {/* Global Search Input */}
       <div className="global-search" role="search">
-        <Search size={15} className="text-muted" aria-hidden="true" />
+        <Search size={14} className="text-brand-subtle shrink-0" aria-hidden="true" />
         <input
           type="text"
-          placeholder="Search transactions, customers, cases…"
+          placeholder="Search transactions, wallets, devices, cases…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search"
         />
-        <kbd className="hidden sm:flex items-center text-[10px] text-subtle bg-surfaceAlt border border-line px-1.5 py-0.5 rounded font-mono leading-none select-none flex-shrink-0">
+        <kbd className="hidden sm:flex items-center text-[10px] text-brand-subtle bg-brand-surface border border-brand-border px-1.5 py-0.5 rounded font-mono leading-none select-none shrink-0">
           ⌘K
         </kbd>
       </div>
 
-      {/* Action Controls */}
+      {/* Operational Indicators & Actions */}
       <div className="top-actions">
-        {/* Simulate Attack — Primary Brand CTA */}
+        {/* Real-time Telemetry Status Badges */}
+        <div className="telemetry-badge hidden md:flex" title="Risk Engine Pipeline Latency">
+          <span className="status-dot animate-pulse" />
+          <span className="font-mono text-emerald-400 font-semibold">&lt; 2ms</span>
+          <span className="text-brand-subtle">&bull; DC1-Dhaka</span>
+        </div>
+
+        {/* Simulate Attack — Primary Testing CTA */}
         <button
           onClick={onOpenSimulation}
           className="btn btn-primary text-xs"
-          aria-label="Open attack simulation"
+          aria-label="Open attack simulation workbench"
         >
-          <Zap size={14} className="animate-pulse" aria-hidden="true" />
-          <span className="hidden sm:inline">Simulate Attack</span>
+          <Zap size={13} className="shrink-0" aria-hidden="true" />
+          <span className="hidden sm:inline">Simulate Scenario</span>
           <span className="sm:hidden">Sim</span>
         </button>
 
-        {/* Audit Report */}
+        {/* Audit Report Export */}
         <button
           onClick={onOpenReport}
-          className="btn btn-secondary text-xs hidden sm:inline-flex"
+          className="btn btn-secondary text-xs hidden lg:inline-flex"
           aria-label="Export audit report"
         >
-          <FileDown size={14} aria-hidden="true" />
+          <FileDown size={13} aria-hidden="true" />
           <span>Audit Report</span>
         </button>
 
-        {/* Date indicator */}
-        <div className="date-control" aria-label="Current time range">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" aria-hidden="true" />
-          <span>Live · 24h</span>
-          <ChevronDown size={13} className="text-subtle flex-shrink-0" aria-hidden="true" />
+        {/* Time range selector */}
+        <div className="telemetry-badge hidden xl:flex cursor-pointer" aria-label="Current time range">
+          <span>Live &middot; 24h</span>
+          <ChevronDown size={12} className="text-brand-subtle shrink-0" aria-hidden="true" />
         </div>
 
         {/* Theme Toggle */}
         <button
           onClick={onToggleTheme}
           className="icon-btn"
-          title={isDarkMode ? "Switch to Light Console" : "Switch to Cyber Dark Mode"}
+          title={isDarkMode ? "Switch to Light Console" : "Switch to Dark Console"}
           aria-label="Toggle Dark Mode"
         >
-          {isDarkMode ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} />}
+          {isDarkMode ? <Sun size={15} className="text-amber-400" /> : <Moon size={15} />}
         </button>
 
-        {/* Help */}
+        {/* Help / Platform Info */}
         <button
           onClick={() => setShowHelp(!showHelp)}
           className="icon-btn"
@@ -115,23 +122,23 @@ export const Topbar: React.FC<TopbarProps> = ({
           aria-label="Help and about"
           aria-expanded={showHelp}
         >
-          <HelpCircle size={16} />
+          <HelpCircle size={15} />
         </button>
 
         {/* Alerts Bell */}
         <button
           onClick={onNavigateAlerts}
           className={`icon-btn ${unreadCount > 0 ? "has-alert" : ""}`}
-          title={`${unreadCount} Unread Alert${unreadCount !== 1 ? "s" : ""}`}
+          title={`${unreadCount} Unread Alerts`}
           aria-label={`${unreadCount} unread alerts`}
         >
-          <Bell size={16} />
+          <Bell size={15} />
         </button>
 
-        {/* User Avatar */}
+        {/* User Identity Avatar */}
         <div
-          className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/30 font-bold text-xs flex items-center justify-center flex-shrink-0 select-none shadow-sm cursor-pointer"
-          title="Arman Hossen — Senior Fraud Analyst"
+          className="w-8 h-8 rounded bg-brand-elevated text-upay-DEFAULT border border-brand-borderStrong font-mono font-bold text-xs flex items-center justify-center shrink-0 select-none cursor-pointer"
+          title="Arman Hossen — Senior Fraud Analyst (Lead)"
           aria-label="User menu"
           role="button"
           tabIndex={0}
@@ -143,56 +150,54 @@ export const Topbar: React.FC<TopbarProps> = ({
       {/* Help Modal */}
       {showHelp && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn"
           role="dialog"
           aria-modal="true"
           aria-label="About upay Sentinel"
           onClick={(e) => e.target === e.currentTarget && setShowHelp(false)}
         >
-          <div className="bg-surface rounded-2xl max-w-md w-full p-6 shadow-2xl border border-line">
+          <div className="bg-brand-surface rounded-lg max-w-md w-full p-6 shadow-modal border border-brand-border">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-line">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/30 font-black">
-                  <Shield size={20} />
+            <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded bg-brand-elevated text-upay-gold flex items-center justify-center shrink-0 border border-brand-borderStrong">
+                  <Shield size={18} />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-[16px] text-ink leading-tight flex items-center gap-1.5">
-                    <span className="text-amber-500">upay</span> Sentinel
+                  <h3 className="font-bold text-sm text-brand-text leading-tight flex items-center gap-1.5">
+                    <span className="text-upay-gold">upay</span> Sentinel
                   </h3>
-                  <p className="text-xs text-muted mt-0.5">
-                    DIU CPC &times; upay AI Hackathon 2026 &middot; Track 01
+                  <p className="text-[11px] text-brand-muted mt-0.5">
+                    DIU CPC &times; upay AI Hackathon 2026 &middot; Track 01: Trust &amp; Risk Intelligence
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowHelp(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surfaceAlt hover:text-ink transition-colors"
+                className="w-7 h-7 rounded flex items-center justify-center text-brand-muted hover:bg-brand-elevated hover:text-brand-text transition-colors"
                 aria-label="Close dialog"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
             {/* Body */}
-            <div className="mt-4 space-y-3.5 text-[13px] text-muted leading-relaxed">
+            <div className="mt-4 space-y-3 text-xs text-brand-muted leading-relaxed">
               <p>
-                <b className="text-ink">upay Sentinel</b> is an enterprise-grade AI Fraud
-                &amp; Scam Intelligence platform built for Mobile Financial Services (MFS) in Bangladesh.
+                <b className="text-brand-text">upay Sentinel</b> is an enterprise-grade Trust &amp; Risk Intelligence platform designed for Bangladesh&apos;s Mobile Financial Services (MFS) ecosystem.
               </p>
-              <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/25 space-y-2.5 text-ink">
-                <div className="font-bold text-amber-500 text-xs uppercase tracking-wider font-mono">
-                  Hackathon Core Deliverables
+              <div className="p-3.5 bg-brand-elevated rounded border border-brand-border space-y-2 text-brand-text">
+                <div className="font-bold text-upay-gold text-[10px] uppercase tracking-wider font-mono">
+                  Operational Risk Lifecycle
                 </div>
-                <div className="text-xs space-y-2">
-                  <div><b className="text-ink">1. What happened?</b> Real-time deterministic + TensorFlow ML telemetry scoring.</div>
-                  <div><b className="text-ink">2. Why is it risky?</b> Topological mule clustering, XAI SHAP explainability, and 3D spatial intelligence.</div>
-                  <div><b className="text-ink">3. What to do next?</b> Google Gemini 2.5 Copilot synthesis providing audited action steps.</div>
+                <div className="space-y-1.5 text-[11px]">
+                  <div><b className="text-brand-text">1. What happened?</b> Real-time deterministic rules + TensorFlow neural network scoring.</div>
+                  <div><b className="text-brand-text">2. Why is it risky?</b> Topological money-mule clustering, velocity burst, and behavioral anomaly detection.</div>
+                  <div><b className="text-brand-text">3. What to do next?</b> Gemini Copilot synthesis with analyst human-in-the-loop oversight.</div>
                 </div>
               </div>
-              <p className="text-xs text-subtle">
-                Tip: Click <b className="text-amber-500">&ldquo;Simulate Attack&rdquo;</b> to inject
-                synthetic mule network spikes and evaluate detection in real time.
+              <p className="text-[11px] text-brand-subtle">
+                Use <b className="text-upay-gold">&ldquo;Simulate Scenario&rdquo;</b> to test attack vectors including Account Takeover, Money Mule Layering, SIM Swap Drain, and Smurfing bursts.
               </p>
             </div>
 
@@ -202,7 +207,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 onClick={() => setShowHelp(false)}
                 className="btn btn-primary text-xs"
               >
-                Got it
+                Acknowledge
               </button>
             </div>
           </div>

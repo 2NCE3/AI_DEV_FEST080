@@ -1,176 +1,105 @@
 # upay Sentinel 🛡️
-### AI-Powered Trust & Risk Intelligence Platform for Mobile Financial Services
-**DIU CPC × upay — AI DEV FEST 2026** &middot; **Track 01: Trust & Risk Intelligence**
+
+**upay Sentinel** is an AI-powered Fraud & Scam Intelligence platform designed to identify, analyze, and mitigate fraudulent transactions (such as account takeovers, money mule syndicates, and micro-structuring velocity bursts) in real time. 
+
+Built for the upay AI Hackathon, Sentinel leverages **Google's Gemini AI** to provide an intelligent Copilot for fraud analysts, automatically evaluating transaction telemetry and suggesting concrete mitigation steps.
 
 ---
 
-## 📌 Executive Summary
-
-**upay Sentinel** is an enterprise-grade AI Fraud & Scam Intelligence platform engineered specifically for modern Digital Financial Services (MFS) in Bangladesh. It bridges the critical gap between raw real-time transaction ingestion and actionable human analyst decision-making.
-
-Rather than relying on superficial dashboards or naive end-to-end LLM classification, **upay Sentinel** implements a deterministic, multi-layered risk evaluation pipeline. High-throughput mathematical risk engines process transactions in sub-milliseconds, while **Google Gemini** powers an investigative reasoning layer that explains structured evidence, generates audit dossiers, and recommends regulatory actions under strict **Human-in-the-Loop** governance.
-
----
-
-## 🏛️ System Architecture
-
-```mermaid
-flowchart TD
-    subgraph INGESTION["1. INGESTION & FEATURE EXTRACTION"]
-        TXN[Transaction Stream / Injected Attack] --> FE[Feature Extractor & Normalizer]
-    end
-
-    subgraph DETECTION_LAYERS["2. MULTI-SIGNAL RISK DETECTION ENGINES"]
-        FE --> BASELINE[Behavioral Baseline Profiler\n• Amount Z-Score\n• Nocturnal Window\n• Unrecognized Hardware]
-        FE --> VELOCITY[Sliding-Window Velocity\n• 10m/1h/24h Windows\n• Micro-structuring Smurfing\n• Rapid Inbound/Outbound]
-        FE --> ATO[Account Takeover Detector\n• USSD PIN Reset Tracking\n• Impossible Travel / Geo Jump\n• Immediate Cash-out Drain]
-        FE --> MULE[Mule Syndicate Intelligence\n• Cluster #17 Linkage\n• Conduit Pass-through\n• Layering Aggregation Hubs]
-        FE --> SCAM[Social Engineering Detector\n• Active Call Coaching\n• First-time Recipient Spike\n• Impersonation Vectors]
-        FE --> RULES[Compliance Rule Engine\n• Bangladesh Bank ৳50K Threshold\n• 24h SIM Swap Hold Rule\n• Night Cash-out Restriction]
-        FE --> GRAPH[Graph Network Topology\n• BFS Shortest Hop Distance\n• Shared Hardware Fingerprints]
-        FE --> TFJS[TensorFlow.js Neural Net\n• Local In-Browser Inference\n• Anomaly Probability Vector]
-    end
-
-    subgraph SCORING["3. RISK COMPOSITE SCORING & EXPLAINABILITY"]
-        BASELINE & VELOCITY & ATO & MULE & SCAM & RULES & GRAPH & TFJS --> SCORER[Multi-Signal Composite Scorer\n• Transparent Weighted Sum\n• Compliance Regulatory Floors\n• Confidence Synthesis\n• Structured Explanations]
-    end
-
-    subgraph PIPELINE["4. UNIFIED SINGLE-SOURCE-OF-TRUTH STATE"]
-        SCORER --> CONTEXT[Sentinel Central Data Pipeline]
-        CONTEXT --> DASH[Executive Overview & 3D Defense Grid]
-        CONTEXT --> MONITOR[Real-time Transaction Feed & Drawer]
-        CONTEXT --> ALERTS[Intelligent Alert Triage Center]
-        CONTEXT --> CASES[Investigation Dossiers & Workspaces]
-        CONTEXT --> NET3D[2D Graph & 3D Spatial Network Cluster]
-        CONTEXT --> AUDIT[Immutable Session Audit Trail]
-    end
-
-    subgraph COPILOT["5. AI COPILOT & HUMAN-IN-THE-LOOP"]
-        CASES --> GEMINI[Gemini Investigation Copilot\n• What Happened?\n• Why is it Risky?\n• What Should upay Do Next?\n• Graceful Offline Heuristic Fallback]
-        GEMINI --> ANALYST[Human Risk Analyst Oversight\n(Autonomous Denials Prohibited)]
-        ANALYST --> DECISION[Analyst Action Execution\n• [HOLD SETTLEMENT]\n• [REQUEST BIOMETRIC 2FA]\n• [ESCALATE AML/LEGAL]\n• [MARK FALSE POSITIVE]\n• [CLOSE & RELEASE]]
-        DECISION --> AUDIT
-    end
-```
-
----
-
-## ⚡ The Fraud Intelligence Lifecycle
-
-Every transaction in upay Sentinel follows an explicit, explainable lifecycle:
-
-1. **Transaction Ingestion**: Ingests transactions via background stream or judge attack injectors.
-2. **Feature Extraction**: Normalizes amounts against historical medians, parses temporal timestamps, extracts hardware device fingerprints, and verifies geographic coordinates.
-3. **Multi-Signal Detection**:
-   - **Behavioral Baseline**: Evaluates historical customer envelope (Amount $Z$-score, typical operating hours, known trusted devices).
-   - **Velocity & Structuring**: Tracks sliding 10-minute and 1-hour windows to identify burst transfers and micro-structuring skirting Bangladesh Bank limits.
-   - **Account Takeover (ATO)**: Correlates recent USSD/App PIN resets with immediate nocturnal full-balance liquidations.
-   - **Mule Ring Discovery**: Evaluates graph proximity to flagged syndicate clusters (e.g., Mule Cluster #17).
-   - **Compliance Rule Engine**: Deterministic rules enforcing Bangladesh Bank ৳50,000 reporting thresholds and carrier SIM swap cooling-off periods.
-4. **Transparent Risk Scoring**: Generates a composite score (0–100) using documented weights, applies regulatory severity floors, and produces structured factor deviations.
-5. **Dynamic Pipeline Propagation**: Propagates state to Alerts, Cases, Network Graph, and Dashboard counters from a **Single Source of Truth**.
-6. **AI Investigation Copilot (Gemini)**: Answers the 3 core questions: *What happened? Why is it risky? What should upay do next?* (with zero-failure offline heuristic fallback).
-7. **Human Oversight & Decision**: Risk analysts review evidence and execute sanctions (`[HOLD]`, `[STEP_UP]`, `[ESCALATE]`, `[RELEASE]`). Autonomous financial blocks are prohibited.
-8. **Tamper-Evident Audit Trail**: Every transaction evaluation, alert dispatch, and analyst decision is permanently logged in the session audit trail.
-
----
-
-## 🎯 1-Click Judge Demonstration Scenarios
-
-To verify the platform end-to-end during evaluation, navigate to the **Overview Dashboard** and click any of the 5 demo cards in the **Judge Demo Hub**:
-
-| Scenario | Attack Vector & Telemetry | Expected Risk | Triggered Rules / Anomalies |
-| :--- | :--- | :---: | :--- |
-| 🚨 **Account Takeover (ATO)** | USSD PIN reset 15 min prior + nocturnal cash-out of ৳32,000 from unknown device in Chattogram. | **Critical (~87)** | `RULE_RAPID_CASHOUT_POST_RESET`, `RULE_NOCTURNAL_BURST`, Geo Jump Anomaly. |
-| 🕸️ **Mule Syndicate Ring** | ৳48,500 transfer to wallet `U-8831` (Cluster #17 conduit) via shared device `DEV-8821` at 02:13 AM. | **Critical (~94)** | `RULE_FLAGGED_MULE_INTERACTION`, Shared Device Anomaly, 1-Hop Syndicate Link. |
-| 📱 **SIM Swap Liquidation** | Max balance drain (৳98,000) within 10 minutes of carrier SIM swap from emulator. | **Critical (~98)** | `RULE_SIM_SWAP_COOL_DOWN`, `RULE_BB_HIGH_VALUE`, Carrier Swap Violation. |
-| ⚡ **Smurfing Velocity** | 6 transfers of ৳24,500 executed in 180 seconds skirting the ৳25,000 reporting limit. | **High (~80)** | `RULE_MICRO_STRUCTURING`, `VELOCITY_BURST`, Threshold Skirting. |
-| ✅ **Legitimate Payment** | ৳2,450 merchant grocery checkout at `M-291` from registered device during business hours. | **Low (~18)** | Conforms to 30-day baseline median, trusted hardware verified. |
-
-*Clicking any scenario immediately updates all 7 product surfaces, generates live alerts, creates investigation dossiers, and adds records to the audit trail.*
-
----
-
-## 📊 Grounded Model Evaluation & Benchmark Metrics
-
-> **Strict Non-Fabrication Guarantee**: Model metrics are **not** hardcoded strings or random numbers. They are computed dynamically on a 100-sample held-out benchmark test dataset representing realistic Bangladesh MFS transaction distributions.
-
-| Evaluation Metric | Score | Formulation | Verification Method |
-| :--- | :---: | :--- | :--- |
-| **Accuracy** | **100.0%** | $(TP + TN) / \text{Total}$ | Evaluated live on 100 benchmark samples |
-| **Precision** | **100.0%** | $TP / (TP + FP)$ | Minimizes false customer friction |
-| **Recall (Sensitivity)** | **100.0%** | $TP / (TP + FN)$ | Intercepts 100% of tested fraudulent attacks |
-| **F1 Score** | **1.000** | $2 \cdot (P \cdot R) / (P + R)$ | Harmonic mean of precision & recall |
-| **False Positive Rate (FPR)** | **0.0%** | $FP / (FP + TN)$ | Strict compliance with Bangladesh Bank limits |
-
-### Held-Out Benchmark Confusion Matrix (100 Samples)
-```text
-                  PREDICTED FRAUD        PREDICTED LEGIT
-ACTUAL FRAUD            30 (TP)                 0 (FN)
-ACTUAL LEGIT             0 (FP)                70 (TN)
-```
-*Run `npm test` or click **"Re-evaluate Benchmark"** in the Fraud Analytics view to re-compute these numbers live.*
-
----
-
-## 🛡️ Responsible AI & Security Framework
-
-1. **Human-in-the-Loop Oversight**: Autonomous irreversible fund freezes or account closures are prohibited. The platform provides evidence packages and recommended interventions; human analysts retain ultimate authority.
-2. **Transparent Mathematical Explainability**: Every score exposes individual factor scores, baseline $z$-score deviations, triggered regulatory rules, and topological graph distances.
-3. **Privacy by Design**: All demonstration data uses synthetic pseudonyms (`U-1042`, `DEV-8821`). Zero actual customer PII is stored or transmitted.
-4. **Resilient 100% Offline Capability**: If `GEMINI_API_KEY` is omitted or the network is unavailable, the local risk engine, TensorFlow.js neural net, and grounded heuristic fallback synthesize complete evidence dossiers with zero downtime.
-
----
-
-## 🛠️ Technology Stack
-
-- **Frontend & App Framework**: Next.js 15 (App Router), React 19, TypeScript 5.7, Tailwind CSS
-- **3D Spatial Visualizations**: Three.js (WebGL 3D Sentinel Defense Globe & Spatial Fraud Network Cluster)
-- **Local Machine Learning**: TensorFlow.js (In-Browser Sequential Neural Network)
-- **AI Copilot & Reasoning**: Google Gemini API (`gemini-flash-latest`, with automatic model fallback cascade)
-- **Testing & Verification**: Node.js Test Runner, TypeScript Execution Engine (`tsx`)
-
----
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### 1. Prerequisites
-- **Node.js**: v18.0.0 or higher (Tested on Node.js v24 LTS)
-- **npm**: v9.0.0 or higher
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
 ### 2. Installation
+Clone the repository and install the dependencies:
 ```bash
-git clone https://github.com/armanhossen-dev/AI_DEV_FEST080.git
-cd AI_DEV_FEST080
 npm install
 ```
 
-### 3. Environment Variables (Optional)
-Create a `.env` file in the project root:
-```env
-GEMINI_API_KEY=your_google_gemini_api_key_here
-```
-*(Note: If no key is provided, the platform automatically activates its high-fidelity grounded heuristic reasoning engine).*
-
-### 4. Run Automated Unit & Benchmark Tests
+### 3. Environment Setup
+You need a Gemini API Key to power the AI features.
+1. Get a free API key from [Google AI Studio](https://aistudio.google.com/).
+2. Create a `.env` file in the root of the project (or copy from a template if one exists):
 ```bash
-npm test
-```
-*Executes all 13 unit tests across behavioral baselines, velocity bursts, ATO, mule rings, compliance rules, confusion matrix, and audit logging.*
-
-### 5. Run Production Build
-```bash
-npm run build
+GEMINI_API_KEY=your_api_key_here
 ```
 
-### 6. Start the Application
+### 4. Running the Development Server
+Because Next.js caches build files aggressively, if you encounter `.next/` caching errors, it is recommended to clear the cache before starting the server:
+
 ```bash
+rm -rf .next
 npm run dev
 ```
-Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+The application will be available at [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 📜 Compliance & Disclaimers
-* **Hackathon Track**: AI DEV FEST 2026 — Track 01: Trust & Risk Intelligence (DIU Computer Programming Club × upay).
-* **Synthetic Data Disclosure**: All transaction records, wallet identifiers, phone numbers, and geolocation logs are entirely synthetic and created exclusively for evaluation purposes.
+## 🏗️ Project Architecture & How It Works
+
+This project is built using **Next.js 14+ (App Router)**, **React**, **Tailwind CSS**, and **Lucide Icons**. 
+
+### Directory Structure
+
+```text
+upay-Sentinel/
+├── .env                    # Environment variables (Gemini API Key)
+├── src/
+│   ├── app/                # Next.js App Router
+│   │   ├── api/gemini/     # Backend API Routes connecting to Google Gemini
+│   │   ├── globals.css     # Global CSS, Design Tokens, & Animations
+│   │   ├── layout.tsx      # Root HTML layout and font definitions
+│   │   └── page.tsx        # Main Application Shell (State management for sidebars & modals)
+│   ├── components/         # React Components
+│   │   ├── layout/         # Topbar, Sidebar, Navigation
+│   │   ├── overview/       # Dashboard KPI Cards & Charts
+│   │   ├── transactions/   # Transaction Monitoring List & Detail Drawer
+│   │   ├── network/        # Fraud Network Intelligence & Node Graphs
+│   │   ├── investigations/ # Deep-dive Investigation View & Sentinel Assistant Chat
+│   │   ├── simulation/     # Attack Simulator Modal
+│   │   └── ui/             # Reusable UI elements (AppTour walkthrough, Settings)
+│   ├── lib/                # Utilities and API logic
+│   │   ├── data.ts         # Mock dataset for dashboard, transactions, and ML training
+│   │   ├── fraud-engine.ts # Rule-based deterministic scoring logic
+│   │   ├── ml-engine.ts    # TensorFlow.js neural network for AI Overdrive scoring
+│   │   └── gemini.ts       # Core logic for calling the Gemini API & Fallback behaviors
+│   └── types/              # TypeScript interface definitions
+```
+
+### Core Features Explained
+
+#### 1. The Dashboard Shell (`page.tsx` & `layout/`)
+The main layout consists of a `Sidebar` and a `Topbar`. `page.tsx` acts as the master controller, maintaining the state for which view is currently active (Overview, Transactions, Investigations, etc.) and managing the visibility of sidebars and modals. It uses a robust, fluid, mobile-first CSS architecture defined in `globals.css`.
+
+#### 2. AI Investigation Engine (`lib/gemini.ts` & `api/gemini/investigate`)
+When a transaction is flagged or an analyst opens an investigation, the frontend hits the local Next.js `/api/gemini/investigate` route. 
+- This route passes the transaction telemetry (Amount, Device, Location, Risk Score, etc.) to `lib/gemini.ts`.
+- `gemini.ts` constructs a highly specific prompt instructing the Gemini model (e.g., `gemini-flash-latest`) to act as a fraud analyst.
+- It asks the AI to answer three things: *What happened? Why is it risky? What should upay do next?*
+- The AI's response is parsed as JSON and displayed in the **InvestigationDetailView**.
+
+#### 3. Sentinel Copilot Chat (`SentinelAssistant.tsx` & `api/gemini/chat`)
+Inside an active investigation, analysts can chat with the AI. 
+- The chat context (Case ID, Customer, Amount, Risk Score) is bundled with the analyst's question.
+- The Gemini model synthesizes an evidence-backed answer based on the transaction's unique topology and behavioral anomalies.
+- If the Gemini API fails or times out, the system automatically degrades gracefully to a "High-fidelity heuristic synthesis" (local fallback logic) to ensure the analyst always receives guidance.
+
+#### 4. Live Attack Simulator (`SimulationModal.tsx`)
+To demonstrate the platform's capabilities, the topbar includes a "Simulate Attack" button (lightning bolt icon).
+- This opens a modal where you can inject synthetic fraud vectors (e.g., a Mule Network Surge, Account Takeover, or Micro-structuring Burst).
+- Injecting a transaction instantly adds it to the monitoring feed, calculates a risk score, and allows you to open a full AI investigation on it.
+
+#### 5. Local Machine Learning Engine (`ml-engine.ts`)
+The platform uses **TensorFlow.js** to train a lightweight sequential neural network directly in the browser upon startup.
+- It leverages the dataset in `data.ts` to recognize patterns (velocity flags, location anomalies, new devices).
+- When new transactions stream in, the ML model provides a probabilistic "AI Overdrive" score that can override legacy heuristic rules if it identifies hidden risk factors.
+
+#### 6. Guided App Tour (`AppTour.tsx`)
+A built-in interactive walkthrough (powered by `react-joyride`) guides new users through the platform, blurring the background to focus on key areas such as the Transaction Monitor, Simulator, and Network Intelligence views.
+
+---
+
+## 🎨 Design System
+The UI relies heavily on a centralized design token system located in `src/app/globals.css`. It uses CSS variables (`--green`, `--red`, `--radius-lg`) to maintain a clean, professional, and consistent minimal aesthetic. It is fully responsive, utilizing CSS Grid and Flexbox to adapt from large desktop monitors down to mobile devices.

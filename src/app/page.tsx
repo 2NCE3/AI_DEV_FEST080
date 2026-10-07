@@ -45,7 +45,23 @@ function SentinelAppShell() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isTourOpen, setIsTourOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [hasMounted, setHasMounted] = useState<boolean>(false);
+
+  // Restore session from localStorage on client mount
+  useEffect(() => {
+    setHasMounted(true);
+    try {
+      const saved = localStorage.getItem("sentinel_user");
+      if (saved) {
+        setCurrentUser(JSON.parse(saved));
+      }
+    } catch {
+      // Fallback if localStorage unavailable
+    }
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -54,6 +70,39 @@ function SentinelAppShell() {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
+
+  // Global '?' shortcut for HelpModal (ignoring text input focus)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setIsHelpOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem("sentinel_user");
+    } catch {
+      // ignore
+    }
+    showNotification("Signed out of upay Sentinel Console");
+  };
 
   const showNotification = (msg: string) => {
     setToastMessage(msg);
@@ -121,6 +170,23 @@ function SentinelAppShell() {
     setSelectedTransaction(injected);
   };
 
+  if (hasMounted && !currentUser) {
+    return (
+      <LoginPage
+        onLogin={(profile) => {
+          setCurrentUser(profile);
+          try {
+            localStorage.setItem("sentinel_user", JSON.stringify(profile));
+          } catch {
+            // ignore
+          }
+          showNotification(`Welcome, ${profile.name} — Authenticated via Google SSO`);
+        }}
+        isDarkMode={isDarkMode}
+      />
+    );
+  }
+
   return (
     <div className="app flex min-h-screen bg-[var(--bg)]">
       {/* Persistent Left Sidebar */}
@@ -132,6 +198,11 @@ function SentinelAppShell() {
         onClose={() => setIsSidebarOpen(false)}
         onSettingsClick={() => setIsSettingsOpen(true)}
         onTourClick={() => setIsTourOpen(true)}
+        isDarkMode={isDarkMode}
+        onToggleTheme={() => setIsDarkMode((d) => !d)}
+        onHelpClick={() => setIsHelpOpen(true)}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Main Shell */}
@@ -147,6 +218,9 @@ function SentinelAppShell() {
           onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
           isDarkMode={isDarkMode}
           onToggleTheme={() => setIsDarkMode((d) => !d)}
+          onOpenHelp={() => setIsHelpOpen(true)}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
 
         {/* Dynamic View Container */}
@@ -267,6 +341,16 @@ function SentinelAppShell() {
 
       {/* Onboarding / App Tour */}
       <AppTour run={isTourOpen} onFinish={() => setIsTourOpen(false)} />
+
+      {/* Centered Help & Shortcuts Modal */}
+      <HelpModal
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        onOpenSimulation={() => setIsSimModalOpen(true)}
+        onOpenReport={() => setIsReportModalOpen(true)}
+        onToggleTheme={() => setIsDarkMode((d) => !d)}
+        isDarkMode={isDarkMode}
+      />
 
       {isSettingsOpen && (
         <div className="fixed inset-0 bg-[#0B0F14]/80 backdrop-blur-md z-50 flex items-center justify-center animate-fadeIn p-4">

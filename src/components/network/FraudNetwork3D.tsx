@@ -121,6 +121,11 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
           opacity: 0.6,
           blending: THREE.AdditiveBlending,
         });
+        halo = new THREE.Mesh(haloGeo, haloMat);
+        halo.position.copy(pos);
+        clusterGroup.add(halo);
+      }
+
       // Invisible generous hit-target sphere to prevent cursor drop-off and blinking
       const hitGeo = new THREE.SphereGeometry(0.75, 12, 12);
       const hitMat = new THREE.MeshBasicMaterial({ visible: false });

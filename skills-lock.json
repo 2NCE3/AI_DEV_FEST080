@@ -120,6 +120,31 @@
       "sourceType": "github",
       "skillPath": "skills/xlsx/SKILL.md",
       "computedHash": "f5945e6e76dc7c178375e5cdf3140959b30cbcd4570ec3dc62296812259fc38d"
+    },
+    "threejs-ai-skills": {
+      "source": "alton47/threejs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/threejs-ai-skills.md"
+    },
+    "react-three-fiber-skills": {
+      "source": "EnzeD/r3f-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-three-fiber-skills.md"
+    },
+    "web-3d-react-three-fiber": {
+      "source": "agents-inc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-3d-react-three-fiber.md"
+    },
+    "full-threejs-skills": {
+      "source": "full-stack-skills/threejs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/full-threejs-skills.md"
+    },
+    "r3f-quality-performance": {
+      "source": "nonaxanon/r3f-skills",
+      "sourceType": "github",
+      "skillPath": "skills/r3f-quality-performance.md"
     }
   }
 }

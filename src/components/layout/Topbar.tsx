@@ -13,6 +13,7 @@ import {
   X,
   Moon,
   Sun,
+  Shield,
 } from "lucide-react";
 
 interface TopbarProps {
@@ -51,9 +52,9 @@ export const Topbar: React.FC<TopbarProps> = ({
         <Menu size={18} />
       </button>
 
-      {/* Search Input */}
+      {/* Global Search Input */}
       <div className="global-search" role="search">
-        <Search size={15} aria-hidden="true" />
+        <Search size={15} className="text-muted" aria-hidden="true" />
         <input
           type="text"
           placeholder="Search transactions, customers, cases…"
@@ -61,20 +62,20 @@ export const Topbar: React.FC<TopbarProps> = ({
           onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search"
         />
-        <kbd className="hidden sm:flex items-center text-[10px] text-gray-400 bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded font-mono leading-none select-none flex-shrink-0">
+        <kbd className="hidden sm:flex items-center text-[10px] text-subtle bg-surfaceAlt border border-line px-1.5 py-0.5 rounded font-mono leading-none select-none flex-shrink-0">
           ⌘K
         </kbd>
       </div>
 
       {/* Action Controls */}
       <div className="top-actions">
-        {/* Simulate Attack — primary CTA */}
+        {/* Simulate Attack — Primary Brand CTA */}
         <button
           onClick={onOpenSimulation}
           className="btn btn-primary text-xs"
           aria-label="Open attack simulation"
         >
-          <Zap size={13} className="animate-pulse" aria-hidden="true" />
+          <Zap size={14} className="animate-pulse" aria-hidden="true" />
           <span className="hidden sm:inline">Simulate Attack</span>
           <span className="sm:hidden">Sim</span>
         </button>
@@ -85,7 +86,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           className="btn btn-secondary text-xs hidden sm:inline-flex"
           aria-label="Export audit report"
         >
-          <FileDown size={13} aria-hidden="true" />
+          <FileDown size={14} aria-hidden="true" />
           <span>Audit Report</span>
         </button>
 
@@ -93,17 +94,17 @@ export const Topbar: React.FC<TopbarProps> = ({
         <div className="date-control" aria-label="Current time range">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" aria-hidden="true" />
           <span>Live · 24h</span>
-          <ChevronDown size={13} className="text-gray-400 flex-shrink-0" aria-hidden="true" />
+          <ChevronDown size={13} className="text-subtle flex-shrink-0" aria-hidden="true" />
         </div>
 
         {/* Theme Toggle */}
         <button
           onClick={onToggleTheme}
           className="icon-btn"
-          title="Toggle Dark Mode"
+          title={isDarkMode ? "Switch to Light Console" : "Switch to Cyber Dark Mode"}
           aria-label="Toggle Dark Mode"
         >
-          {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+          {isDarkMode ? <Sun size={16} className="text-amber-400" /> : <Moon size={16} />}
         </button>
 
         {/* Help */}
@@ -129,8 +130,8 @@ export const Topbar: React.FC<TopbarProps> = ({
 
         {/* User Avatar */}
         <div
-          className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-700 font-bold text-xs flex items-center justify-center border border-emerald-200 flex-shrink-0 select-none"
-          title="Arman Hossen — Fraud Operations Analyst"
+          className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-500 border border-amber-500/30 font-bold text-xs flex items-center justify-center flex-shrink-0 select-none shadow-sm cursor-pointer"
+          title="Arman Hossen — Senior Fraud Analyst"
           aria-label="User menu"
           role="button"
           tabIndex={0}
@@ -142,31 +143,31 @@ export const Topbar: React.FC<TopbarProps> = ({
       {/* Help Modal */}
       {showHelp && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn"
           role="dialog"
           aria-modal="true"
           aria-label="About upay Sentinel"
           onClick={(e) => e.target === e.currentTarget && setShowHelp(false)}
         >
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
+          <div className="bg-surface rounded-2xl max-w-md w-full p-6 shadow-2xl border border-line">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+            <div className="flex items-center justify-between pb-4 border-b border-line">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
-                  <Sparkles size={18} />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-slate-950 flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/30 font-black">
+                  <Shield size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-[15px] text-gray-900 leading-tight">
-                    upay Sentinel
+                  <h3 className="font-extrabold text-[16px] text-ink leading-tight flex items-center gap-1.5">
+                    <span className="text-amber-500">upay</span> Sentinel
                   </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    DIU CPC × upay AI Hackathon 2026 · Track 01
+                  <p className="text-xs text-muted mt-0.5">
+                    DIU CPC &times; upay AI Hackathon 2026 &middot; Track 01
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowHelp(false)}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:bg-surfaceAlt hover:text-ink transition-colors"
                 aria-label="Close dialog"
               >
                 <X size={16} />
@@ -174,24 +175,24 @@ export const Topbar: React.FC<TopbarProps> = ({
             </div>
 
             {/* Body */}
-            <div className="mt-4 space-y-3 text-[13px] text-gray-600 leading-relaxed">
+            <div className="mt-4 space-y-3.5 text-[13px] text-muted leading-relaxed">
               <p>
-                <b className="text-gray-800">upay Sentinel</b> is an enterprise-grade AI Fraud
-                &amp; Scam Intelligence platform built for Mobile Financial Services (MFS).
+                <b className="text-ink">upay Sentinel</b> is an enterprise-grade AI Fraud
+                &amp; Scam Intelligence platform built for Mobile Financial Services (MFS) in Bangladesh.
               </p>
-              <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-100 space-y-2 text-emerald-950">
-                <div className="font-semibold text-emerald-800 text-xs uppercase tracking-wide">
-                  Hackathon Answers
+              <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/25 space-y-2.5 text-ink">
+                <div className="font-bold text-amber-500 text-xs uppercase tracking-wider font-mono">
+                  Hackathon Core Deliverables
                 </div>
-                <div className="text-xs space-y-1.5">
-                  <div><b>1. What happened?</b> Real-time scoring &amp; event reconstruction.</div>
-                  <div><b>2. Why is it risky?</b> Behavioral anomaly + mule graph analysis.</div>
-                  <div><b>3. What to do next?</b> Gemini-powered actionable synthesis.</div>
+                <div className="text-xs space-y-2">
+                  <div><b className="text-ink">1. What happened?</b> Real-time deterministic + TensorFlow ML telemetry scoring.</div>
+                  <div><b className="text-ink">2. Why is it risky?</b> Topological mule clustering, XAI SHAP explainability, and 3D spatial intelligence.</div>
+                  <div><b className="text-ink">3. What to do next?</b> Google Gemini 2.5 Copilot synthesis providing audited action steps.</div>
                 </div>
               </div>
-              <p className="text-xs text-gray-400">
-                Tip: Click <b className="text-gray-600">&ldquo;Simulate Attack&rdquo;</b> to inject
-                live mule network spikes and test AI detection in real time.
+              <p className="text-xs text-subtle">
+                Tip: Click <b className="text-amber-500">&ldquo;Simulate Attack&rdquo;</b> to inject
+                synthetic mule network spikes and evaluate detection in real time.
               </p>
             </div>
 

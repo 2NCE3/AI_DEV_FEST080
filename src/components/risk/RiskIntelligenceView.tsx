@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { NavigationPage, RiskFactor } from "@/types";
 import { riskFactorsTXN8F42 } from "@/lib/data";
+import { CyberDefenseShield3D } from "./CyberDefenseShield3D";
 import {
   ShieldAlert,
   Sparkles,
@@ -25,6 +26,8 @@ export const RiskIntelligenceView: React.FC<RiskIntelligenceViewProps> = ({
   onNotify,
 }) => {
   const [selectedTxnId, setSelectedTxnId] = useState("TXN-8F42");
+  const currentScore = selectedTxnId === "TXN-8F42" ? 94 : selectedTxnId === "TXN-92KD" ? 87 : 89;
+  const currentThreat = currentScore >= 90 ? "Critical" : "High";
 
   const reasoningItems = [
     {

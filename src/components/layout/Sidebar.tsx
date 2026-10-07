@@ -17,6 +17,7 @@ import {
   Moon,
   Sun,
   HelpCircle,
+  Cpu,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,6 +28,8 @@ interface SidebarProps {
   onClose?: () => void;
   onSettingsClick?: () => void;
   onTourClick?: () => void;
+  isDarkMode?: boolean;
+  onToggleTheme?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -37,28 +40,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClose,
   onSettingsClick,
   onTourClick,
+  isDarkMode = false,
+  onToggleTheme,
 }) => {
-  const [isDark, setIsDark] = React.useState(false);
-
-  React.useEffect(() => {
-    // Check initial
-    setIsDark(document.documentElement.classList.contains("dark"));
-  }, []);
-
-  const toggleTheme = () => {
-    const isNowDark = document.documentElement.classList.toggle("dark");
-    setIsDark(isNowDark);
-  };
-
   const navItems: { id: NavigationPage; label: string; icon: React.ReactNode }[] = [
-    { id: "overview",      label: "Overview",            icon: <LayoutGrid  size={17} /> },
-    { id: "transactions",  label: "Transaction Monitor", icon: <Activity    size={17} /> },
-    { id: "risk",          label: "Risk Intelligence",   icon: <ShieldAlert size={17} /> },
-    { id: "network",       label: "Fraud Network",       icon: <Share2      size={17} /> },
-    { id: "investigations",label: "Investigations",      icon: <Briefcase   size={17} /> },
-    { id: "customers",     label: "Customers",           icon: <Users       size={17} /> },
-    { id: "alerts",        label: "Alerts",              icon: <Bell        size={17} /> },
-    { id: "analytics",     label: "Analytics",           icon: <BarChart3   size={17} /> },
+    { id: "overview",       label: "Overview",            icon: <LayoutGrid  size={17} /> },
+    { id: "transactions",   label: "Transaction Monitor", icon: <Activity    size={17} /> },
+    { id: "risk",           label: "Risk Intelligence",   icon: <ShieldAlert size={17} /> },
+    { id: "network",        label: "Fraud Network",       icon: <Share2      size={17} /> },
+    { id: "investigations", label: "Investigations",      icon: <Briefcase   size={17} /> },
+    { id: "customers",      label: "Customers",           icon: <Users       size={17} /> },
+    { id: "alerts",         label: "Alerts",              icon: <Bell        size={17} /> },
+    { id: "analytics",      label: "Analytics",           icon: <BarChart3   size={17} /> },
   ];
 
   const handleNav = (page: NavigationPage) => {
@@ -85,19 +78,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onKeyDown={(e) => e.key === "Enter" && handleNav("overview")}
         >
           <div className="brand-mark">
-            <ShieldCheck size={20} strokeWidth={2.5} />
+            <ShieldCheck size={22} strokeWidth={2.5} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="brand-name">
               <span>upay</span> Sentinel
             </div>
-            <div className="brand-sub">AI Fraud Intelligence</div>
+            <div className="brand-sub">Fraud Defense Cloud</div>
           </div>
           {/* Close button on mobile */}
           <button
             onClick={(e) => { e.stopPropagation(); onClose?.(); }}
-            className="hidden md:hidden p-1 rounded text-[#6b8880] hover:text-white transition-colors"
-            style={{ display: "var(--show-close-btn, none)" }}
+            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors"
             aria-label="Close sidebar"
           >
             <X size={16} />
@@ -108,7 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="nav-label">Intelligence Suite</div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-px" role="navigation">
+        <nav className="flex-1 space-y-0.5" role="navigation">
           {navItems.map((item) => {
             const isActive =
               currentPage === item.id ||
@@ -137,13 +129,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         {/* Sidebar Bottom */}
-        <div className="sidebar-bottom pt-4">
+        <div className="sidebar-bottom pt-3">
           {/* Engine Status */}
           <div className="engine-status-box">
             <span className="pulse" aria-hidden="true" />
-            <div>
-              <b>AI Risk Engine Online</b>
-              <small>XGBoost + Gemini Active</small>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <b>Sentinel Neural AI</b>
+                <span className="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/20 px-1 py-0.2 rounded">
+                  96.4%
+                </span>
+              </div>
+              <small>DIU CPC &times; upay Node 01</small>
             </div>
           </div>
 
@@ -154,19 +151,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <b>Arman Hossen</b>
               <small>Senior Fraud Analyst</small>
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1">
               <button
-                title="Toggle Dark Theme (Orange Accent)"
-                onClick={toggleTheme}
-                className="text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0"
+                title={isDarkMode ? "Switch to Light Console" : "Switch to Cyber Dark Mode"}
+                onClick={onToggleTheme}
+                className="text-slate-400 hover:text-amber-400 transition-colors p-1.5 rounded-lg hover:bg-white/5"
                 aria-label="Toggle Theme"
               >
-                {isDark ? <Sun size={15} /> : <Moon size={15} />}
+                {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
               </button>
               <button
                 title="Start App Tour"
                 onClick={onTourClick}
-                className="text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0"
+                className="text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5"
                 aria-label="Start Tour"
               >
                 <HelpCircle size={15} />
@@ -174,7 +171,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 title="System Settings"
                 onClick={onSettingsClick}
-                className="btn-settings text-[#516b62] hover:text-white transition-colors p-1 rounded flex-shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
+                className="btn-settings text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5"
                 aria-label="Settings"
               >
                 <Settings size={15} />

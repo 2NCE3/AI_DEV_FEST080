@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { NetworkNode } from "@/types";
-import { networkNodes, networkEdges } from "@/lib/data";
+import { useSentinel } from "@/context/SentinelContext";
 import {
   Share2,
   Maximize2,
@@ -32,6 +32,7 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
   onOpenCase,
   filterType,
 }) => {
+  const { networkNodes, networkEdges } = useSentinel();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

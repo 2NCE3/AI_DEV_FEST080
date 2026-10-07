@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { InvestigationCase, RiskLevel } from "@/types";
-import { investigationCases } from "@/lib/data";
+import { useSentinel } from "@/context/SentinelContext";
 import {
   Briefcase,
   Search,
@@ -24,10 +24,11 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
   onSelectCase,
   onNewCaseModal,
 }) => {
+  const { cases } = useSentinel();
   const [activeTab, setActiveTab] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
 
-  const filteredCases = investigationCases.filter((c) => {
+  const filteredCases = cases.filter((c) => {
     const matchesSearch =
       c.id.toLowerCase().includes(search.toLowerCase()) ||
       c.customer.toLowerCase().includes(search.toLowerCase()) ||

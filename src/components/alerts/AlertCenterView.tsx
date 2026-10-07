@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AlertItem, NavigationPage, RiskLevel } from "@/types";
-import { alertsList } from "@/lib/data";
+import { useSentinel } from "@/context/SentinelContext";
 import {
   Bell,
   Search,
@@ -27,7 +27,7 @@ export const AlertCenterView: React.FC<AlertCenterViewProps> = ({
   onOpenCase,
   onNotify,
 }) => {
-  const [alerts, setAlerts] = useState<AlertItem[]>(alertsList);
+  const { alerts, markAlertAsRead } = useSentinel();
   const [selectedSeverity, setSelectedSeverity] = useState<string>("All");
 
   const filteredAlerts = alerts.filter(
@@ -35,14 +35,12 @@ export const AlertCenterView: React.FC<AlertCenterViewProps> = ({
   );
 
   const handleDismiss = (id: string) => {
-    setAlerts((prev) => prev.filter((a) => a.id !== id));
-    onNotify(`Alert ${id} dismissed.`);
+    markAlertAsRead(id);
+    onNotify(`Alert ${id} acknowledged and dismissed.`);
   };
 
   const handleMarkAsRead = (id: string) => {
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, unread: false } : a))
-    );
+    markAlertAsRead(id);
     onNotify(`Alert ${id} marked as read.`);
   };
 

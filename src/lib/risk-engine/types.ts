@@ -1,4 +1,5 @@
 import { RiskLevel, Transaction, TransactionType } from "@/types";
+export type { RiskLevel, Transaction, TransactionType };
 
 export interface RiskFactor {
   name: string;
@@ -82,7 +83,8 @@ export interface AuditEvent {
     | "ANALYST_ACTION"
     | "STEP_UP_CHALLENGE"
     | "MODEL_EVALUATED"
-    | "SCENARIO_INJECTED";
+    | "SCENARIO_INJECTED"
+    | "SYSTEM_CONFIG";
   actor: string; // e.g. "SYSTEM_SENTINEL", "ANALYST: Arman Hossen"
   relatedId?: string; // transactionId or caseId
   details: string;

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { NavigationPage, NetworkNode, NetworkEdge } from "@/types";
-import { networkNodes, networkEdges } from "@/lib/data";
+import { useSentinel } from "@/context/SentinelContext";
 import {
   Share2,
   Sparkles,
@@ -32,6 +32,7 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
   onOpenCase,
   onNotify,
 }) => {
+  const { networkNodes, networkEdges } = useSentinel();
   const [selectedNodeId, setSelectedNodeId] = useState<string>("U-1042");
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [filterType, setFilterType] = useState<string>("all");

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChatMessage } from "@/types";
 import { defaultChatMessages } from "@/lib/data";
+import { askSentinelCopilot } from "@/lib/gemini";
 import {
   Sparkles,
   Send,
@@ -52,38 +53,26 @@ export const SentinelAssistant: React.FC<SentinelAssistantProps> = ({
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/gemini/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query,
-          context: {
-            caseId,
-            customer,
-            riskScore: 94,
-            amount: 48500,
-          },
-        }),
+      const data = await askSentinelCopilot(query, {
+        caseId,
+        customer,
+        riskScore: 94,
+        amount: 48500,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const aiMsg: ChatMessage = {
-          id: `ai-${Date.now()}`,
-          sender: "ai",
-          text: data.reply,
-          timestamp: "Just now",
-          evidenceUsed: data.evidence || [
-            "Customer 30-day baseline",
-            "Hardware device telemetry",
-            "Graph Cluster #17",
-          ],
-          disclaimer: "AI synthesized explanation &middot; Verify evidence prior to enforcement",
-        };
-        setMessages((prev) => [...prev, aiMsg]);
-      } else {
-        throw new Error("Failed response");
-      }
+      const aiMsg: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        sender: "ai",
+        text: data.reply,
+        timestamp: "Just now",
+        evidenceUsed: data.evidence && data.evidence.length > 0 ? data.evidence : [
+          "Customer 30-day baseline",
+          "Hardware device telemetry",
+          "Graph Cluster #17",
+        ],
+        disclaimer: "AI synthesized explanation &middot; Verify evidence prior to enforcement",
+      };
+      setMessages((prev) => [...prev, aiMsg]);
     } catch (e) {
       // Deterministic evidence-grounded fallback
       const fallbackMsg: ChatMessage = {

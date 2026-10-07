@@ -88,7 +88,7 @@ const MODELS_IN_ORDER = [
 export async function generateInvestigationAnalysis(
   input: GeminiInvestigationInput
 ): Promise<GeminiInvestigationResult> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
   if (apiKey) {
     const prompt = `You are "upay Sentinel", an AI Fraud & Scam Intelligence engine for upay, a leading MFS in Bangladesh.
@@ -162,7 +162,7 @@ export async function askSentinelCopilot(
     status?: string;
   }
 ): Promise<{ reply: string; evidence: string[]; confidence: number }> {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
   if (apiKey) {
     const prompt = `You are "Sentinel AI", an intelligent fraud co-pilot in the upay operations center.

@@ -20,6 +20,8 @@ import {
   Box,
 } from "lucide-react";
 import { FraudNetwork3D } from "./FraudNetwork3D";
+import { BangladeshTransactionMap } from "./BangladeshTransactionMap";
+import { MapPin } from "lucide-react";
 
 interface FraudNetworkViewProps {
   onNavigate: (page: NavigationPage) => void;
@@ -36,7 +38,7 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
   const [selectedNodeId, setSelectedNodeId] = useState<string>("U-1042");
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [filterType, setFilterType] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
+  const [viewMode, setViewMode] = useState<"map" | "3d" | "2d">("map");
 
   const selectedNode = networkNodes.find((n) => n.id === selectedNodeId) || networkNodes[0];
 
@@ -59,13 +61,24 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2.5">
-          {/* 2D vs 3D View Switcher */}
+          {/* View Switcher: Geo Map vs 3D Topology vs 2D Matrix */}
           <div className="flex items-center bg-brand-surface border border-brand-border rounded p-0.5 text-xs">
+            <button
+              onClick={() => setViewMode("map")}
+              className={`px-2.5 py-1 rounded font-semibold flex items-center gap-1.5 transition-all ${
+                viewMode === "map"
+                  ? "bg-upay-gold text-slate-950 font-bold shadow-sm"
+                  : "text-brand-muted hover:text-brand-text"
+              }`}
+            >
+              <MapPin size={12} />
+              <span>Bangladesh Geo Flow</span>
+            </button>
             <button
               onClick={() => setViewMode("3d")}
               className={`px-2.5 py-1 rounded font-semibold flex items-center gap-1.5 transition-all ${
                 viewMode === "3d"
-                  ? "bg-upay-gold text-slate-950 font-bold"
+                  ? "bg-upay-gold text-slate-950 font-bold shadow-sm"
                   : "text-brand-muted hover:text-brand-text"
               }`}
             >
@@ -126,7 +139,11 @@ export const FraudNetworkView: React.FC<FraudNetworkViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
         {/* Network Canvas Card */}
         <div className="lg:col-span-8 card-base min-h-[520px] relative overflow-hidden flex flex-col justify-between border border-brand-border bg-brand-surface">
-          {viewMode === "3d" ? (
+          {viewMode === "map" ? (
+            <BangladeshTransactionMap
+              onOpenCase={onOpenCase}
+            />
+          ) : viewMode === "3d" ? (
             <FraudNetwork3D
               selectedNodeId={selectedNodeId}
               onSelectNode={handleNodeClick}

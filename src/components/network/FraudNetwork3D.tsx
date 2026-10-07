@@ -38,6 +38,7 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
 
   const [hoveredNode, setHoveredNode] = useState<NetworkNode | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+  const hoveredNodeIdRef = useRef<string | null>(null);
 
   // Filter nodes according to prop
   const visibleNodes = networkNodes.filter((node) => {
@@ -76,6 +77,7 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
 
     // 2. Node Meshes & Mapping to 3D Coordinates
     const nodeMeshes: { mesh: THREE.Mesh; halo?: THREE.Mesh; node: NetworkNode }[] = [];
+    const hitMeshes: THREE.Mesh[] = [];
     const nodePositionMap = new Map<string, THREE.Vector3>();
 
     // Map 2D coordinates (0..920, 0..520) to centered 3D (-8..8, -4.5..4.5, -2..2)
@@ -119,12 +121,16 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
           opacity: 0.6,
           blending: THREE.AdditiveBlending,
         });
-        halo = new THREE.Mesh(haloGeo, haloMat);
-        halo.position.copy(pos);
-        clusterGroup.add(halo);
-      }
+      // Invisible generous hit-target sphere to prevent cursor drop-off and blinking
+      const hitGeo = new THREE.SphereGeometry(0.75, 12, 12);
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+      hitMesh.position.copy(pos);
+      hitMesh.userData = { nodeId: node.id, node, visualMesh: mesh };
+      clusterGroup.add(hitMesh);
 
       nodeMeshes.push({ mesh, halo, node });
+      hitMeshes.push(hitMesh);
     });
 
     // 3. Connect Edges in 3D Space
@@ -251,6 +257,8 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
     // 7. Animation Loop
     const clock = new THREE.Clock();
     let animId: number;
+    let lastHitNode: NetworkNode | null = null;
+    let lastHitTime = 0;
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
@@ -283,13 +291,16 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
         }
       });
 
-      // Raycast hover check
+      // Stable Raycast hover check against generous hit targets
       raycaster.setFromCamera(mouse, camera);
-      const hits = raycaster.intersectObjects(nodeMeshes.map((n) => n.mesh));
+      const hits = raycaster.intersectObjects(hitMeshes);
+      const now = performance.now();
+
       if (hits.length > 0) {
         const hit = hits[0].object as THREE.Mesh;
         const n = hit.userData?.node as NetworkNode;
-        setHoveredNode(n);
+        lastHitNode = n;
+        lastHitTime = now;
 
         // Convert 3D hit position to 2D screen coordinates
         const v = hit.position.clone();
@@ -297,10 +308,20 @@ export const FraudNetwork3D: React.FC<FraudNetwork3DProps> = ({
         v.project(camera);
         const sx = ((v.x + 1) * width) / 2;
         const sy = ((-v.y + 1) * height) / 2;
-        setHoverPos({ x: sx, y: sy });
-      } else {
-        setHoveredNode(null);
-        setHoverPos(null);
+
+        if (hoveredNodeIdRef.current !== n.id) {
+          hoveredNodeIdRef.current = n.id;
+          setHoveredNode(n);
+          setHoverPos({ x: sx, y: sy });
+        }
+      } else if (lastHitNode && now - lastHitTime > 250) {
+        // Hysteresis: only dismiss if cursor remains off-node for 250ms
+        lastHitNode = null;
+        if (hoveredNodeIdRef.current !== null) {
+          hoveredNodeIdRef.current = null;
+          setHoveredNode(null);
+          setHoverPos(null);
+        }
       }
 
       renderer.render(scene, camera);

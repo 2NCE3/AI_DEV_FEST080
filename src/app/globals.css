@@ -758,7 +758,7 @@ th {
   color: var(--subtle);
   padding: 10px 16px;
   border-bottom: 1px solid var(--line);
-  background: #161C24;
+  background: var(--surface-elevated);
   white-space: nowrap;
 }
 
@@ -771,7 +771,7 @@ td {
 }
 
 tbody tr:hover td {
-  background: #161C24;
+  background: var(--surface-elevated);
 }
 
 tbody tr:last-child td {
@@ -797,7 +797,7 @@ tbody tr:last-child td {
   border-radius: var(--radius-sm);
   padding: 0 10px;
   height: 34px;
-  background: #161C24;
+  background: var(--surface-elevated);
   color: var(--ink);
   font-size: 12.5px;
 }
@@ -807,7 +807,7 @@ tbody tr:last-child td {
 }
 
 select.field, select {
-  background-color: #161C24;
+  background-color: var(--surface-elevated);
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -823,7 +823,7 @@ select.field, select {
   border-radius: var(--radius-sm);
   padding: 0 10px;
   height: 34px;
-  background: #161C24;
+  background: var(--surface-elevated);
   color: var(--ink);
   cursor: pointer;
   transition: all 0.14s ease;
@@ -832,7 +832,7 @@ select.field, select {
 }
 
 .filter-button:hover {
-  background: #1E2632;
+  background: var(--bg-alt);
   border-color: var(--line-strong);
 }
 
@@ -851,7 +851,7 @@ select.field, select {
   right: 0;
   bottom: 0;
   width: min(520px, 100vw);
-  background: #11161D;
+  background: var(--surface);
   border-left: 1px solid var(--line);
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.75);
   z-index: 50;
@@ -868,8 +868,8 @@ select.field, select {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #161C24;
-  color: #F4F7FA;
+  background: var(--surface-elevated);
+  color: var(--ink);
   padding: 10px 16px;
   border-radius: var(--radius-sm);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
@@ -885,7 +885,7 @@ select.field, select {
   left: var(--sidebar-w);
   right: 0;
   height: 56px;
-  background: rgba(17, 22, 29, 0.95);
+  background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--line);
   display: flex;

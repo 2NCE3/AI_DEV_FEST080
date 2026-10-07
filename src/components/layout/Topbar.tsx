@@ -15,7 +15,10 @@ import {
   Shield,
   Activity,
   Cpu,
+  LogOut,
+  User,
 } from "lucide-react";
+import { UserProfile } from "../auth/LoginPage";
 
 interface TopbarProps {
   onOpenSimulation: () => void;
@@ -27,6 +30,9 @@ interface TopbarProps {
   onToggleSidebar: () => void;
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  onOpenHelp: () => void;
+  currentUser?: UserProfile | null;
+  onLogout?: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -39,8 +45,11 @@ export const Topbar: React.FC<TopbarProps> = ({
   onToggleSidebar,
   isDarkMode,
   onToggleTheme,
+  onOpenHelp,
+  currentUser,
+  onLogout,
 }) => {
-  const [showHelp, setShowHelp] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <header className="topbar">
@@ -116,11 +125,10 @@ export const Topbar: React.FC<TopbarProps> = ({
 
         {/* Help / Platform Info */}
         <button
-          onClick={() => setShowHelp(!showHelp)}
+          onClick={onOpenHelp}
           className="icon-btn"
-          title="About upay Sentinel"
-          aria-label="Help and about"
-          aria-expanded={showHelp}
+          title="About upay Sentinel & Shortcuts (Press ?)"
+          aria-label="Help and shortcuts"
         >
           <HelpCircle size={15} />
         </button>
@@ -135,84 +143,68 @@ export const Topbar: React.FC<TopbarProps> = ({
           <Bell size={15} />
         </button>
 
-        {/* User Identity Avatar */}
-        <div
-          className="w-8 h-8 rounded bg-brand-elevated text-upay-DEFAULT border border-brand-borderStrong font-mono font-bold text-xs flex items-center justify-center shrink-0 select-none cursor-pointer"
-          title="Arman Hossen — Senior Fraud Analyst (Lead)"
-          aria-label="User menu"
-          role="button"
-          tabIndex={0}
-        >
-          AH
+        {/* User Identity Avatar & Menu */}
+        <div className="relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="w-8 h-8 rounded bg-brand-elevated text-upay-gold border border-brand-borderStrong font-mono font-bold text-xs flex items-center justify-center shrink-0 select-none cursor-pointer hover:border-amber-400/50 transition-colors"
+            title={`${currentUser?.name || "Arman Hossen"} (${currentUser?.role || "Lead Risk Analyst"})`}
+            aria-label="User account menu"
+            aria-expanded={showUserMenu}
+          >
+            {currentUser?.avatar || "AH"}
+          </button>
+
+          {showUserMenu && (
+            <div
+              className="absolute right-0 top-full mt-2 w-64 bg-brand-surface border border-brand-border rounded-xl shadow-modal p-3 z-50 text-left animate-scaleUp"
+              onMouseLeave={() => setShowUserMenu(false)}
+            >
+              <div className="flex items-center gap-2.5 pb-2.5 border-b border-brand-border">
+                <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-upay-gold border border-amber-500/20 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                  {currentUser?.avatar || "AH"}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-brand-text truncate">
+                    {currentUser?.name || "Arman Hossen"}
+                  </div>
+                  <div className="text-[10px] text-brand-muted truncate font-mono">
+                    {currentUser?.email || "arman.hossen@upay.com.bd"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="py-2 text-[10px] space-y-1">
+                <div className="text-brand-subtle flex justify-between">
+                  <span>Role:</span>
+                  <span className="font-semibold text-brand-text truncate max-w-[140px]">
+                    {currentUser?.role || "Lead Risk Analyst"}
+                  </span>
+                </div>
+                <div className="text-brand-subtle flex justify-between">
+                  <span>Authorization:</span>
+                  <span className="text-emerald-400 font-mono font-bold">
+                    {currentUser?.badge || "SOC TIER 3"}
+                  </span>
+                </div>
+              </div>
+
+              {onLogout && (
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    onLogout();
+                  }}
+                  className="w-full mt-1.5 pt-2 border-t border-brand-border flex items-center justify-center gap-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 py-1.5 rounded transition-colors"
+                >
+                  <LogOut size={13} />
+                  <span>Sign Out of Console</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Help Modal */}
-      {showHelp && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn"
-          role="dialog"
-          aria-modal="true"
-          aria-label="About upay Sentinel"
-          onClick={(e) => e.target === e.currentTarget && setShowHelp(false)}
-        >
-          <div className="bg-brand-surface rounded-lg max-w-md w-full p-6 shadow-modal border border-brand-border">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-brand-border">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded bg-brand-elevated text-upay-gold flex items-center justify-center shrink-0 border border-brand-borderStrong">
-                  <Shield size={18} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-sm text-brand-text leading-tight flex items-center gap-1.5">
-                    <span className="text-upay-gold">upay</span> Sentinel
-                  </h3>
-                  <p className="text-[11px] text-brand-muted mt-0.5">
-                    DIU CPC &times; upay AI Hackathon 2026 &middot; Track 01: Trust &amp; Risk Intelligence
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowHelp(false)}
-                className="w-7 h-7 rounded flex items-center justify-center text-brand-muted hover:bg-brand-elevated hover:text-brand-text transition-colors"
-                aria-label="Close dialog"
-              >
-                <X size={15} />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="mt-4 space-y-3 text-xs text-brand-muted leading-relaxed">
-              <p>
-                <b className="text-brand-text">upay Sentinel</b> is an enterprise-grade Trust &amp; Risk Intelligence platform designed for Bangladesh&apos;s Mobile Financial Services (MFS) ecosystem.
-              </p>
-              <div className="p-3.5 bg-brand-elevated rounded border border-brand-border space-y-2 text-brand-text">
-                <div className="font-bold text-upay-gold text-[10px] uppercase tracking-wider font-mono">
-                  Operational Risk Lifecycle
-                </div>
-                <div className="space-y-1.5 text-[11px]">
-                  <div><b className="text-brand-text">1. What happened?</b> Real-time deterministic rules + TensorFlow neural network scoring.</div>
-                  <div><b className="text-brand-text">2. Why is it risky?</b> Topological money-mule clustering, velocity burst, and behavioral anomaly detection.</div>
-                  <div><b className="text-brand-text">3. What to do next?</b> Gemini Copilot synthesis with analyst human-in-the-loop oversight.</div>
-                </div>
-              </div>
-              <p className="text-[11px] text-brand-subtle">
-                Use <b className="text-upay-gold">&ldquo;Simulate Scenario&rdquo;</b> to test attack vectors including Account Takeover, Money Mule Layering, SIM Swap Drain, and Smurfing bursts.
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="mt-5 flex justify-end">
-              <button
-                onClick={() => setShowHelp(false)}
-                className="btn btn-primary text-xs"
-              >
-                Acknowledge
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 };

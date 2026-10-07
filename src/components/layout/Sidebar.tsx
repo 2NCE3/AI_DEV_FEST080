@@ -18,7 +18,9 @@ import {
   Sun,
   HelpCircle,
   Cpu,
+  LogOut,
 } from "lucide-react";
+import { UserProfile } from "../auth/LoginPage";
 
 interface SidebarProps {
   currentPage: NavigationPage;
@@ -30,6 +32,9 @@ interface SidebarProps {
   onTourClick?: () => void;
   isDarkMode?: boolean;
   onToggleTheme?: () => void;
+  onHelpClick?: () => void;
+  currentUser?: UserProfile | null;
+  onLogout?: () => void;
 }
 
 interface NavGroup {
@@ -51,6 +56,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onTourClick,
   isDarkMode = false,
   onToggleTheme,
+  onHelpClick,
+  currentUser,
+  onLogout,
 }) => {
   const navGroups: NavGroup[] = [
     {
@@ -179,10 +187,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Analyst Profile */}
           <div className="analyst-profile">
-            <div className="avatar" aria-hidden="true">AH</div>
+            <div className="avatar" aria-hidden="true">
+              {currentUser?.avatar || "AH"}
+            </div>
             <div className="profile-info">
-              <b>Arman Hossen</b>
-              <small>Lead Risk Analyst</small>
+              <b>{currentUser?.name || "Arman Hossen"}</b>
+              <small>{currentUser?.role || "Lead Risk Analyst"}</small>
             </div>
             <div className="flex items-center gap-0.5">
               <button
@@ -194,10 +204,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
               </button>
               <button
-                title="Start App Tour"
-                onClick={onTourClick}
+                title="Platform Guide & Shortcuts (Press ?)"
+                onClick={onHelpClick || onTourClick}
                 className="text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-brand-elevated"
-                aria-label="Start Tour"
+                aria-label="Platform Guide"
               >
                 <HelpCircle size={14} />
               </button>
@@ -209,6 +219,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <Settings size={14} />
               </button>
+              {onLogout && (
+                <button
+                  title="Sign Out"
+                  onClick={onLogout}
+                  className="text-slate-400 hover:text-rose-400 transition-colors p-1 rounded hover:bg-brand-elevated"
+                  aria-label="Sign Out"
+                >
+                  <LogOut size={14} />
+                </button>
+              )}
             </div>
           </div>
         </div>

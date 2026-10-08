@@ -76,7 +76,7 @@ export function generateBenchmarkDataset(): LabeledBenchmarkTransaction[] {
         location: "Sylhet",
         isNewLocation: true,
         time: "03:45 AM",
-        flags: ["Sim swap detected", "Max limit transfer", "Unrecognized IP address"],
+        flags: ["Sim swap detected", "Max limit transfer", "Unregistered BTS tower / SIM IMSI mismatch"],
       },
     });
   }

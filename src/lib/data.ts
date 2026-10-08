@@ -186,7 +186,7 @@ export const initialTransactions: Transaction[] = [
     riskLevel: "Critical",
     riskScore: 98,
     status: "Investigating",
-    flags: ["Sim swap detected", "Max limit transfer", "Unrecognized IP address"],
+    flags: ["Sim swap detected", "Max limit transfer", "Unregistered SIM & device pairing"],
   },
   {
     id: "TXN-11CA",
@@ -240,7 +240,7 @@ export const riskFactorsTXN8F42: RiskFactor[] = [
     name: "Location Anomaly",
     score: 63,
     weight: 0.1,
-    description: "IP geolocated to Mirpur, Dhaka while prior session 40 minutes earlier was in Gulshan, Dhaka.",
+    description: "Session cell tower relocated to Mirpur-10, Dhaka while prior session 40 minutes earlier was in Gulshan, Dhaka.",
     deviated: false,
   },
   {
@@ -374,7 +374,7 @@ export const evidenceTimelineINV1042: TimelineEvent[] = [
   {
     time: "02:01 AM",
     title: "Device changed & session authenticated",
-    description: "New Android device DEV-8821 (Samsung S23) logged in from IP 103.114.98.12 (Mirpur, Dhaka).",
+    description: "New Android device DEV-8821 (Samsung S23) logged in from cellular tower node (Mirpur-10, Dhaka).",
   },
   {
     time: "02:05 AM",
@@ -521,7 +521,7 @@ export const alertsList: AlertItem[] = [
     id: "ALT-1046",
     severity: "Medium",
     title: "Abnormal transaction velocity burst",
-    description: "12 micro-transfers executed within 10 minutes from single IP subnet.",
+    description: "12 micro-transfers executed within 10 minutes from single agent USSD terminal.",
     timeAgo: "21 minutes ago",
     iconType: "activity",
     confidence: 85,

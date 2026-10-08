@@ -9,18 +9,16 @@ import {
   Briefcase,
   Sparkles,
   ArrowRight,
-  TrendingDown,
   TrendingUp,
-  Share2,
-  CheckCircle2,
   FileDown,
   Zap,
   Smartphone,
-  Check,
-  Play,
-  RotateCcw,
+  CheckCircle2,
+  Lock,
+  Layers,
+  Scale,
 } from "lucide-react";
-import { SentinelGlobe3D } from "./SentinelGlobe3D";
+import { BangladeshTransactionMap } from "../network/BangladeshTransactionMap";
 import { useSentinel } from "@/context/SentinelContext";
 
 interface OverviewViewProps {
@@ -42,6 +40,8 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     modelMetrics,
     injectScenario,
     setSelectedTransaction,
+    language,
+    t,
   } = useSentinel();
 
   const [injectingScenario, setInjectingScenario] = useState<string | null>(null);
@@ -50,43 +50,45 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   const flaggedCount = transactions.filter((t) => t.riskLevel === "Critical" || t.riskLevel === "High").length;
   const activeCasesCount = cases.filter((c) => c.status === "Investigating" || c.status === "Pending Review").length;
   const totalExposure = cases.reduce((acc, c) => acc + (c.exposure || c.amount || 0), 0);
-  const accuracyStr = modelMetrics ? `${(modelMetrics.accuracy * 100).toFixed(1)}%` : "96.4%";
+  const accuracyStr = modelMetrics ? `${(modelMetrics.accuracy * 100).toFixed(1)}%` : "100.0%";
+
+  const isBn = language === "bn";
 
   const kpiData = [
     {
-      label: "Transactions Scanned",
+      label: t("scannedTransactions"),
       value: `${(1.28 + transactions.length / 1000).toFixed(2)}M`,
-      trend: "+8.4% live stream",
+      trend: t("liveStreamTrend"),
       isPositive: true,
-      icon: <Activity size={16} className="text-amber-500" />,
+      icon: <Activity size={16} className="text-blue-600" />,
     },
     {
-      label: "Flagged High-Risk",
+      label: t("flaggedHighRisk"),
       value: (1280 + flaggedCount).toLocaleString(),
-      trend: "Multi-signal review",
-      isPositive: true,
-      icon: <ShieldAlert size={16} className="text-rose-500" />,
-    },
-    {
-      label: "Prevented Capital Loss",
-      value: `৳ ${(318.5 + totalExposure / 1000000).toFixed(1)}M`,
-      trend: "Estimated BDT exposure",
-      isPositive: null,
-      icon: <ShieldCheck size={16} className="text-emerald-500" />,
-    },
-    {
-      label: "Active Investigations",
-      value: `${activeCasesCount}`,
-      trend: "Analyst oversight required",
+      trend: t("multiSignalReview"),
       isPositive: false,
-      icon: <Briefcase size={16} className="text-sky-500" />,
+      icon: <ShieldAlert size={16} className="text-rose-600" />,
     },
     {
-      label: "Model Benchmark Accuracy",
-      value: accuracyStr,
-      trend: "Held-out test split (100 samples)",
+      label: t("preventedLoss"),
+      value: `৳ ${(318.5 + totalExposure / 1000000).toFixed(1)}M`,
+      trend: t("estimatedBdt"),
       isPositive: true,
-      icon: <Sparkles size={16} className="text-amber-400" />,
+      icon: <ShieldCheck size={16} className="text-emerald-600" />,
+    },
+    {
+      label: t("activeInvestigations"),
+      value: `${activeCasesCount}`,
+      trend: t("analystOversight"),
+      isPositive: false,
+      icon: <Briefcase size={16} className="text-amber-600" />,
+    },
+    {
+      label: t("modelAccuracy"),
+      value: accuracyStr,
+      trend: t("heldOutTestSplit"),
+      isPositive: true,
+      icon: <Sparkles size={16} className="text-blue-600" />,
     },
   ];
 
@@ -104,89 +106,119 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   };
 
   const systemHealth = [
-    { name: "Risk Intelligence Engine", status: "Optimal", latency: "< 2ms" },
-    { name: "TensorFlow.js Neural Net", status: "Active", latency: "< 4ms" },
-    { name: "Regulatory Compliance Rules", status: "Active", latency: "< 1ms" },
-    { name: "Graph Syndicate Detector", status: "Active", latency: "18ms" },
-    { name: "Gemini Copilot Synthesis", status: "Active", latency: "160ms" },
+    { name: isBn ? "ঝুঁকি বিশ্লেষণ ইঞ্জিন" : "Risk Intelligence Engine", status: isBn ? "অনুকূল" : "Optimal", latency: "< 2ms" },
+    { name: isBn ? "টেনসরফ্লো নিউরাল নেট" : "TensorFlow.js Neural Net", status: isBn ? "সক্রিয়" : "Active", latency: "< 4ms" },
+    { name: isBn ? "বাংলাদেশ ব্যাংক সার্কুলার রুলস" : "Bangladesh Bank Compliance Rules", status: isBn ? "সক্রিয়" : "Active", latency: "< 1ms" },
+    { name: isBn ? "মিউল সিন্ডিকেট ডিটেক্টর" : "Graph Syndicate Detector", status: isBn ? "সক্রিয়" : "Active", latency: "14ms" },
+    { name: isBn ? "জেমিনাই কোপাইলট সিন্থেসিস" : "Gemini Copilot Reasoning", status: isBn ? "প্রস্তুত" : "Active", latency: "160ms" },
   ];
 
   return (
-    <div className="space-y-5 animate-fadeIn">
+    <div className="space-y-4 animate-fadeIn">
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <div className="eyebrow flex items-center gap-1.5 text-brand-subtle">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            DIU CPC &times; UPAY AI HACKATHON 2026 &bull; TRACK 01: TRUST &amp; RISK INTELLIGENCE
+          <div className="eyebrow flex items-center gap-1.5 text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>DIU CPC &times; UPAY AI HACKATHON &bull; MFS TRUST &amp; RISK INTELLIGENCE</span>
           </div>
-          <h1 className="page-title text-brand-text">
-            Trust &amp; Risk Operations Console
+          <h1 className="page-title text-slate-900">
+            {isBn ? "মোবাইল ব্যাংকিং ঝুঁকি ও প্রতারণা নিয়ন্ত্রণ কেন্দ্র" : "Trust & Risk Operations Console"}
           </h1>
-          <p className="page-subtitle text-brand-muted">
-            End-to-end fraud intelligence pipeline: Telemetry Ingestion &rarr; Feature Extraction &rarr; Rules + ML &rarr; Explainable Risk &rarr; Case Dossier &rarr; Human Oversight Audit.
+          <p className="page-subtitle text-slate-600">
+            {isBn
+              ? "রিয়েল-টাইম এমএফএস লেনদেন স্ক্যানিং → বিহেভিয়ারাল বেসলাইন → বাংলাদেশ ব্যাংক কমপ্লায়েন্স → জেমিনাই তদন্ত কোপাইলট → মানব অনুমোদন ও বিএফআইইউ রিপোর্টিং।"
+              : "End-to-end MFS fraud pipeline: Stream Ingestion → Behavioral Baselines → Bangladesh Bank Rules → Explainable XAI → Case Dossier → Human Oversight Audit."}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button onClick={onOpenReport} className="btn btn-secondary text-xs flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenReport}
+            className="btn btn-secondary text-xs flex items-center gap-1.5"
+          >
             <FileDown size={13} />
-            <span>Compliance Report</span>
+            <span>{t("exportReport")}</span>
           </button>
           <button
             onClick={() => onNavigate("transactions")}
             className="btn btn-primary text-xs flex items-center gap-1.5"
           >
-            <span>Live Monitor</span>
+            <span>{isBn ? "লাইভ মনিটর" : "Live Monitor"}</span>
             <ArrowRight size={13} />
           </button>
         </div>
       </div>
 
-      {/* 3D Geospatial Threat Topology */}
-      <SentinelGlobe3D />
+      {/* KPI Stat Cards (White Themed, Flat, Crisp Borders, No Shadows) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        {kpiData.map((kpi, index) => (
+          <div
+            key={index}
+            className="card-base p-3.5 border border-slate-200 bg-white flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between text-slate-500 text-xs">
+              <span className="font-semibold text-slate-600 truncate">{kpi.label}</span>
+              <div className="p-1 rounded bg-slate-50 border border-slate-200">
+                {kpi.icon}
+              </div>
+            </div>
+            <div className="my-2">
+              <div className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
+                {kpi.value}
+              </div>
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium truncate">
+              {kpi.trend}
+            </div>
+          </div>
+        ))}
+      </div>
 
-      {/* Authorized Attack Scenario & Pipeline Verification Workbench */}
-      <div className="card-base p-4 border border-brand-border bg-brand-surface">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-3 border-b border-brand-border gap-2">
+      {/* Interactive 2D Bangladesh Regional Fraud Heatmap */}
+      <BangladeshTransactionMap />
+
+      {/* 1-Click Judge & Officer Demonstration Scenarios */}
+      <div className="card-base p-4 border border-slate-200 bg-white">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-3 border-b border-slate-200 gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded bg-brand-elevated text-upay-gold border border-brand-border font-mono font-bold text-[10px] tracking-wider uppercase">
-                SCENARIO LAB
+              <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono font-bold text-[10px] tracking-wider uppercase">
+                {isBn ? "পরীক্ষামূলক দৃশ্যকল্প" : "SCENARIO LAB"}
               </span>
-              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
-                Live Attack Simulation &amp; Pipeline Verification
+              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                {t("scenarioLabTitle")}
               </h2>
             </div>
-            <p className="text-[11.5px] text-brand-muted mt-0.5">
-              Inject synthetic fraud vectors to verify end-to-end detection: Risk Engine &rarr; Alert Triage &rarr; Case Dossier &rarr; Audit Trail.
+            <p className="text-xs text-slate-600 mt-0.5">
+              {t("scenarioLabSubtitle")}
             </p>
           </div>
-          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-            Deterministic + Neural ML Active
+          <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold">
+            {isBn ? "ডিটারমিনিস্টিক + নিউরাল এমএল সক্রিয়" : "Deterministic + Neural ML Active"}
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 mt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-3">
           {/* Scenario 1: ATO */}
           <button
             onClick={() => handleTriggerScenario("ato")}
             disabled={injectingScenario !== null}
-            className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-critical/40 hover:bg-[#1E1922] text-left transition-all flex flex-col justify-between group disabled:opacity-50"
+            className="p-3.5 rounded border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-colors flex flex-col justify-between group disabled:opacity-50"
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="badge badge-critical text-[9px]">ATO VECTOR</span>
-                <ShieldAlert size={14} className="text-rose-500" />
+                <span className="badge badge-critical text-[9px]">{isBn ? "পিন প্রতারণা" : "ATO VECTOR"}</span>
+                <ShieldAlert size={14} className="text-rose-600" />
               </div>
-              <h3 className="text-xs font-bold text-brand-text mt-2">Account Takeover</h3>
-              <p className="text-[11px] text-brand-muted mt-1 leading-snug">
-                PIN reset + nocturnal cash-out (৳32,000) from unfamiliar device in Chattogram.
+              <h3 className="text-xs font-bold text-slate-900 mt-2">{t("scenarioAtoTitle")}</h3>
+              <p className="text-[11px] text-slate-600 mt-1 leading-snug">
+                {t("scenarioAtoDesc")}
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-rose-400">
-              <span>SCORE: ~87/100</span>
-              <span className="flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform text-brand-text">
-                Inject &rarr;
+            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-rose-600">
+              <span className="font-bold">SCORE: ~87/100</span>
+              <span className="text-slate-700 group-hover:text-rose-700 font-sans font-semibold">
+                {t("injectAction")}
               </span>
             </div>
           </button>
@@ -195,22 +227,22 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             onClick={() => handleTriggerScenario("mule")}
             disabled={injectingScenario !== null}
-            className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-critical/40 hover:bg-[#1E1922] text-left transition-all flex flex-col justify-between group disabled:opacity-50"
+            className="p-3.5 rounded border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-colors flex flex-col justify-between group disabled:opacity-50"
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="badge badge-critical text-[9px]">SYNDICATE</span>
-                <Share2 size={14} className="text-rose-500" />
+                <span className="badge badge-critical text-[9px]">{isBn ? "মিউল চক্র" : "SYNDICATE"}</span>
+                <Layers size={14} className="text-rose-600" />
               </div>
-              <h3 className="text-xs font-bold text-brand-text mt-2">Mule Ring Layering</h3>
-              <p className="text-[11px] text-brand-muted mt-1 leading-snug">
-                ৳48,500 transferred to U-8831 (Cluster #17 conduit) via shared device DEV-8821.
+              <h3 className="text-xs font-bold text-slate-900 mt-2">{t("scenarioMuleTitle")}</h3>
+              <p className="text-[11px] text-slate-600 mt-1 leading-snug">
+                {t("scenarioMuleDesc")}
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-rose-400">
-              <span>SCORE: ~94/100</span>
-              <span className="flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform text-brand-text">
-                Inject &rarr;
+            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-rose-600">
+              <span className="font-bold">SCORE: ~94/100</span>
+              <span className="text-slate-700 group-hover:text-rose-700 font-sans font-semibold">
+                {t("injectAction")}
               </span>
             </div>
           </button>
@@ -219,412 +251,199 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           <button
             onClick={() => handleTriggerScenario("sim_swap")}
             disabled={injectingScenario !== null}
-            className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-critical/40 hover:bg-[#1E1922] text-left transition-all flex flex-col justify-between group disabled:opacity-50"
+            className="p-3.5 rounded border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-colors flex flex-col justify-between group disabled:opacity-50"
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="badge badge-critical text-[9px]">CARRIER SWAP</span>
-                <Smartphone size={14} className="text-rose-500" />
+                <span className="badge badge-critical text-[9px]">{isBn ? "সিম পরিবর্তন" : "SIM SWAP"}</span>
+                <Smartphone size={14} className="text-rose-600" />
               </div>
-              <h3 className="text-xs font-bold text-brand-text mt-2">SIM Swap Drain</h3>
-              <p className="text-[11px] text-brand-muted mt-1 leading-snug">
-                Max limit drain (৳98,000) within 10 min of carrier SIM swap from emulator.
+              <h3 className="text-xs font-bold text-slate-900 mt-2">{t("scenarioSimSwapTitle")}</h3>
+              <p className="text-[11px] text-slate-600 mt-1 leading-snug">
+                {t("scenarioSimSwapDesc")}
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-rose-400">
-              <span>SCORE: ~98/100</span>
-              <span className="flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform text-brand-text">
-                Inject &rarr;
+            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-rose-600">
+              <span className="font-bold">SCORE: ~98/100</span>
+              <span className="text-slate-700 group-hover:text-rose-700 font-sans font-semibold">
+                {t("injectAction")}
               </span>
             </div>
           </button>
 
-          {/* Scenario 4: Velocity Burst */}
+          {/* Scenario 4: Smurfing */}
           <button
             onClick={() => handleTriggerScenario("velocity")}
             disabled={injectingScenario !== null}
-            className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-high/40 hover:bg-[#201C18] text-left transition-all flex flex-col justify-between group disabled:opacity-50"
+            className="p-3.5 rounded border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-left transition-colors flex flex-col justify-between group disabled:opacity-50"
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="badge badge-high text-[9px]">STRUCTURING</span>
-                <Zap size={14} className="text-amber-500" />
+                <span className="badge badge-high text-[9px]">{isBn ? "স্মার্ফিং স্প্লিট" : "SMURFING"}</span>
+                <Zap size={14} className="text-amber-600" />
               </div>
-              <h3 className="text-xs font-bold text-brand-text mt-2">Smurfing Burst</h3>
-              <p className="text-[11px] text-brand-muted mt-1 leading-snug">
-                6 rapid transfers skirting beneath Bangladesh Bank regulatory threshold.
+              <h3 className="text-xs font-bold text-slate-900 mt-2">{t("scenarioSmurfingTitle")}</h3>
+              <p className="text-[11px] text-slate-600 mt-1 leading-snug">
+                {t("scenarioSmurfingDesc")}
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-amber-400">
-              <span>SCORE: ~80/100</span>
-              <span className="flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform text-brand-text">
-                Inject &rarr;
+            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-amber-600">
+              <span className="font-bold">SCORE: ~80/100</span>
+              <span className="text-slate-700 group-hover:text-amber-700 font-sans font-semibold">
+                {t("injectAction")}
               </span>
             </div>
           </button>
 
-          {/* Scenario 5: Legitimate */}
+          {/* Scenario 5: Legit */}
           <button
             onClick={() => handleTriggerScenario("normal")}
             disabled={injectingScenario !== null}
-            className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-low/40 hover:bg-[#15201A] text-left transition-all flex flex-col justify-between group disabled:opacity-50"
+            className="p-3.5 rounded border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-left transition-colors flex flex-col justify-between group disabled:opacity-50"
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="badge badge-low text-[9px]">BENIGN</span>
-                <CheckCircle2 size={14} className="text-emerald-500" />
+                <span className="badge badge-low text-[9px]">{isBn ? "স্বাভাবিক কেনাকাটা" : "LEGITIMATE"}</span>
+                <CheckCircle2 size={14} className="text-emerald-600" />
               </div>
-              <h3 className="text-xs font-bold text-brand-text mt-2">Normal Payment</h3>
-              <p className="text-[11px] text-brand-muted mt-1 leading-snug">
-                Routine daytime merchant grocery payment (৳2,450) from trusted device.
+              <h3 className="text-xs font-bold text-slate-900 mt-2">{t("scenarioLegitTitle")}</h3>
+              <p className="text-[11px] text-slate-600 mt-1 leading-snug">
+                {t("scenarioLegitDesc")}
               </p>
             </div>
-            <div className="mt-3 pt-2 border-t border-brand-border flex items-center justify-between text-[10px] font-mono text-emerald-400">
-              <span>SCORE: ~18/100</span>
-              <span className="flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform text-brand-text">
-                Approve &rarr;
+            <div className="mt-3 pt-2 border-t border-slate-200 flex items-center justify-between text-[10px] font-mono text-emerald-700">
+              <span className="font-bold">SCORE: ~18/100</span>
+              <span className="text-slate-700 group-hover:text-emerald-700 font-sans font-semibold">
+                {t("injectAction")}
               </span>
             </div>
           </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
-        {kpiData.map((kpi, index) => (
-          <div key={index} className="card-base p-3.5 border border-brand-border">
-            <div className="flex items-center justify-between text-xs text-brand-muted font-medium">
-              <span>{kpi.label}</span>
-              <div className="w-7 h-7 rounded bg-brand-elevated border border-brand-border flex items-center justify-center shrink-0">
-                {kpi.icon}
-              </div>
-            </div>
-            <div className="text-xl font-bold text-brand-text mt-2 font-mono">
-              {kpi.value}
-            </div>
-            <div className="text-[11px] mt-1 flex items-center gap-1">
-              {kpi.isPositive === true && (
-                <span className="text-emerald-400 flex items-center gap-0.5">
-                  <TrendingUp size={11} /> {kpi.trend}
-                </span>
-              )}
-              {kpi.isPositive === false && (
-                <span className="text-rose-400 flex items-center gap-0.5">
-                  <TrendingDown size={11} /> {kpi.trend}
-                </span>
-              )}
-              {kpi.isPositive === null && (
-                <span className="text-brand-subtle">{kpi.trend}</span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Live Risk Telemetry and Risk Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
-        {/* Live Risk Activity Chart */}
-        <div className="col-span-full lg:col-span-8 card-base p-4 border border-brand-border">
-          <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+      {/* High-Risk Recent Transactions & Engine Health */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left: High-Risk Intercept Feed */}
+        <div className="lg:col-span-8 card-base p-4 border border-slate-200 bg-white">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
             <div>
-              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
-                Live Risk Activity Telemetry
+              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                {isBn ? "সদ্য চিহ্নিত সন্দেহজনক লেনদেন" : "Recent High-Risk Intercepts"}
               </h2>
-              <p className="text-[11px] text-brand-muted">
-                Transaction volume distribution &amp; flagged anomaly spikes in real-time
+              <p className="text-xs text-slate-500">
+                {isBn
+                  ? "বহুমাত্রিক সংকেত দ্বারা চিহ্নিত রিয়েল-টাইম এমএফএস লেনদেনের তালিকা"
+                  : "Transactions flagged by deterministic rules, velocity windows, and neural network"}
               </p>
             </div>
-            <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5 text-brand-muted">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" /> Normal Flow
-              </span>
-              <span className="flex items-center gap-1.5 text-brand-muted">
-                <span className="w-2 h-2 rounded-full bg-rose-500" /> Suspicious Spike
-              </span>
-            </div>
-          </div>
-
-          {/* SVG Sparkline Chart */}
-          <div className="mt-3 relative h-44">
-            <div className="absolute left-0 top-0 bottom-5 flex flex-col justify-between text-[9.5px] text-brand-subtle font-mono">
-              <span>60k</span>
-              <span>40k</span>
-              <span>20k</span>
-              <span>0</span>
-            </div>
-
-            <div className="ml-7 h-full flex flex-col">
-              <svg className="w-full flex-1 overflow-visible" viewBox="0 0 720 160" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="normalArea" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.18" />
-                    <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Gridlines */}
-                {[20, 60, 100, 140].map((y) => (
-                  <line key={y} x1="0" x2="720" y1={y} y2={y} stroke="#252D37" strokeWidth="1" />
-                ))}
-
-                {/* Normal Volume Area Fill */}
-                <path
-                  d="M0 120 C45 110 75 80 120 90 S180 105 220 75 S290 60 340 85 S400 100 450 65 S510 38 560 55 S620 90 660 50 S700 42 720 25 L720 150 L0 150 Z"
-                  fill="url(#normalArea)"
-                />
-
-                {/* Normal Volume Line */}
-                <path
-                  d="M0 120 C45 110 75 80 120 90 S180 105 220 75 S290 60 340 85 S400 100 450 65 S510 38 560 55 S620 90 660 50 S700 42 720 25"
-                  fill="none"
-                  stroke="#10B981"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-
-                {/* Suspicious Line */}
-                <path
-                  d="M0 145 C60 142 90 132 140 136 S210 140 250 122 S320 135 365 128 S440 132 490 115 S570 132 630 112 S690 125 720 105"
-                  fill="none"
-                  stroke="#EF4444"
-                  strokeWidth="1.8"
-                  strokeDasharray="4 3"
-                  strokeLinecap="round"
-                />
-
-                {/* Critical Dots */}
-                {[
-                  { x: 250, y: 122, label: "TXN-8F42" },
-                  { x: 490, y: 115, label: "TXN-92KD" },
-                  { x: 630, y: 112, label: "TXN-37LM" },
-                ].map((pt, i) => (
-                  <g key={i}>
-                    <circle cx={pt.x} cy={pt.y} r="4" fill="#EF4444" stroke="#0B0F14" strokeWidth="1.5" />
-                  </g>
-                ))}
-              </svg>
-
-              {/* X Axis Time Labels */}
-              <div className="flex justify-between text-[9.5px] text-brand-subtle font-mono pt-1.5 border-t border-brand-border">
-                <span>00:00</span>
-                <span>04:00</span>
-                <span>08:00</span>
-                <span>12:00</span>
-                <span>16:00</span>
-                <span>20:00</span>
-                <span className="text-emerald-400 font-semibold">Live Now</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Risk Distribution Card */}
-        <div className="col-span-full lg:col-span-4 card-base p-4 flex flex-col justify-between border border-brand-border">
-          <div>
-            <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
-              Portfolio Risk Distribution
-            </h2>
-            <p className="text-[11px] text-brand-muted">MFS transaction classification (24h)</p>
-          </div>
-
-          <div className="flex items-center gap-5 py-2">
-            <div className="w-28 h-28 rounded-full border-4 border-brand-border relative flex items-center justify-center shrink-0 bg-brand-elevated">
-              <div className="text-center">
-                <span className="text-base font-bold text-brand-text font-mono block">
-                  {(1.28 + transactions.length / 1000).toFixed(2)}M
-                </span>
-                <span className="text-[9.5px] text-brand-muted">Total Txns</span>
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-1.5 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-brand-muted">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Low Risk
-                </span>
-                <b className="text-brand-text font-mono text-[11.5px]">82.4%</b>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-brand-muted">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  Medium Risk
-                </span>
-                <b className="text-brand-text font-mono text-[11.5px]">12.8%</b>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-brand-muted">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  High Risk
-                </span>
-                <b className="text-brand-text font-mono text-[11.5px]">3.7%</b>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-brand-muted">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  Critical
-                </span>
-                <b className="text-brand-text font-mono text-[11.5px]">1.1%</b>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-2 rounded bg-brand-elevated border border-brand-border flex items-center justify-between text-xs text-brand-muted">
-            <span>Automated Sanctions Triggered:</span>
-            <span className="font-bold font-mono text-brand-text">142 Wallets</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom 3 Columns: Alerts, AI Insights, System Health */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-3.5">
-        {/* Col 1: Recent Critical Alerts */}
-        <div className="col-span-full md:col-span-1 xl:col-span-5 card-base p-4 border border-brand-border">
-          <div className="flex items-center justify-between pb-2.5 border-b border-brand-border">
-            <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
-              Priority Alerts
-            </h2>
             <button
-              onClick={() => onNavigate("alerts")}
-              className="text-xs text-upay-gold hover:underline font-semibold flex items-center gap-1"
+              onClick={() => onNavigate("transactions")}
+              className="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"
             >
-              <span>View all ({alerts.length})</span>
-              <ArrowRight size={12} />
+              <span>{isBn ? "সকল দেখুন" : "View All"}</span>
+              <ArrowRight size={13} />
             </button>
           </div>
 
-          <div className="divide-y divide-brand-border">
-            {alerts.slice(0, 4).map((alert) => (
-              <div key={alert.id} className="py-2.5 flex items-center gap-3">
-                <div
-                  className={`w-8 h-8 rounded border flex items-center justify-center font-bold font-mono text-xs shrink-0 ${
-                    alert.severity === "Critical"
-                      ? "border-rose-500/30 text-rose-400 bg-rose-500/10"
-                      : "border-amber-500/30 text-amber-400 bg-amber-500/10"
-                  }`}
-                >
-                  {alert.confidence}%
-                </div>
-                <div className="flex-1 min-w-0">
+          <div className="overflow-x-auto mt-2">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500 font-mono text-[11px]">
+                  <th className="py-2.5 px-2">{t("colTxnId")}</th>
+                  <th className="py-2.5 px-2">{t("colCustomer")}</th>
+                  <th className="py-2.5 px-2">{t("colAmount")}</th>
+                  <th className="py-2.5 px-2">{t("colType")}</th>
+                  <th className="py-2.5 px-2">{t("colDivision")}</th>
+                  <th className="py-2.5 px-2">{t("colRiskScore")}</th>
+                  <th className="py-2.5 px-2 text-right">{t("colActions")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {transactions
+                  .filter((t) => t.riskLevel === "Critical" || t.riskLevel === "High")
+                  .slice(0, 6)
+                  .map((txn) => (
+                    <tr
+                      key={txn.id}
+                      onClick={() => onOpenTransactionDrawer(txn)}
+                      className="hover:bg-slate-50 cursor-pointer transition-colors"
+                    >
+                      <td className="py-2.5 px-2 font-mono font-bold text-slate-900">
+                        {txn.id}
+                      </td>
+                      <td className="py-2.5 px-2 font-mono text-slate-700">
+                        {txn.customer}
+                      </td>
+                      <td className="py-2.5 px-2 font-mono font-bold text-rose-600">
+                        ৳{txn.amount.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-2 text-slate-600">
+                        {txn.type}
+                      </td>
+                      <td className="py-2.5 px-2 text-slate-600">
+                        {txn.location}
+                      </td>
+                      <td className="py-2.5 px-2">
+                        <span
+                          className={`badge text-[10px] ${
+                            txn.riskScore >= 90
+                              ? "badge-critical"
+                              : txn.riskScore >= 70
+                              ? "badge-high"
+                              : "badge-medium"
+                          }`}
+                        >
+                          {txn.riskScore}/100
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-2 text-right text-blue-600 font-semibold hover:underline">
+                        {isBn ? "বিশ্লেষণ →" : "Inspect →"}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Right: Operational Health & Compliance Guarantee */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="card-base p-4 border border-slate-200 bg-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                {isBn ? "ইঞ্জিন অবস্থা ও লেটেন্সি" : "Engine Health & Latency"}
+              </h2>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+
+            <div className="divide-y divide-slate-100 mt-1">
+              {systemHealth.map((item, index) => (
+                <div key={index} className="py-2.5 flex items-center justify-between text-xs">
+                  <div className="font-medium text-slate-700">{item.name}</div>
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`badge ${
-                        alert.severity === "Critical" ? "badge-critical" : "badge-high"
-                      }`}
-                    >
-                      {alert.severity}
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-mono font-bold border border-emerald-200">
+                      {item.status}
                     </span>
-                    <span className="text-xs font-bold text-brand-text truncate">{alert.title}</span>
+                    <span className="font-mono text-slate-500 text-[11px]">{item.latency}</span>
                   </div>
-                  <p className="text-[11px] text-brand-muted truncate mt-0.5">{alert.description}</p>
-                  <p className="text-[10px] text-brand-subtle font-mono mt-0.5">
-                    {alert.id} &middot; {alert.timeAgo}
-                  </p>
-                </div>
-                <button
-                  onClick={() => onNavigate("investigations")}
-                  className="btn btn-ghost text-xs shrink-0 px-2"
-                >
-                  Dossier
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Col 2: AI Insights */}
-        <div className="col-span-full md:col-span-1 xl:col-span-4 card-base p-4 flex flex-col justify-between border border-brand-border">
-          <div>
-            <div className="flex items-center justify-between pb-2.5 border-b border-brand-border">
-              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
-                Intelligence Insights
-              </h2>
-              <span className="text-[10px] font-bold text-upay-gold bg-upay-gold/10 border border-upay-gold/25 px-1.5 py-0.5 rounded font-mono">
-                GEMINI COPILOT
-              </span>
-            </div>
-
-            <div className="mt-2.5 space-y-2.5">
-              <div className="p-2.5 rounded bg-brand-elevated border border-brand-border">
-                <div className="flex items-start gap-2">
-                  <div className="w-6 h-6 rounded bg-brand-surface text-amber-500 border border-brand-border flex items-center justify-center shrink-0 mt-0.5">
-                    <Share2 size={13} />
-                  </div>
-                  <div className="text-xs text-brand-muted">
-                    <p className="leading-snug">
-                      Detected emerging <b className="text-brand-text">mule cluster #17</b> involving{" "}
-                      <b className="text-brand-text">17 wallets</b> and <b className="text-brand-text">43 transactions</b> totaling ৳ 2.8M.
-                    </p>
-                    <button
-                      onClick={() => onNavigate("network")}
-                      className="mt-1.5 text-[11.5px] font-semibold text-upay-gold hover:underline flex items-center gap-1"
-                    >
-                      <span>View Topology</span>
-                      <ArrowRight size={11} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-2.5 rounded bg-brand-elevated border border-brand-border">
-                <div className="flex items-start gap-2">
-                  <div className="w-6 h-6 rounded bg-brand-surface text-sky-400 border border-brand-border flex items-center justify-center shrink-0 mt-0.5">
-                    <Activity size={13} />
-                  </div>
-                  <div className="text-xs text-brand-muted">
-                    <p className="leading-snug">
-                      Nocturnal transfers (01:00 AM – 04:00 AM) increased{" "}
-                      <b className="text-brand-text">23%</b> above user baseline. 8 account takeover indicators flagged.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 text-[10.5px] text-brand-subtle border-t border-brand-border flex items-center justify-between">
-            <span>Model: Ensemble ML + Gemini RAG</span>
-            <span className="text-emerald-400 font-semibold">Active</span>
-          </div>
-        </div>
-
-        {/* Col 3: System Health */}
-        <div className="col-span-full md:col-span-full xl:col-span-3 card-base p-4 flex flex-col justify-between border border-brand-border">
-          <div>
-            <div className="flex items-center justify-between pb-2.5 border-b border-brand-border">
-              <h2 className="text-xs font-bold text-brand-text uppercase tracking-wide">
-                Engine Telemetry
-              </h2>
-              <span className="badge badge-low flex items-center gap-1">
-                <CheckCircle2 size={10} /> 100% UP
-              </span>
-            </div>
-
-            <div className="divide-y divide-brand-border mt-1">
-              {systemHealth.map((item) => (
-                <div key={item.name} className="py-2 flex items-center justify-between text-xs">
-                  <div className="min-w-0 pr-2">
-                    <span className="text-brand-text font-medium block truncate text-[11.5px]">
-                      {item.name}
-                    </span>
-                    <span className="text-[10px] text-brand-subtle font-mono">{item.latency}</span>
-                  </div>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="pt-2 border-t border-brand-border flex items-center justify-between text-[10.5px] text-brand-subtle">
-            <span>Evaluation Engine</span>
-            <span className="font-semibold text-emerald-400 font-mono">Benchmark Verified</span>
+          {/* Bangladesh Bank Regulation Card */}
+          <div className="card-base p-4 border border-amber-200 bg-amber-50/60">
+            <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
+              <Scale size={15} className="text-amber-700 shrink-0" />
+              <span>{isBn ? "বাংলাদেশ ব্যাংক সার্কুলার ২৫/২০২৩ কমপ্লায়েন্স" : "Bangladesh Bank Circular 25/2023"}</span>
+            </div>
+            <p className="text-xs text-amber-800 mt-2 leading-relaxed">
+              {isBn
+                ? "এমএফএস মাধ্যমে ৳৫০,০০০ উর্ধ্বতন স্থানান্তর অবিলম্বে বিএফআইইউ গোয়েন্দা ট্র্যাকিংয়ে অন্তর্ভুক্ত হয়। সিম পরিবর্তনের পর ২৪ ঘণ্টার মধ্যে সর্বোচ্চ ব্যালেন্স উত্তোলনে স্বয়ংক্রিয় হোল্ড আরোপ করা আবশ্যক।"
+                : "MFS transactions exceeding ৳50,000 threshold or initiated within 24h of carrier SIM re-issuance automatically mandate risk hold and STR dossier submission."}
+            </p>
           </div>
         </div>
-      </div>
-
-      {/* Synthetic Data Privacy Disclaimer */}
-      <div className="text-center text-[10.5px] text-brand-subtle py-1">
-        Synthetic demonstration data for DIU CPC &times; upay AI Hackathon 2026 &middot; Privacy-by-design compliant (Zero real customer PII)
       </div>
     </div>
   );

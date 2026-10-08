@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ChatMessage } from "@/types";
 import { defaultChatMessages } from "@/lib/data";
 import { askSentinelCopilot } from "@/lib/gemini";
+import { useSentinel } from "@/context/SentinelContext";
 import {
   Sparkles,
   Send,
@@ -26,16 +27,25 @@ export const SentinelAssistant: React.FC<SentinelAssistantProps> = ({
   customer,
   onNotify,
 }) => {
+  const { language, t } = useSentinel();
   const [messages, setMessages] = useState<ChatMessage[]>(defaultChatMessages);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const isBn = language === "bn";
 
-  const suggestedPrompts = [
-    "Why was this transaction flagged?",
-    "What changed from normal baseline?",
-    "Show connected syndicate wallets",
-    "Recommended analyst action?",
-  ];
+  const suggestedPrompts = isBn
+    ? [
+        "কেন এই লেনদেনটি চিহ্নিত করা হলো?",
+        "স্বাভাবিক হিসাবের চেয়ে কী পরিবর্তন হয়েছে?",
+        "সংযুক্ত মিউল সিন্ডিকেট চক্র দেখান",
+        "উপায়ের করণীয় সুপারিশ কী?",
+      ]
+    : [
+        "Why was this transaction flagged?",
+        "What changed from normal baseline?",
+        "Show connected syndicate wallets",
+        "Recommended analyst action?",
+      ];
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = textToSend || inputText;
@@ -66,22 +76,30 @@ export const SentinelAssistant: React.FC<SentinelAssistantProps> = ({
         text: data.reply,
         timestamp: "Just now",
         evidenceUsed: data.evidence && data.evidence.length > 0 ? data.evidence : [
-          "Customer 30-day baseline",
-          "Hardware device telemetry",
-          "Graph Cluster #17",
+          isBn ? "গ্রাহকের ৩০ দিনের স্বাভাবিক লেনদেন সীমা" : "Customer 30-day baseline",
+          isBn ? "নতুন হার্ডওয়্যার ও সিম পেয়ারিং" : "Hardware device telemetry",
+          isBn ? "মিউল ক্লাস্টার ১৭" : "Graph Cluster #17",
         ],
-        disclaimer: "AI synthesized explanation &middot; Verify evidence prior to enforcement",
+        disclaimer: isBn
+          ? "এআই সিন্থেসাইজড গোয়েন্দা তথ্য · প্রয়োগের আগে প্রমাণ যাচাই আবশ্যক"
+          : "AI synthesized explanation · Verify evidence prior to enforcement",
       };
       setMessages((prev) => [...prev, aiMsg]);
-    } catch (e) {
+    } catch {
       // Deterministic evidence-grounded fallback
       const fallbackMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: "ai",
-        text: `Analysis grounded in telemetry: Customer ${customer} has 5 distinct risk anomalies. Amount of ৳48,500 exceeds the ৳6,800 median, device DEV-8821 is unverified, and recipient U-8831 connects to mule syndicate cluster #17. Recommend freezing outgoing settlement pending biometric re-authentication.`,
+        text: isBn
+          ? `টেলিম্যাট্রি বিশ্লেষণ: গ্রাহক ${customer}-এর লেনদেনে ৫টি স্বতন্ত্র ঝুঁকি সংকেত বিদ্যমান। ৳৪৮,৫০০ লেনদেন ৩০ দিনের স্বাভাবিক হিসাবের চেয়ে বহুগুণ বেশি, ডিভাইস DEV-8821 লেনদেনের ১২ মিনিট আগে প্রথম ব্যবহৃত হয়েছে, এবং প্রাপক U-8831 মিউল সিন্ডিকেটের সাথে সংযুক্ত। প্রস্তাবিত ব্যবস্থা: বায়োমেট্রিক আঙুলের ছাপ যাচাই সাপেক্ষে বহির্গামী অর্থ স্থগিত রাখা।`
+          : `Analysis grounded in telemetry: Customer ${customer} has 5 distinct risk anomalies. Amount of ৳48,500 exceeds the ৳6,800 median, device DEV-8821 is unverified, and recipient U-8831 connects to mule syndicate cluster #17. Recommend freezing outgoing settlement pending biometric re-authentication.`,
         timestamp: "Just now",
-        evidenceUsed: ["30-day baseline metrics", "Device registration log", "Topological graph connectivity"],
-        disclaimer: "Grounded AI synthesis",
+        evidenceUsed: [
+          isBn ? "৩০ দিনের লেনদেন বেসলাইন" : "30-day baseline metrics",
+          isBn ? "ডিভাইস ও সিম নিবন্ধন লগ" : "Device registration log",
+          isBn ? "টপোলজিক্যাল গ্রাফ সংযোগ" : "Topological graph connectivity",
+        ],
+        disclaimer: isBn ? "প্রমাণভিত্তিক এআই সিন্থেসিস" : "Grounded AI synthesis",
       };
       setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
@@ -90,150 +108,124 @@ export const SentinelAssistant: React.FC<SentinelAssistantProps> = ({
   };
 
   return (
-    <div className="card-base flex flex-col h-[560px] overflow-hidden border border-brand-border bg-brand-surface">
+    <div className="card-base flex flex-col h-[560px] overflow-hidden border border-slate-200 bg-white">
       {/* Assistant Header */}
-      <div className="p-3.5 px-4 bg-brand-elevated border-b border-brand-border flex items-center justify-between shrink-0">
+      <div className="p-3.5 px-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded bg-brand-surface text-upay-gold flex items-center justify-center shrink-0 border border-brand-border">
+          <div className="w-7 h-7 rounded bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-200">
             <Sparkles size={14} />
           </div>
           <div>
-            <div className="text-xs font-bold text-brand-text flex items-center gap-1.5">
-              <span>Sentinel Copilot</span>
-              <span className="text-[9.5px] bg-brand-surface text-upay-gold px-1.5 py-0.2 rounded font-mono border border-brand-border">
-                GEMINI 2.5
+            <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <span>{t("aiCopilotTitle")}</span>
+              <span className="text-[9.5px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono font-bold">
+                GEMINI 2.5 FLASH
               </span>
-            </div>
-            <span className="text-[10px] text-brand-muted">
-              Evidence-grounded case co-pilot
-            </span>
+            </h3>
+            <p className="text-[10.5px] text-slate-500">
+              {t("aiCopilotSubtitle")}
+            </p>
           </div>
         </div>
-        <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          ONLINE
+
+        <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-bold">
+          {isBn ? "অনলাইন সক্রিয়" : "OFFLINE GROUNDED"}
         </span>
       </div>
 
-      {/* Chat Stream */}
-      <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-brand-surface">
-        {/* Suggested Prompts Chips */}
-        <div className="space-y-1">
-          <div className="text-[9.5px] text-brand-subtle font-bold uppercase tracking-wider font-mono">
-            QUICK INVESTIGATION PROMPTS:
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {suggestedPrompts.map((p) => (
-              <button
-                key={p}
-                onClick={() => handleSendMessage(p)}
-                className="text-[11px] text-brand-muted bg-brand-elevated hover:text-brand-text hover:bg-brand-borderSubtle border border-brand-border rounded px-2 py-0.5 text-left transition-colors font-medium"
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Message Feed */}
-        <div className="space-y-2.5 pt-1">
-          {messages.map((m) => (
+      {/* Messages Scroll Area */}
+      <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-white">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex gap-2.5 text-xs ${
+              msg.sender === "analyst" ? "flex-row-reverse" : "flex-row"
+            }`}
+          >
             <div
-              key={m.id}
-              className={`space-y-1 ${m.sender === "analyst" ? "text-right" : "text-left"}`}
+              className={`w-6 h-6 rounded flex items-center justify-center shrink-0 text-[10px] font-bold ${
+                msg.sender === "analyst"
+                  ? "bg-slate-200 text-slate-800"
+                  : "bg-blue-50 text-blue-700 border border-blue-200"
+              }`}
             >
-              <div
-                className={`text-[9.5px] font-bold uppercase tracking-wider flex items-center gap-1 font-mono ${
-                  m.sender === "analyst"
-                    ? "justify-end text-brand-subtle"
-                    : "text-upay-gold"
-                }`}
-              >
-                {m.sender === "analyst" ? (
-                  <>
-                    <span>LEAD ANALYST</span>
-                    <User size={10} />
-                  </>
-                ) : (
-                  <>
-                    <Bot size={11} />
-                    <span>SENTINEL COPILOT</span>
-                  </>
-                )}
-              </div>
-
-              <div
-                className={`p-3 rounded text-xs leading-relaxed inline-block max-w-[92%] border ${
-                  m.sender === "analyst"
-                    ? "bg-brand-elevated text-brand-text border-brand-border text-left"
-                    : "bg-[#141A23] text-brand-text border-brand-border text-left"
-                }`}
-              >
-                <p>{m.text}</p>
-
-                {/* Evidence Used Box */}
-                {m.evidenceUsed && m.evidenceUsed.length > 0 && (
-                  <div className="mt-2 pt-2 border-t border-brand-border">
-                    <span className="text-[9.5px] font-bold text-brand-muted block mb-1 uppercase tracking-wider font-mono">
-                      Grounded Telemetry Sources:
-                    </span>
-                    <div className="space-y-0.5 text-[10.5px] text-brand-subtle">
-                      {m.evidenceUsed.map((ev, i) => (
-                        <div key={i} className="flex items-center gap-1.5">
-                          <CheckCircle2 size={10} className="text-emerald-400 shrink-0" />
-                          <span className="truncate">{ev}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {m.disclaimer && (
-                  <div className="mt-1.5 text-[9px] text-brand-subtle italic flex items-center gap-1 font-mono">
-                    <AlertCircle size={9} />
-                    <span>{m.disclaimer}</span>
-                  </div>
-                )}
-              </div>
+              {msg.sender === "analyst" ? <User size={12} /> : <Bot size={12} />}
             </div>
-          ))}
 
-          {isLoading && (
-            <div className="text-left space-y-1">
-              <span className="text-[9.5px] text-upay-gold font-bold flex items-center gap-1 font-mono">
-                <Bot size={11} />
-                <span>SYNTHESIZING EVIDENCE...</span>
-              </span>
-              <div className="p-2.5 bg-brand-elevated rounded border border-brand-border flex items-center gap-2 text-xs text-brand-muted">
-                <Loader2 size={13} className="animate-spin text-upay-gold" />
-                <span>Evaluating behavioral baseline, device topology, and AML rules...</span>
-              </div>
+            <div
+              className={`max-w-[85%] rounded-lg p-3 space-y-2 border ${
+                msg.sender === "analyst"
+                  ? "bg-blue-600 text-white border-blue-700"
+                  : "bg-slate-50 text-slate-800 border-slate-200"
+              }`}
+            >
+              <p className="text-xs leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+
+              {msg.evidenceUsed && msg.evidenceUsed.length > 0 && (
+                <div className="pt-2 border-t border-slate-200 text-[11px] text-slate-600 space-y-1">
+                  <span className="font-semibold block text-[10px] text-slate-500 uppercase tracking-wider font-mono">
+                    {isBn ? "ব্যবহৃত প্রমাণাবলী" : "Evidentiary Basis"}
+                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {msg.evidenceUsed.map((ev, i) => (
+                      <span
+                        key={i}
+                        className="px-1.5 py-0.5 rounded bg-white text-slate-700 text-[10px] border border-slate-200"
+                      >
+                        ✓ {ev}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ))}
+
+        {isLoading && (
+          <div className="flex gap-2 text-xs">
+            <div className="w-6 h-6 rounded bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200">
+              <Loader2 size={12} className="animate-spin" />
+            </div>
+            <div className="bg-slate-50 text-slate-600 border border-slate-200 rounded-lg p-2.5 text-xs">
+              {isBn ? "জেমিনাই টেলিম্যাট্রি বিশ্লেষণ করছে..." : "Gemini synthesizing telemetry and BFIU guidelines..."}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Input Bar */}
+      {/* Suggested Prompt Chips */}
+      <div className="p-2 px-3 border-t border-slate-100 bg-slate-50 flex items-center gap-1.5 overflow-x-auto text-xs">
+        {suggestedPrompts.map((prompt, i) => (
+          <button
+            key={i}
+            onClick={() => handleSendMessage(prompt)}
+            className="px-2.5 py-1 rounded-full border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 text-slate-600 text-[11px] whitespace-nowrap transition-colors"
+          >
+            {prompt}
+          </button>
+        ))}
+      </div>
+
+      {/* Input Box */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSendMessage();
         }}
-        className="p-2.5 border-t border-brand-border bg-brand-surface flex items-center gap-2 shrink-0"
+        className="p-3 border-t border-slate-200 bg-white flex items-center gap-2"
       >
         <input
           type="text"
-          placeholder="Ask Sentinel Copilot about history, devices, or next actions..."
+          placeholder={isBn ? "তদন্ত কোপাইলটকে প্রশ্ন করুন..." : "Ask copilot about evidence, baseline, or BFIU action..."}
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          disabled={isLoading}
-          className="flex-1 h-8 px-2.5 text-xs bg-brand-elevated border border-brand-border rounded outline-none text-brand-text placeholder:text-brand-subtle focus:border-upay-gold"
+          className="field flex-1 text-xs"
         />
         <button
           type="submit"
           disabled={!inputText.trim() || isLoading}
-          className="w-8 h-8 rounded bg-upay-gold text-slate-950 flex items-center justify-center hover:bg-amber-400 disabled:opacity-30 transition-colors shrink-0"
-          title="Send query"
+          className="btn btn-primary text-xs px-3 disabled:opacity-40"
         >
           <Send size={13} />
         </button>

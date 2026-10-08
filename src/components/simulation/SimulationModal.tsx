@@ -6,14 +6,13 @@ import {
   Zap,
   X,
   ShieldAlert,
-  AlertTriangle,
   Play,
-  RotateCcw,
   CheckCircle2,
-  Sparkles,
   Smartphone,
-  Share2,
+  Layers,
+  ArrowRight,
 } from "lucide-react";
+import { useSentinel } from "@/context/SentinelContext";
 
 interface SimulationModalProps {
   isOpen: boolean;
@@ -26,21 +25,24 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({
   onClose,
   onInjectTransaction,
 }) => {
+  const { language, t } = useSentinel();
   const [customAmount, setCustomAmount] = useState<number>(45000);
   const [customType, setCustomType] = useState<TransactionType>("Wallet Transfer");
   const [customDevice, setCustomDevice] = useState<string>("DEV-8821");
   const [isNewDevice, setIsNewDevice] = useState<boolean>(true);
   const [customLocation, setCustomLocation] = useState<string>("Dhaka");
-  const [customRecipient, setCustomRecipient] = useState<string>("U-8831");
+  const [customRecipient, setCustomRecipient] = useState<string>("01833-883100");
+  const [customCustomer, setCustomCustomer] = useState<string>("01712-894102");
   const [customTime, setCustomTime] = useState<string>("02:45 AM");
 
   if (!isOpen) return null;
+  const isBn = language === "bn";
 
-  const handleScenario = (scenario: "mule" | "ato" | "velocity" | "normal") => {
+  const handleScenario = (scenario: "mule" | "ato" | "velocity" | "normal" | "sim_swap") => {
     if (scenario === "mule") {
       onInjectTransaction({
-        customer: "U-1042",
-        recipient: "U-8831",
+        customer: "01712-894102",
+        recipient: "01833-883100",
         amount: 48500,
         type: "Wallet Transfer",
         device: "DEV-8821",
@@ -51,14 +53,14 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({
         flags: [
           "Amount 4.8× above normal baseline",
           "Unrecognized hardware device DEV-8821",
-          "Target wallet U-8831 linked to mule syndicate #17",
+          "Target wallet linked to mule syndicate #17",
           "Off-hours nocturnal execution (02:13 AM)",
         ],
       });
     } else if (scenario === "ato") {
       onInjectTransaction({
-        customer: "U-2214",
-        recipient: "U-9210",
+        customer: "01922-221455",
+        recipient: "01733-921099",
         amount: 32000,
         type: "Cash Out",
         device: "DEV-9932",
@@ -72,11 +74,28 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({
           "Immediate full-balance cash-out attempt",
         ],
       });
+    } else if (scenario === "sim_swap") {
+      onInjectTransaction({
+        customer: "01822-918231",
+        recipient: "01911-990144",
+        amount: 98000,
+        type: "Wallet Transfer",
+        device: "DEV-9901",
+        isNewDevice: true,
+        location: "Sylhet",
+        isNewLocation: true,
+        time: "03:45 AM",
+        flags: [
+          "Carrier SIM swap detected 15m prior",
+          "Bangladesh Bank 24h cooling violation",
+          "Max limit account drain",
+        ],
+      });
     } else if (scenario === "velocity") {
       onInjectTransaction({
-        customer: "U-8821",
-        recipient: "U-4412",
-        amount: 18500,
+        customer: "01711-882140",
+        recipient: "01822-441270",
+        amount: 24500,
         type: "Wallet Transfer",
         device: "DEV-8821",
         isNewDevice: false,
@@ -85,21 +104,21 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({
         time: "01:22 AM",
         flags: [
           "Micro-structuring velocity: 6 transfers in 180 seconds",
-          "Recipient linked to mule cluster #17",
+          "Evading Bangladesh Bank ৳25,000 reporting threshold",
         ],
       });
     } else if (scenario === "normal") {
       onInjectTransaction({
-        customer: "U-2910",
-        recipient: "M-291",
+        customer: "01700-291033",
+        recipient: "M-291 (Shwapno Superstore)",
         amount: 2450,
         type: "Merchant Pay",
         device: "DEV-2211",
         isNewDevice: false,
         location: "Dhaka",
         isNewLocation: false,
-        time: "02:30 PM",
-        flags: ["Within regular daytime spending pattern", "Verified merchant terminal"],
+        time: "11:45 AM",
+        flags: ["Conforms to 30-day baseline median", "Known trusted device"],
       });
     }
     onClose();
@@ -108,211 +127,234 @@ export const SimulationModal: React.FC<SimulationModalProps> = ({
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onInjectTransaction({
-      customer: "U-CUSTOM",
+      customer: customCustomer,
       recipient: customRecipient,
       amount: Number(customAmount),
       type: customType,
       device: customDevice,
       isNewDevice,
       location: customLocation,
-      isNewLocation: false,
+      isNewLocation: isNewDevice,
       time: customTime,
       flags: [
-        isNewDevice ? `New hardware ${customDevice} detected` : "Known device verified",
-        Number(customAmount) > 25000 ? "High value transaction" : "Normal value",
+        isNewDevice ? "Unregistered device login" : "Registered device",
+        customAmount > 30000 ? "High value transaction" : "Normal value",
       ],
     });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-brand-surface rounded-lg max-w-2xl w-full p-5 shadow-modal border border-brand-border space-y-4">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-brand-border">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded bg-brand-elevated text-upay-gold flex items-center justify-center border border-brand-border">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200">
               <Zap size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-brand-text uppercase tracking-wide">
-                Risk Scenario Testing Laboratory
+              <h2 className="text-sm font-bold text-slate-900">
+                {isBn ? "বাংলাদেশ এমএফএস প্রতারণা সিমুলেশন ওয়ার্কবেঞ্চ" : "MFS Attack Simulation Workbench"}
               </h2>
-              <p className="text-[11px] text-brand-muted mt-0.5">
-                Inject verified synthetic fraud vectors to test deterministic rules, neural scoring, and graph clustering.
+              <p className="text-[11px] text-slate-500">
+                {isBn ? "বাস্তব লেনদেন তৈরি করে ঝুঁকি ইঞ্জিন পরীক্ষা করুন" : "Inject synthetic attack vectors to verify sub-2ms engine scoring"}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded flex items-center justify-center text-brand-muted hover:bg-brand-elevated hover:text-brand-text transition-colors"
+            className="w-7 h-7 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* 4 Pre-built Quick Attack Scenarios */}
-        <div>
-          <h3 className="text-[10px] font-bold text-brand-subtle uppercase tracking-wider font-mono mb-2">
-            STANDARDIZED TEST SCENARIOS
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {/* Scenario 1: Coordinated Mule Syndicate */}
-            <div
-              onClick={() => handleScenario("mule")}
-              className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-critical/40 cursor-pointer transition-all space-y-1 group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="badge badge-critical text-[9px]">CRITICAL SYNDICATE</span>
-                <Play size={12} className="text-rose-400 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-              <b className="text-xs font-bold text-brand-text block mt-1">
-                Mule Network Surge (Cluster #17)
-              </b>
-              <p className="text-[11px] text-brand-muted leading-snug">
-                ৳48,500 transfer to U-8831 with unverified device DEV-8821 at 02:13 AM.
-              </p>
+        {/* Modal Body */}
+        <div className="p-5 overflow-y-auto space-y-5">
+          {/* Preset Attack Scenarios */}
+          <div>
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono mb-2">
+              {isBn ? "১-ক্লিক দ্রুত প্রতারণা দৃশ্যকল্প" : "1-Click Standard MFS Attack Scenarios"}
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => handleScenario("ato")}
+                className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="badge badge-critical text-[9px]">{isBn ? "পিন চুরি" : "ATO"}</span>
+                  <span className="text-[10px] font-mono text-slate-500">৳32,000</span>
+                </div>
+                <div className="text-xs font-bold text-slate-900 mt-1">Account Takeover</div>
+                <div className="text-[11px] text-slate-600 mt-0.5">
+                  USSD PIN reset + nocturnal cash-out at agent
+                </div>
+              </button>
 
-            {/* Scenario 2: Account Takeover */}
-            <div
-              onClick={() => handleScenario("ato")}
-              className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-critical/40 cursor-pointer transition-all space-y-1 group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="badge badge-high text-[9px]">HIGH RISK ATO</span>
-                <Play size={12} className="text-orange-400 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-              <b className="text-xs font-bold text-brand-text block mt-1">
-                Account Takeover &amp; Cash-Out
-              </b>
-              <p className="text-[11px] text-brand-muted leading-snug">
-                USSD reset followed by instant ৳32,000 cash-out in Chattogram.
-              </p>
-            </div>
+              <button
+                type="button"
+                onClick={() => handleScenario("sim_swap")}
+                className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="badge badge-critical text-[9px]">{isBn ? "সিম পরিবর্তন" : "SIM SWAP"}</span>
+                  <span className="text-[10px] font-mono text-slate-500">৳98,000</span>
+                </div>
+                <div className="text-xs font-bold text-slate-900 mt-1">SIM Swap Liquidation</div>
+                <div className="text-[11px] text-slate-600 mt-0.5">
+                  Carrier SIM re-issuance + 24h cooling violation
+                </div>
+              </button>
 
-            {/* Scenario 3: Micro-structuring Velocity */}
-            <div
-              onClick={() => handleScenario("velocity")}
-              className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-medium/40 cursor-pointer transition-all space-y-1 group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="badge badge-medium text-[9px]">BURST VELOCITY</span>
-                <Play size={12} className="text-amber-400 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-              <b className="text-xs font-bold text-brand-text block mt-1">
-                Structuring &amp; Smurfing Burst
-              </b>
-              <p className="text-[11px] text-brand-muted leading-snug">
-                6 back-to-back fund transfers under threshold within 180 seconds.
-              </p>
-            </div>
+              <button
+                type="button"
+                onClick={() => handleScenario("mule")}
+                className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-left transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="badge badge-critical text-[9px]">{isBn ? "মিউল চক্র" : "SYNDICATE"}</span>
+                  <span className="text-[10px] font-mono text-slate-500">৳48,500</span>
+                </div>
+                <div className="text-xs font-bold text-slate-900 mt-1">Mule Syndicate #17</div>
+                <div className="text-[11px] text-slate-600 mt-0.5">
+                  Direct transfer into confirmed laundering conduit
+                </div>
+              </button>
 
-            {/* Scenario 4: Legitimate Baseline */}
-            <div
-              onClick={() => handleScenario("normal")}
-              className="p-3 rounded border border-brand-border bg-brand-elevated hover:border-risk-low/40 cursor-pointer transition-all space-y-1 group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="badge badge-low text-[9px]">SAFE BASELINE</span>
-                <Play size={12} className="text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-              <b className="text-xs font-bold text-brand-text block mt-1">
-                Legitimate Merchant Grocery Pay
-              </b>
-              <p className="text-[11px] text-brand-muted leading-snug">
-                ৳2,450 to verified supermarket M-291 at 02:30 PM on known device.
-              </p>
+              <button
+                type="button"
+                onClick={() => handleScenario("velocity")}
+                className="p-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-left transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="badge badge-high text-[9px]">{isBn ? "স্মার্ফিং" : "SMURFING"}</span>
+                  <span className="text-[10px] font-mono text-slate-500">৳24,500</span>
+                </div>
+                <div className="text-xs font-bold text-slate-900 mt-1">Smurfing Split Hop</div>
+                <div className="text-[11px] text-slate-600 mt-0.5">
+                  Skirting Bangladesh Bank ৳25,000 limit
+                </div>
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Custom Transaction Form */}
-        <form onSubmit={handleCustomSubmit} className="pt-3 border-t border-brand-border space-y-2.5">
-          <h3 className="text-[10px] font-bold text-brand-subtle uppercase tracking-wider font-mono">
-            CUSTOM TRANSACTION PARAMETER INJECTION
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-            <div>
-              <label className="text-brand-muted font-medium block mb-1 text-[11px]">Amount (BDT ৳)</label>
-              <input
-                type="number"
-                value={customAmount}
-                onChange={(e) => setCustomAmount(Number(e.target.value))}
-                className="w-full h-8 px-2 bg-brand-elevated border border-brand-border rounded outline-none font-mono text-brand-text focus:border-upay-gold"
-              />
+          {/* Custom Transaction Form */}
+          <form onSubmit={handleCustomSubmit} className="space-y-3 pt-3 border-t border-slate-200">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+              {isBn ? "কাস্টম লেনদেন প্যারামিটার তৈরি করুন" : "Or Build Custom MFS Vector"}
             </div>
 
-            <div>
-              <label className="text-brand-muted font-medium block mb-1 text-[11px]">Channel / Type</label>
-              <select
-                value={customType}
-                onChange={(e) => setCustomType(e.target.value as TransactionType)}
-                className="w-full h-8 px-2 bg-brand-elevated border border-brand-border rounded outline-none text-brand-text"
-              >
-                <option value="Wallet Transfer">Wallet Transfer</option>
-                <option value="Cash Out">Cash Out</option>
-                <option value="Merchant Pay">Merchant Pay</option>
-                <option value="Add Money">Add Money</option>
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  {isBn ? "প্রেরক ওয়ালেট" : "Customer Wallet"}
+                </label>
+                <input
+                  type="text"
+                  value={customCustomer}
+                  onChange={(e) => setCustomCustomer(e.target.value)}
+                  className="field w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  {isBn ? "প্রাপক / এজেন্ট" : "Beneficiary / Agent"}
+                </label>
+                <input
+                  type="text"
+                  value={customRecipient}
+                  onChange={(e) => setCustomRecipient(e.target.value)}
+                  className="field w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  {isBn ? "পরিমাণ (টাকা ৳)" : "Amount (BDT ৳)"}
+                </label>
+                <input
+                  type="number"
+                  value={customAmount}
+                  onChange={(e) => setCustomAmount(Number(e.target.value))}
+                  className="field w-full font-mono font-bold"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  {isBn ? "লেনদেনের ধরন" : "MFS Type"}
+                </label>
+                <select
+                  value={customType}
+                  onChange={(e) => setCustomType(e.target.value as TransactionType)}
+                  className="field w-full"
+                >
+                  <option value="Wallet Transfer">P2P Send Money</option>
+                  <option value="Cash Out">Agent Cash-Out</option>
+                  <option value="Merchant Pay">Merchant Payment</option>
+                  <option value="Add Money">Bank Add Money</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  {isBn ? "বিভাগ" : "Division"}
+                </label>
+                <select
+                  value={customLocation}
+                  onChange={(e) => setCustomLocation(e.target.value)}
+                  className="field w-full"
+                >
+                  <option value="Dhaka">Dhaka</option>
+                  <option value="Chattogram">Chattogram</option>
+                  <option value="Sylhet">Sylhet</option>
+                  <option value="Rajshahi">Rajshahi</option>
+                  <option value="Khulna">Khulna</option>
+                  <option value="Barishal">Barishal</option>
+                  <option value="Rangpur">Rangpur</option>
+                  <option value="Mymensingh">Mymensingh</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-600 font-medium mb-1">
+                  {isBn ? "সময়" : "Time"}
+                </label>
+                <input
+                  type="text"
+                  value={customTime}
+                  onChange={(e) => setCustomTime(e.target.value)}
+                  className="field w-full font-mono"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="text-brand-muted font-medium block mb-1 text-[11px]">Execution Time</label>
-              <input
-                type="text"
-                value={customTime}
-                onChange={(e) => setCustomTime(e.target.value)}
-                placeholder="e.g. 02:45 AM"
-                className="w-full h-8 px-2 bg-brand-elevated border border-brand-border rounded outline-none font-mono text-brand-text"
-              />
-            </div>
-
-            <div>
-              <label className="text-brand-muted font-medium block mb-1 text-[11px]">Target Recipient</label>
-              <input
-                type="text"
-                value={customRecipient}
-                onChange={(e) => setCustomRecipient(e.target.value)}
-                className="w-full h-8 px-2 bg-brand-elevated border border-brand-border rounded outline-none font-mono text-brand-text"
-              />
-            </div>
-
-            <div>
-              <label className="text-brand-muted font-medium block mb-1 text-[11px]">Hardware Device</label>
-              <input
-                type="text"
-                value={customDevice}
-                onChange={(e) => setCustomDevice(e.target.value)}
-                className="w-full h-8 px-2 bg-brand-elevated border border-brand-border rounded outline-none font-mono text-brand-text"
-              />
-            </div>
-
-            <div className="flex items-center pt-5 gap-2">
+            <div className="flex items-center gap-2 pt-2">
               <input
                 type="checkbox"
-                id="isNew"
+                id="newDevCheck"
                 checked={isNewDevice}
                 onChange={(e) => setIsNewDevice(e.target.checked)}
-                className="w-3.5 h-3.5 rounded border-brand-border bg-brand-elevated text-upay-gold focus:ring-0"
+                className="rounded border-slate-300 text-blue-600"
               />
-              <label htmlFor="isNew" className="text-xs text-brand-muted cursor-pointer select-none">
-                New/Unpaired Hardware
+              <label htmlFor="newDevCheck" className="text-xs text-slate-700 cursor-pointer">
+                {isBn ? "অপরিচিত নতুন ডিভাইস ও সিম ফ্ল্যাগ যোগ করুন" : "Flag as unrecognized new device & SIM pairing"}
               </label>
             </div>
-          </div>
 
-          <div className="pt-2 flex justify-end gap-2 border-t border-brand-border">
-            <button type="button" onClick={onClose} className="btn btn-secondary text-xs">
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary text-xs flex items-center gap-1.5">
-              <Zap size={13} />
-              <span>Score &amp; Inject into Pipeline</span>
-            </button>
-          </div>
-        </form>
+            <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+              <button type="button" onClick={onClose} className="btn btn-secondary text-xs">
+                {t("close")}
+              </button>
+              <button type="submit" className="btn btn-primary text-xs">
+                {isBn ? "ইনজেক্ট ও মূল্যায়ন করুন" : "Inject & Evaluate"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

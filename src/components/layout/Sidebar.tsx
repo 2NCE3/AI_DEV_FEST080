@@ -12,15 +12,14 @@ import {
   Users,
   Bell,
   BarChart3,
-  Settings,
   X,
-  Moon,
-  Sun,
   HelpCircle,
-  Cpu,
   LogOut,
+  Globe,
+  Sliders,
 } from "lucide-react";
 import { UserProfile } from "../auth/LoginPage";
+import { useSentinel } from "@/context/SentinelContext";
 
 interface SidebarProps {
   currentPage: NavigationPage;
@@ -38,10 +37,10 @@ interface SidebarProps {
 }
 
 interface NavGroup {
-  section: string;
+  sectionKey: string;
   items: {
     id: NavigationPage;
-    label: string;
+    labelKey: "navOverview" | "navTransactions" | "navRisk" | "navNetwork" | "navInvestigations" | "navCustomers" | "navAlerts" | "navAnalytics";
     icon: React.ReactNode;
   }[];
 }
@@ -54,39 +53,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onClose,
   onSettingsClick,
   onTourClick,
-  isDarkMode = false,
-  onToggleTheme,
   onHelpClick,
   currentUser,
   onLogout,
 }) => {
+  const { language, toggleLanguage, t } = useSentinel();
+
   const navGroups: NavGroup[] = [
     {
-      section: "OVERVIEW",
+      sectionKey: language === "bn" ? "ড্যাশবোর্ড ও নিরীক্ষণ" : "MONITORING & OVERVIEW",
       items: [
-        { id: "overview", label: "Executive Console", icon: <LayoutGrid size={15} /> },
+        { id: "overview", labelKey: "navOverview", icon: <LayoutGrid size={15} /> },
+        { id: "transactions", labelKey: "navTransactions", icon: <Activity size={15} /> },
       ],
     },
     {
-      section: "INTELLIGENCE",
+      sectionKey: language === "bn" ? "ঝুঁকি ও গোয়েন্দা তথ্য" : "INTELLIGENCE & DETECTION",
       items: [
-        { id: "transactions", label: "Transaction Monitor", icon: <Activity size={15} /> },
-        { id: "risk", label: "Risk Signals & XAI", icon: <ShieldAlert size={15} /> },
-        { id: "network", label: "Fraud Network Topology", icon: <Share2 size={15} /> },
+        { id: "risk", labelKey: "navRisk", icon: <ShieldAlert size={15} /> },
+        { id: "network", labelKey: "navNetwork", icon: <Share2 size={15} /> },
+        { id: "alerts", labelKey: "navAlerts", icon: <Bell size={15} /> },
       ],
     },
     {
-      section: "OPERATIONS",
+      sectionKey: language === "bn" ? "তদন্ত ও পরিচালনা" : "OPERATIONS & INVESTIGATIONS",
       items: [
-        { id: "investigations", label: "Investigation Cases", icon: <Briefcase size={15} /> },
-        { id: "customers", label: "Customer 360", icon: <Users size={15} /> },
-        { id: "alerts", label: "Alert Triage", icon: <Bell size={15} /> },
+        { id: "investigations", labelKey: "navInvestigations", icon: <Briefcase size={15} /> },
+        { id: "customers", labelKey: "navCustomers", icon: <Users size={15} /> },
       ],
     },
     {
-      section: "GOVERNANCE",
+      sectionKey: language === "bn" ? "নিয়ন্ত্রণ ও বিএফআইইউ" : "BFIU GOVERNANCE & SAR",
       items: [
-        { id: "analytics", label: "Model Benchmarks & SAR", icon: <BarChart3 size={15} /> },
+        { id: "analytics", labelKey: "navAnalytics", icon: <BarChart3 size={15} /> },
       ],
     },
   ];
@@ -98,70 +97,86 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Mobile scrim */}
+      {/* Mobile Scrim Backdrop */}
       <div
         className={`sidebar-scrim ${isOpen ? "open" : ""}`}
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <aside className={`sidebar select-none ${isOpen ? "open" : ""}`} aria-label="Main navigation">
+      <aside className={`sidebar ${isOpen ? "open" : ""}`} aria-label="Main Navigation">
         {/* Brand Header */}
-        <div
-          className="brand"
-          onClick={() => handleNav("overview")}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === "Enter" && handleNav("overview")}
-        >
-          <div className="brand-mark">
-            <ShieldCheck size={18} strokeWidth={2.5} />
+        <div className="brand" onClick={() => handleNav("overview")}>
+          <div className="brand-mark bg-blue-600 text-white rounded font-extrabold text-sm flex items-center justify-center">
+            u
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="brand-name">
-              <span>upay</span> Sentinel
+          <div className="min-w-0 flex-1">
+            <div className="brand-name flex items-center gap-1.5 font-bold text-slate-900 text-sm">
+              upay <span className="text-blue-600">Sentinel</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono font-bold">
+                MFS
+              </span>
             </div>
-            <div className="brand-sub">Trust &amp; Risk Platform</div>
+            <div className="brand-sub text-[9.5px] text-slate-500 font-medium tracking-wider">
+              {language === "bn" ? "জালিয়াতি প্রতিরোধ প্ল্যাটফর্ম" : "BANGLADESH RISK CONSOLE"}
+            </div>
           </div>
-          {/* Close button on mobile */}
+          {onClose && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="md:hidden text-slate-400 hover:text-slate-700 p-1 rounded"
+              aria-label="Close menu"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        {/* Language Switcher Bar in Sidebar */}
+        <div className="my-2.5 px-2">
           <button
-            onClick={(e) => { e.stopPropagation(); onClose?.(); }}
-            className="md:hidden p-1 rounded text-slate-400 hover:text-white transition-colors"
-            aria-label="Close sidebar"
+            onClick={toggleLanguage}
+            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition-colors"
           >
-            <X size={15} />
+            <span className="flex items-center gap-1.5 text-[11.5px]">
+              <Globe size={13} className="text-blue-600" />
+              <span>{language === "bn" ? "ভাষা: বাংলা" : "Language: English"}</span>
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-blue-600 font-bold">
+              {language === "bn" ? "EN Switch" : "বাংলা সুইচ"}
+            </span>
           </button>
         </div>
 
-        {/* Categorized Navigation */}
-        <nav className="flex-1 py-1 space-y-3" role="navigation">
+        {/* Navigation Categories */}
+        <nav className="flex-1 overflow-y-auto space-y-3 py-1 pr-1">
           {navGroups.map((group) => (
-            <div key={group.section}>
-              <div className="nav-section-title">{group.section}</div>
+            <div key={group.sectionKey}>
+              <div className="nav-section-title text-[9.5px] font-bold text-slate-400 tracking-wider">
+                {group.sectionKey}
+              </div>
               <div className="space-y-0.5">
                 {group.items.map((item) => {
-                  const isActive =
-                    currentPage === item.id ||
-                    (currentPage === "investigation" && item.id === "investigations");
-
+                  const isActive = currentPage === item.id;
+                  const isAlert = item.id === "alerts" && unreadAlertsCount > 0;
                   return (
-                    <div
+                    <button
                       key={item.id}
-                      role="button"
-                      tabIndex={0}
                       onClick={() => handleNav(item.id)}
-                      onKeyDown={(e) => e.key === "Enter" && handleNav(item.id)}
-                      className={`nav-item nav-${item.id} ${isActive ? "active" : ""}`}
+                      className={`nav-item w-full text-left transition-colors ${
+                        isActive ? "active" : ""
+                      }`}
                       aria-current={isActive ? "page" : undefined}
                     >
-                      <span className="shrink-0" aria-hidden="true">{item.icon}</span>
-                      <span className="flex-1 truncate">{item.label}</span>
-                      {item.id === "alerts" && unreadAlertsCount > 0 && (
-                        <span className="nav-count" aria-label={`${unreadAlertsCount} unread`}>
-                          {unreadAlertsCount}
-                        </span>
-                      )}
-                    </div>
+                      <span className={isActive ? "text-blue-600" : "text-slate-400"}>
+                        {item.icon}
+                      </span>
+                      <span className="truncate flex-1">{t(item.labelKey)}</span>
+                      {isAlert && <span className="nav-count">{unreadAlertsCount}</span>}
+                    </button>
                   );
                 })}
               </div>
@@ -169,68 +184,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </nav>
 
-        {/* Sidebar Bottom Dock */}
-        <div className="sidebar-bottom pt-2 border-t border-brand-borderSubtle">
-          {/* Engine Status */}
-          <div className="engine-status-box">
-            <span className="pulse" aria-hidden="true" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <b>Risk Engine Active</b>
-                <span className="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/20">
-                  &lt; 2ms
-                </span>
-              </div>
-              <small>DIU CPC &times; upay Node 01</small>
-            </div>
+        {/* Operational Engine Health Status */}
+        <div className="engine-status-box border border-slate-200 bg-slate-50">
+          <div className="pulse bg-emerald-500" />
+          <div className="min-w-0 flex-1">
+            <b className="text-xs text-slate-800">
+              {language === "bn" ? "ডিটারমিনিস্টিক ইঞ্জিন সক্রিয়" : "Deterministic Engine Online"}
+            </b>
+            <small className="text-[10px] text-slate-500 block truncate">
+              {language === "bn" ? "বাংলাদেশ ব্যাংক BFIU সংযোগ চালু" : "BFIU Link & Rule Engine v2.4"}
+            </small>
           </div>
+        </div>
 
-          {/* Analyst Profile */}
-          <div className="analyst-profile">
-            <div className="avatar" aria-hidden="true">
-              {currentUser?.avatar || "AH"}
-            </div>
-            <div className="profile-info">
-              <b>{currentUser?.name || "Arman Hossen"}</b>
-              <small>{currentUser?.role || "Lead Risk Analyst"}</small>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <button
-                title={isDarkMode ? "Switch to Light Console" : "Switch to Cyber Dark Mode"}
-                onClick={onToggleTheme}
-                className="text-slate-400 hover:text-amber-400 transition-colors p-1 rounded hover:bg-brand-elevated"
-                aria-label="Toggle Theme"
-              >
-                {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
-              </button>
-              <button
-                title="Platform Guide & Shortcuts (Press ?)"
-                onClick={onHelpClick || onTourClick}
-                className="text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-brand-elevated"
-                aria-label="Platform Guide"
-              >
-                <HelpCircle size={14} />
-              </button>
-              <button
-                title="System Settings"
-                onClick={onSettingsClick}
-                className="btn-settings text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-brand-elevated"
-                aria-label="Settings"
-              >
-                <Settings size={14} />
-              </button>
-              {onLogout && (
-                <button
-                  title="Sign Out"
-                  onClick={onLogout}
-                  className="text-slate-400 hover:text-rose-400 transition-colors p-1 rounded hover:bg-brand-elevated"
-                  aria-label="Sign Out"
-                >
-                  <LogOut size={14} />
-                </button>
-              )}
-            </div>
+        {/* Analyst Profile & Sign Out */}
+        <div className="analyst-profile border-t border-slate-200 pt-2">
+          <div className="avatar bg-blue-50 text-blue-700 border border-blue-200">
+            {currentUser?.avatar || "OP"}
           </div>
+          <div className="min-w-0 flex-1">
+            <b className="text-xs text-slate-800">{currentUser?.name || "Risk Analyst"}</b>
+            <small className="text-[10px] text-slate-500">{currentUser?.role || "SOC Lead"}</small>
+          </div>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="text-slate-400 hover:text-rose-600 p-1.5 rounded transition-colors"
+              title="Sign Out"
+              aria-label="Sign Out"
+            >
+              <LogOut size={13} />
+            </button>
+          )}
         </div>
       </aside>
     </>

@@ -24,7 +24,7 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
   onSelectCase,
   onNewCaseModal,
 }) => {
-  const { cases } = useSentinel();
+  const { cases, language } = useSentinel();
   const [activeTab, setActiveTab] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
 
@@ -47,13 +47,19 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <div className="eyebrow flex items-center gap-1.5 text-brand-subtle">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            CASE WORKSTATION &bull; REGULATORY COMPLIANCE AUDIT
+          <div className="eyebrow flex items-center gap-1.5 text-slate-500">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {language === "bn"
+              ? "তদন্ত ওয়ার্কস্টেশন • বিএফআইইউ রেগুলেটরি অডিট"
+              : "CASE WORKSTATION • REGULATORY COMPLIANCE AUDIT"}
           </div>
-          <h1 className="page-title text-brand-text">Fraud Case Dossiers</h1>
-          <p className="page-subtitle text-brand-muted">
-            Triage flagged cases, inspect AI evidence packages, and execute verified sanctions with tamper-evident audit logging.
+          <h1 className="page-title text-slate-900">
+            {language === "bn" ? "প্রতারণা ও ঝুঁকি কেস ডসিয়ার" : "Fraud Case Dossiers"}
+          </h1>
+          <p className="page-subtitle text-slate-500">
+            {language === "bn"
+              ? "চিহ্নিত কেসসমূহ যাচাই করুন, এআই প্রমাণের বিস্তারিত দেখুন এবং অডিট লগসহ কার্যকর পদক্ষেপ নিন।"
+              : "Triage flagged cases, inspect AI evidence packages, and execute verified sanctions with tamper-evident audit logging."}
           </p>
         </div>
         <button
@@ -61,18 +67,18 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
           className="btn btn-primary text-xs flex items-center gap-1.5"
         >
           <Plus size={14} />
-          <span>+ New Investigation</span>
+          <span>{language === "bn" ? "+ নতুন তদন্ত শুরু করুন" : "+ New Investigation"}</span>
         </button>
       </div>
 
       {/* Tabs */}
       <div className="tabs">
         {[
-          { id: "all", label: `All Open Cases (${cases.length})` },
-          { id: "critical", label: `Critical Priority (${cases.filter(c => c.riskLevel === "Critical").length})` },
-          { id: "high", label: `High Risk (${cases.filter(c => c.riskLevel === "High").length})` },
-          { id: "assigned", label: "Assigned to Me" },
-          { id: "resolved", label: "Resolved / Safe" },
+          { id: "all", label: language === "bn" ? `সকল কেস (${cases.length})` : `All Open Cases (${cases.length})` },
+          { id: "critical", label: language === "bn" ? `মারাত্মক অগ্রাধিকার (${cases.filter(c => c.riskLevel === "Critical").length})` : `Critical Priority (${cases.filter(c => c.riskLevel === "Critical").length})` },
+          { id: "high", label: language === "bn" ? `উচ্চ ঝুঁকি (${cases.filter(c => c.riskLevel === "High").length})` : `High Risk (${cases.filter(c => c.riskLevel === "High").length})` },
+          { id: "assigned", label: language === "bn" ? "আমার দায়িত্বে" : "Assigned to Me" },
+          { id: "resolved", label: language === "bn" ? "নিষ্পত্তি / নিরাপদ" : "Resolved / Safe" },
         ].map((tab) => (
           <div
             key={tab.id}
@@ -85,23 +91,23 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
       </div>
 
       {/* Table Card */}
-      <div className="card-base table-card">
+      <div className="card-base table-card bg-white border border-slate-200">
         {/* Meta & Filters */}
         <div className="table-meta">
           <div className="field w-80">
-            <Search size={13} className="text-brand-subtle shrink-0" />
+            <Search size={13} className="text-slate-400 shrink-0" />
             <input
               type="text"
-              placeholder="Search case ID, wallet, reason, or analyst..."
+              placeholder={language === "bn" ? "কেস আইডি, ওয়ালেট, কারণ বা বিশ্লেষক খুঁজুন..." : "Search case ID, wallet, reason, or analyst..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="outline-none bg-transparent w-full text-xs text-brand-text"
+              className="outline-none bg-transparent w-full text-xs text-slate-800"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs text-brand-subtle font-mono">
-              Showing {filteredCases.length} case records
+            <div className="text-xs text-slate-500 font-mono">
+              {language === "bn" ? `${filteredCases.length} টি কেস রেকর্ড প্রদর্শিত` : `Showing ${filteredCases.length} case records`}
             </div>
           </div>
         </div>
@@ -111,15 +117,15 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
           <table>
             <thead>
               <tr>
-                <th>Case Identifier</th>
-                <th>Priority</th>
-                <th>Subject Customer</th>
-                <th>Disputed Exposure</th>
-                <th>Primary Threat Vector</th>
-                <th>Assigned Lead</th>
-                <th>Workflow Status</th>
-                <th>Last Update</th>
-                <th className="text-right">Action</th>
+                <th>{language === "bn" ? "কেস আইডি" : "Case Identifier"}</th>
+                <th>{language === "bn" ? "অগ্রাধিকার" : "Priority"}</th>
+                <th>{language === "bn" ? "গ্রাহক ওয়ালেট" : "Subject Customer"}</th>
+                <th>{language === "bn" ? "তহবিলের পরিমাণ" : "Disputed Exposure"}</th>
+                <th>{language === "bn" ? "ঝুঁকির কারণ" : "Primary Threat Vector"}</th>
+                <th>{language === "bn" ? "দায়িত্বপ্রাপ্ত" : "Assigned Lead"}</th>
+                <th>{language === "bn" ? "স্ট্যাটাস" : "Workflow Status"}</th>
+                <th>{language === "bn" ? "সর্বশেষ আপডেট" : "Last Update"}</th>
+                <th className="text-right">{language === "bn" ? "পদক্ষেপ" : "Action"}</th>
               </tr>
             </thead>
             <tbody>
@@ -127,10 +133,10 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                 <tr
                   key={c.id}
                   onClick={() => onSelectCase(c)}
-                  className="hover:bg-brand-elevated transition-colors cursor-pointer"
+                  className="hover:bg-slate-50 transition-colors cursor-pointer"
                 >
-                  <td className="mono font-bold text-brand-text flex items-center gap-1.5">
-                    <Briefcase size={13} className="text-upay-gold" />
+                  <td className="mono font-bold text-slate-900 flex items-center gap-1.5">
+                    <Briefcase size={13} className="text-emerald-700" />
                     <span>{c.id}</span>
                   </td>
                   <td>
@@ -147,25 +153,25 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
                     </span>
                   </td>
                   <td className="link font-mono">{c.customer}</td>
-                  <td className="amount font-bold text-brand-text font-mono">
+                  <td className="amount font-bold text-slate-900 font-mono">
                     ৳{(c.exposure || c.amount || 0).toLocaleString()}
                   </td>
-                  <td className="text-brand-text font-medium text-xs">{c.reason}</td>
-                  <td className="text-brand-muted text-xs">{c.analyst}</td>
+                  <td className="text-slate-800 font-medium text-xs">{c.reason}</td>
+                  <td className="text-slate-500 text-xs">{c.analyst}</td>
                   <td>
                     <span
                       className={`px-2 py-0.5 rounded text-[10.5px] font-mono font-semibold border ${
                         c.status === "Investigating"
-                          ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                          ? "bg-rose-50 text-rose-700 border-rose-200"
                           : c.status === "Pending Review"
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
                       }`}
                     >
                       {c.status}
                     </span>
                   </td>
-                  <td className="text-brand-subtle text-xs font-mono">{c.updated}</td>
+                  <td className="text-slate-400 text-xs font-mono">{c.updated}</td>
                   <td className="text-right">
                     <button
                       onClick={(e) => {

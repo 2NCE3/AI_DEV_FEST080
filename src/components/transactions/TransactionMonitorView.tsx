@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Transaction, RiskLevel, TransactionType } from "@/types";
+import { Transaction, RiskLevel } from "@/types";
 import {
   Search,
   Filter,
@@ -9,11 +9,9 @@ import {
   Pause,
   ChevronLeft,
   ChevronRight,
-  MoreVertical,
-  Activity,
-  Shield,
   Zap,
 } from "lucide-react";
+import { useSentinel } from "@/context/SentinelContext";
 
 interface TransactionMonitorViewProps {
   transactions: Transaction[];
@@ -30,13 +28,14 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
   onToggleStreaming,
   onOpenSimulation,
 }) => {
+  const { language, t } = useSentinel();
   const [search, setSearch] = useState("");
   const [selectedRisk, setSelectedRisk] = useState<string>("All");
   const [selectedType, setSelectedType] = useState<string>("All");
   const [selectedLocation, setSelectedLocation] = useState<string>("All");
-  const [selectedDevice, setSelectedDevice] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const isBn = language === "bn";
 
   // Filter transactions
   const filtered = transactions.filter((t) => {
@@ -52,13 +51,8 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
     const matchesType = selectedType === "All" || t.type === selectedType;
     const matchesLocation =
       selectedLocation === "All" || t.location === selectedLocation;
-    const matchesDevice =
-      selectedDevice === "All" ||
-      (selectedDevice === "New Device" ? t.isNewDevice : !t.isNewDevice);
 
-    return (
-      matchesSearch && matchesRisk && matchesType && matchesLocation && matchesDevice
-    );
+    return matchesSearch && matchesRisk && matchesType && matchesLocation;
   });
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
@@ -72,16 +66,20 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <div className="eyebrow flex items-center gap-1.5 text-brand-subtle">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            REAL-TIME INGESTION ENGINE &bull; TELEMETRY STREAM
+          <div className="eyebrow flex items-center gap-1.5 text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>{isBn ? "লাইভ এমএফএস ইনজেশন স্ট্রিম" : "REAL-TIME INGESTION ENGINE · TELEMETRY STREAM"}</span>
           </div>
-          <h1 className="page-title text-brand-text">Transaction Monitor</h1>
-          <p className="page-subtitle text-brand-muted">
-            Live digital financial stream inspection, composite multi-signal risk scores, and anomaly detection.
+          <h1 className="page-title text-slate-900">
+            {isBn ? "লাইভ লেনদেন পর্যবেক্ষণ মনিটর" : "Transaction Monitor"}
+          </h1>
+          <p className="page-subtitle text-slate-600">
+            {isBn
+              ? "রিয়েল-টাইম এমএফএস লেনদেন স্ক্রিনিং, সমন্বিত ঝুঁকি স্কোর এবং অনিয়ম সনাক্তকরণ।"
+              : "Live digital financial stream inspection, composite multi-signal risk scores, and anomaly detection."}
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {/* Live Streaming Toggle */}
           <button
             onClick={onToggleStreaming}
@@ -89,291 +87,202 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
           >
             {isStreaming ? (
               <>
-                <Pause size={13} className="text-amber-400" />
-                <span>Pause Live Stream</span>
+                <Pause size={13} className="text-amber-600" />
+                <span>{isBn ? "স্ট্রিম বিরতি" : "Pause Stream"}</span>
               </>
             ) : (
               <>
-                <Play size={13} className="text-emerald-400" />
-                <span>Resume Stream</span>
+                <Play size={13} className="text-emerald-600" />
+                <span>{isBn ? "স্ট্রিম চালু" : "Resume Stream"}</span>
               </>
             )}
           </button>
 
-          {/* Attack Injector shortcut */}
+          {/* Test Inject Vector CTA */}
           <button
             onClick={onOpenSimulation}
             className="btn btn-primary text-xs flex items-center gap-1.5"
           >
             <Zap size={13} />
-            <span>Inject Test Scenario</span>
+            <span>{isBn ? "আক্রমণ টেস্ট" : "Inject Vector"}</span>
           </button>
-
-          {/* Live Indicator */}
-          <div className="live-label">
-            <span className={`pulse ${isStreaming ? "bg-emerald-400" : "bg-brand-subtle"}`} />
-            <span>{isStreaming ? "STREAMING LIVE" : "STREAM PAUSED"}</span>
-          </div>
         </div>
       </div>
 
       {/* Filter Toolbar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 text-xs">
-        {/* Search */}
-        <div className="lg:col-span-4 field">
-          <Search size={13} className="text-brand-subtle shrink-0" />
-          <input
-            type="text"
-            placeholder="Search txn ID, wallet, hardware device..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="outline-none bg-transparent w-full text-xs text-brand-text"
-          />
-        </div>
+      <div className="card-base p-3 border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 flex-1">
+          {/* Search box */}
+          <div className="relative min-w-[220px]">
+            <Search
+              size={14}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              type="text"
+              placeholder={isBn ? "ওয়ালেট, আইডি বা প্রাপক খুঁজুন..." : "Search wallet, TXN, recipient..."}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="field w-full pl-8 text-xs"
+            />
+          </div>
 
-        {/* Risk Filter */}
-        <div className="lg:col-span-2">
+          {/* Risk Level Filter */}
           <select
             value={selectedRisk}
             onChange={(e) => {
               setSelectedRisk(e.target.value);
               setCurrentPage(1);
             }}
-            className="field w-full outline-none cursor-pointer"
+            className="field text-xs cursor-pointer font-medium"
           >
-            <option value="All">All Risk Levels</option>
-            <option value="Critical">Critical</option>
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
+            <option value="All">{isBn ? "সকল ঝুঁকি মাত্রা" : "All Risk Levels"}</option>
+            <option value="Critical">{isBn ? "চরম ঝুঁকি (Critical)" : "Critical Risk"}</option>
+            <option value="High">{isBn ? "উচ্চ ঝুঁকি (High)" : "High Risk"}</option>
+            <option value="Medium">{isBn ? "মাঝারি ঝুঁকি (Medium)" : "Medium Risk"}</option>
+            <option value="Low">{isBn ? "স্বাভাবিক (Low)" : "Low Risk"}</option>
           </select>
-        </div>
 
-        {/* Type Filter */}
-        <div className="lg:col-span-2">
+          {/* Transaction Type Filter */}
           <select
             value={selectedType}
             onChange={(e) => {
               setSelectedType(e.target.value);
               setCurrentPage(1);
             }}
-            className="field w-full outline-none cursor-pointer"
+            className="field text-xs cursor-pointer font-medium"
           >
-            <option value="All">All Transaction Types</option>
-            <option value="Wallet Transfer">Wallet Transfer</option>
-            <option value="Cash Out">Cash Out</option>
-            <option value="Merchant Pay">Merchant Pay</option>
-            <option value="Add Money">Add Money</option>
-            <option value="Mobile Recharge">Mobile Recharge</option>
+            <option value="All">{isBn ? "সকল লেনদেনের ধরন" : "All Transaction Types"}</option>
+            <option value="Wallet Transfer">{isBn ? "সেন্ড মানি (P2P)" : "Wallet Transfer"}</option>
+            <option value="Cash Out">{isBn ? "এজেন্ট ক্যাশ আউট" : "Cash Out"}</option>
+            <option value="Merchant Pay">{isBn ? "মার্চেন্ট পেমেন্ট" : "Merchant Pay"}</option>
+            <option value="Add Money">{isBn ? "অ্যাড মানি" : "Add Money"}</option>
           </select>
-        </div>
 
-        {/* Location Filter */}
-        <div className="lg:col-span-2">
+          {/* Location Filter */}
           <select
             value={selectedLocation}
             onChange={(e) => {
               setSelectedLocation(e.target.value);
               setCurrentPage(1);
             }}
-            className="field w-full outline-none cursor-pointer"
+            className="field text-xs cursor-pointer font-medium"
           >
-            <option value="All">All Locations</option>
-            <option value="Dhaka">Dhaka</option>
-            <option value="Chattogram">Chattogram</option>
-            <option value="Sylhet">Sylhet</option>
-            <option value="Khulna">Khulna</option>
-            <option value="Rajshahi">Rajshahi</option>
+            <option value="All">{isBn ? "সকল ৮টি বিভাগ" : "All 8 Divisions"}</option>
+            <option value="Dhaka">{isBn ? "ঢাকা বিভাগ" : "Dhaka"}</option>
+            <option value="Chattogram">{isBn ? "চট্টগ্রাম বিভাগ" : "Chattogram"}</option>
+            <option value="Sylhet">{isBn ? "সিলেট বিভাগ" : "Sylhet"}</option>
+            <option value="Rajshahi">{isBn ? "রাজশাহী বিভাগ" : "Rajshahi"}</option>
+            <option value="Khulna">{isBn ? "খুলনা বিভাগ" : "Khulna"}</option>
           </select>
         </div>
 
-        {/* Reset Filter Button */}
-        <div className="lg:col-span-2">
-          <button
-            onClick={() => {
-              setSearch("");
-              setSelectedRisk("All");
-              setSelectedType("All");
-              setSelectedLocation("All");
-              setSelectedDevice("All");
-              setCurrentPage(1);
-            }}
-            className="filter-button w-full justify-center text-xs"
-            title="Reset Filters"
-          >
-            <Filter size={12} />
-            <span>Reset Filters</span>
-          </button>
+        {/* Counter */}
+        <div className="text-xs text-slate-500 font-mono">
+          {filtered.length} {isBn ? "টি লেনদেন প্রদর্শিত" : "records matched"}
         </div>
       </div>
 
-      {/* Main Table Card */}
-      <div className="card-base table-card">
-        {/* Table Meta bar */}
-        <div className="table-meta">
-          <div className="flex items-center gap-2">
-            <span className="text-brand-text font-bold text-xs uppercase tracking-wide">
-              Live Ingestion Feed
-            </span>
-            <span className="text-brand-subtle text-xs flex items-center gap-1 font-mono">
-              &bull; {filtered.length} matched
-            </span>
-          </div>
-          <span className="text-[11px] text-brand-subtle font-mono">
-            P99 Latency: 1.8ms &bull; Zero Buffer Lag
-          </span>
-        </div>
-
-        {/* Table Content */}
-        <div className="table-scroll">
-          <table>
+      {/* High-Density Transactions Table */}
+      <div className="card-base border border-slate-200 bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
             <thead>
-              <tr>
-                <th>Risk Priority</th>
-                <th>Transaction ID</th>
-                <th>Sender (Customer)</th>
-                <th>Target Recipient</th>
-                <th>Amount (BDT)</th>
-                <th>Channel / Type</th>
-                <th>Timestamp</th>
-                <th>Hardware Fingerprint</th>
-                <th>Location</th>
-                <th>Risk Score</th>
-                <th>Decision Status</th>
-                <th className="text-right">Action</th>
+              <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-mono text-[11px]">
+                <th className="py-3 px-3">{t("colTxnId")}</th>
+                <th className="py-3 px-3">{t("colCustomer")}</th>
+                <th className="py-3 px-3">{t("colRecipient")}</th>
+                <th className="py-3 px-3">{t("colAmount")}</th>
+                <th className="py-3 px-3">{t("colType")}</th>
+                <th className="py-3 px-3">{t("colDivision")}</th>
+                <th className="py-3 px-3">{t("colDeviceSim")}</th>
+                <th className="py-3 px-3">{t("colRiskScore")}</th>
+                <th className="py-3 px-3">{t("colStatus")}</th>
+                <th className="py-3 px-3 text-right">{t("colActions")}</th>
               </tr>
             </thead>
-            <tbody>
-              {paginated.length === 0 ? (
-                <tr>
-                  <td colSpan={12} className="text-center py-12 text-brand-subtle">
-                    No transactions match the selected filter criteria.
+            <tbody className="divide-y divide-slate-100">
+              {paginated.map((txn) => (
+                <tr
+                  key={txn.id}
+                  onClick={() => onSelectTransaction(txn)}
+                  className="hover:bg-slate-50 cursor-pointer transition-colors"
+                >
+                  <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
+                    {txn.id}
+                  </td>
+                  <td className="py-2.5 px-3 font-mono text-slate-800">
+                    {txn.customer}
+                  </td>
+                  <td className="py-2.5 px-3 font-mono text-slate-600">
+                    {txn.recipient}
+                  </td>
+                  <td className="py-2.5 px-3 font-mono font-bold text-slate-900">
+                    <span className={txn.amount >= 40000 ? "text-rose-600" : "text-slate-900"}>
+                      ৳{txn.amount.toLocaleString()}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-700">
+                    {txn.type}
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-600">
+                    {txn.location}
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <span className="text-[11px] font-mono text-slate-500">
+                      {txn.device} {txn.isNewDevice && <span className="text-rose-600 font-bold ml-1">(NEW)</span>}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <span
+                      className={`badge text-[10px] ${
+                        txn.riskScore >= 90
+                          ? "badge-critical"
+                          : txn.riskScore >= 70
+                          ? "badge-high"
+                          : txn.riskScore >= 50
+                          ? "badge-medium"
+                          : "badge-low"
+                      }`}
+                    >
+                      {txn.riskScore}/100
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3">
+                    <span className="text-slate-700 font-medium">
+                      {txn.status}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-blue-600 font-semibold hover:underline">
+                    {isBn ? "বিবরণ →" : "Inspect →"}
                   </td>
                 </tr>
-              ) : (
-                paginated.map((txn) => (
-                  <tr
-                    key={txn.id}
-                    onClick={() => onSelectTransaction(txn)}
-                    className="hover:bg-brand-elevated transition-colors cursor-pointer"
-                  >
-                    <td>
-                      <span
-                        className={`badge ${
-                          txn.riskLevel === "Critical"
-                            ? "badge-critical"
-                            : txn.riskLevel === "High"
-                            ? "badge-high"
-                            : txn.riskLevel === "Medium"
-                            ? "badge-medium"
-                            : "badge-low"
-                        }`}
-                      >
-                        {txn.riskLevel}
-                      </span>
-                    </td>
-                    <td className="mono font-semibold text-brand-text">{txn.id}</td>
-                    <td className="link font-mono">{txn.customer}</td>
-                    <td className="link font-mono">{txn.recipient}</td>
-                    <td className="amount font-bold text-brand-text font-mono">
-                      ৳{txn.amount.toLocaleString()}
-                    </td>
-                    <td className="text-brand-muted text-xs">{txn.type}</td>
-                    <td className="text-brand-subtle font-mono text-xs">{txn.time}</td>
-                    <td>
-                      <span
-                        className={
-                          txn.isNewDevice
-                            ? "text-rose-400 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded text-[10.5px] border border-rose-500/20 font-mono"
-                            : "text-brand-muted font-mono text-[11px]"
-                        }
-                      >
-                        {txn.device} {txn.isNewDevice && "(New)"}
-                      </span>
-                    </td>
-                    <td className="text-brand-muted">{txn.location}</td>
-                    <td>
-                      <div
-                        className={`w-7 h-7 rounded border font-mono font-bold text-xs flex items-center justify-center ${
-                          txn.riskLevel === "Critical"
-                            ? "border-rose-500/30 text-rose-400 bg-rose-500/10"
-                            : txn.riskLevel === "High"
-                            ? "border-orange-500/30 text-orange-400 bg-orange-500/10"
-                            : txn.riskLevel === "Medium"
-                            ? "border-amber-500/30 text-amber-400 bg-amber-500/10"
-                            : "border-emerald-500/30 text-emerald-400 bg-emerald-500/10"
-                        }`}
-                      >
-                        {txn.riskScore}
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10.5px] font-mono font-semibold border ${
-                          txn.status === "Investigating"
-                            ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                            : txn.status === "Flagged"
-                            ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                            : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        }`}
-                      >
-                        {txn.status}
-                      </span>
-                    </td>
-                    <td className="text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectTransaction(txn);
-                        }}
-                        className="text-brand-subtle hover:text-brand-text p-1 rounded hover:bg-brand-elevated"
-                        title="Inspect Evidence"
-                      >
-                        <MoreVertical size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination Bar */}
-        <div className="pagination">
-          <span>
-            Page {currentPage} of {totalPages} ({filtered.length} total records)
-          </span>
-          <div className="flex items-center gap-1">
+        {/* Pagination Controls */}
+        <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-600">
+          <div>
+            {isBn
+              ? `পৃষ্ঠা ${currentPage} / ${totalPages}`
+              : `Page ${currentPage} of ${totalPages}`}
+          </div>
+          <div className="flex items-center gap-1.5">
             <button
-              disabled={currentPage === 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="btn btn-secondary text-xs px-2 py-1 disabled:opacity-40"
+              disabled={currentPage === 1}
+              className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40"
             >
-              <ChevronLeft size={13} />
+              <ChevronLeft size={14} />
             </button>
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map((num) => (
-              <button
-                key={num}
-                onClick={() => setCurrentPage(num)}
-                className={`w-6 h-6 rounded text-xs font-semibold font-mono ${
-                  currentPage === num
-                    ? "bg-upay-gold text-slate-950 font-bold"
-                    : "bg-brand-surface text-brand-text hover:bg-brand-elevated border border-brand-border"
-                }`}
-              >
-                {num}
-              </button>
-            ))}
             <button
-              disabled={currentPage === totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="btn btn-secondary text-xs px-2 py-1 disabled:opacity-40"
+              disabled={currentPage === totalPages}
+              className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40"
             >
-              <ChevronRight size={13} />
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>

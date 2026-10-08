@@ -8,6 +8,7 @@ export interface GeminiInvestigationInput {
   recipient: string;
   riskScore: number;
   flags: string[];
+  language?: "en" | "bn";
 }
 
 export interface GeminiInvestigationResult {
@@ -59,14 +60,12 @@ async function callGemini(
 /** Extract JSON from a raw response string (handles markdown code fences) */
 function extractJSON(raw: string): Record<string, unknown> | null {
   try {
-    // Strip markdown code fences if present
     const cleaned = raw
       .replace(/^```(?:json)?\n?/i, "")
       .replace(/\n?```$/i, "")
       .trim();
     return JSON.parse(cleaned);
   } catch {
-    // Try to find a JSON object within the string
     const match = raw.match(/\{[\s\S]*\}/);
     if (match) {
       try {
@@ -88,10 +87,34 @@ const MODELS_IN_ORDER = [
 export async function generateInvestigationAnalysis(
   input: GeminiInvestigationInput
 ): Promise<GeminiInvestigationResult> {
+  const isBangla = input.language === "bn";
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 
   if (apiKey) {
-    const prompt = `You are "upay Sentinel", an AI Fraud & Scam Intelligence engine for upay, a leading MFS in Bangladesh.
+    const prompt = isBangla
+      ? `You are "upay Sentinel", an AI Fraud & Scam Intelligence engine for upay MFS in Bangladesh.
+Analyze this fraud case and answer the three core questions in natural, professional Bengali (বাংলা). Return ONLY valid JSON.
+
+Case:
+- Case ID: ${input.caseId}
+- Customer: ${input.customer}
+- Amount: BDT ${input.amount.toLocaleString()}
+- Time: ${input.time}
+- Device: ${input.device}
+- Location: ${input.location}
+- Recipient: ${input.recipient}
+- Risk Score: ${input.riskScore}/100
+- Flags: ${input.flags.join("; ")}
+
+Return this JSON structure (no markdown fences, only raw JSON):
+{
+  "whatHappened": "বাংলায় ঘটনার সংক্ষিপ্ত বিবরণ",
+  "whyIsItRisky": "বাংলায় কেন এই লেনদেনটি বিপজ্জনক ও সংকেতসমূহের বিশ্লেষণ",
+  "whatShouldUpayDoNext": "উপায়ের করণীয় জরুরি ৩টি পদক্ষেপ (হোল্ড, ২এফএ, বিএফআইইউ এসটিআর)",
+  "evidencePoints": ["প্রমাণ ১", "প্রমাণ ২", "প্রমাণ ৩"],
+  "confidence": 95
+}`
+      : `You are "upay Sentinel", an AI Fraud & Scam Intelligence engine for upay, a leading MFS in Bangladesh.
 Analyze this fraud case and answer the three core hackathon questions. Return ONLY valid JSON.
 
 Case:
@@ -137,6 +160,22 @@ Return this JSON structure (no markdown, no extra text):
   }
 
   // High-fidelity heuristic synthesis fallback
+  if (isBangla) {
+    return {
+      whatHappened: `গ্রাহক ${input.customer} তার অ্যাকাউন্ট থেকে প্রাপক ${input.recipient}-এর ওয়ালেটে ৳${input.amount.toLocaleString()} পাঠানোর নির্দেশ দেন। লেনদেনটি রাত ${input.time}-এ ${input.location} বিভাগ থেকে সম্পন্ন করার চেষ্টা করা হয়।`,
+      whyIsItRisky: `৫টি সংকেতের সমন্বিত ঝুঁকি: (১) লেনদেনের পরিমাণ ৳${input.amount.toLocaleString()} যা গ্রাহকের ৩০ দিনের গড় হিসাবের তুলনায় ${(input.amount / 6800).toFixed(1)} গুণ বেশি; (২) ডিভাইস ও সিম পরিবর্তনের পর প্রথম লেনদেন; (৩) গভীর রাতের ঝুঁকিপূর্ণ লেনদেন উইন্ডো; (৪) প্রাপক ওয়ালেট মানি মিউল সিন্ডিকেটের সাথে সরাসরি সংযুক্ত; (৫) দ্রুত অর্থ সরিয়ে নেওয়ার চেষ্টা।`,
+      whatShouldUpayDoNext: `প্রাপক ওয়ালেট ${input.recipient}-এ তহবিল ছাড় অবিলম্বে সাময়িক স্থগিত (HOLD) করুন। গ্রাহক ${input.customer}-এর এনআইডি বায়োমেট্রিক ২এফএ যাচাই সক্রিয় করুন। ১৫ মিনিটের মধ্যে সাড়া না পেলে বাংলাদেশ ব্যাংক সার্কুলার ২৫/২০২৩ অনুযায়ী বিএফআইইউ-তে সন্দেহজনক লেনদেন রিপোর্ট (STR) প্রেরণ করুন।`,
+      evidencePoints: [
+        `ডিভাইস ${input.device} বিগত ৩০ মিনিটের মধ্যে প্রথম লগইন`,
+        `পরিমাণ ৳${input.amount.toLocaleString()} স্বাভাবিক সীমার চেয়ে +${Math.round((input.amount / 6800 - 1) * 100)}% বেশি`,
+        `প্রাপক ${input.recipient} চিহ্নিত মিউল ক্লাস্টারের সাথে সংযুক্ত`,
+        `গভীর রাতে সময় ${input.time}-এ সংঘটিত`,
+      ],
+      confidence: 96,
+      isAiGenerated: false,
+    };
+  }
+
   return {
     whatHappened: `Customer ${input.customer} initiated a transfer of ৳${input.amount.toLocaleString()} to recipient ${input.recipient} via device ${input.device} at ${input.time} in ${input.location}. The transaction triggered multiple risk signals simultaneously.`,
     whyIsItRisky: `Five converging risk signals: (1) Amount is ${(input.amount / 6800).toFixed(1)}× above the 30-day customer baseline; (2) Device ${input.device} has no trusted pairing history; (3) Transaction occurred during the high-fraud nocturnal window; (4) Recipient ${input.recipient} has topological ties to known mule cluster; (5) Velocity burst detected.`,

@@ -1,34 +1,40 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { NavigationPage } from "@/types";
+import React, { useState, useEffect, useRef } from "react";
 import {
   MapPin,
   ArrowRight,
-  TrendingUp,
   ShieldAlert,
-  Zap,
   Activity,
-  Radio,
-  Layers,
   AlertTriangle,
-  RotateCcw,
+  CheckCircle2,
+  RefreshCw,
+  BarChart2,
+  Wifi,
+  X,
 } from "lucide-react";
+import { useSentinel } from "@/context/SentinelContext";
 
-interface GeoHub {
+/* ──────────────────────────────────────────────────────────
+   DATA MODEL
+────────────────────────────────────────────────────────── */
+export interface GeoHub {
   id: string;
   name: string;
   bnName: string;
-  x: number;
-  y: number;
+  lat: number;
+  lng: number;
+  svgX: number; // normalised 0–1000 for fallback SVG
+  svgY: number;
   role: string;
+  bnRole: string;
   riskTier: "Critical" | "High" | "Normal";
   tps: number;
   activeTxns: number;
   totalVolume: number;
 }
 
-interface TransactionFlow {
+export interface TransactionFlow {
   id: string;
   fromId: string;
   toId: string;
@@ -36,436 +42,565 @@ interface TransactionFlow {
   sender: string;
   recipient: string;
   type: string;
+  bnType: string;
   riskScore: number;
   riskLevel: "Critical" | "High" | "Normal";
   isSyndicate: boolean;
   time: string;
 }
 
-const BANGLADESH_HUBS: GeoHub[] = [
-  { id: "dhaka", name: "Dhaka Central", bnName: "ঢাকা", x: 470, y: 270, role: "National MFS Primary Gateway & Settlement Switch", riskTier: "Critical", tps: 840, activeTxns: 1240, totalVolume: 14850000 },
-  { id: "chattogram", name: "Chattogram Hub", bnName: "চট্টগ্রাম", x: 620, y: 360, role: "Port Merchant Clearing & High-Value Cash-Out", riskTier: "High", tps: 320, activeTxns: 410, totalVolume: 6200000 },
-  { id: "sylhet", name: "Sylhet Corridor", bnName: "সিলেট", x: 630, y: 160, role: "International Inbound Remittance & Smurfing Watch", riskTier: "Critical", tps: 210, activeTxns: 290, totalVolume: 4900000 },
-  { id: "rajshahi", name: "Rajshahi Gateway", bnName: "রাজশাহী", x: 260, y: 190, role: "North-West Cross-Border Distribution Node", riskTier: "Normal", tps: 130, activeTxns: 180, totalVolume: 2100000 },
-  { id: "khulna", name: "Khulna Node", bnName: "খুলনা", x: 340, y: 380, role: "South-West Industrial Merchant Transit Point", riskTier: "Normal", tps: 160, activeTxns: 220, totalVolume: 2800000 },
-  { id: "barishal", name: "Barishal Delta", bnName: "বরিশাল", x: 440, y: 410, role: "Southern Riverine MFS Agent Network", riskTier: "Normal", tps: 95, activeTxns: 140, totalVolume: 1450000 },
-  { id: "rangpur", name: "Rangpur North", bnName: "রংপুর", x: 280, y: 100, role: "Northern Frontier Velocity Conduit", riskTier: "High", tps: 110, activeTxns: 160, totalVolume: 1750000 },
-  { id: "mymensingh", name: "Mymensingh Hub", bnName: "ময়মনসিংহ", x: 460, y: 170, role: "Central Agricultural Trade Junction", riskTier: "Normal", tps: 125, activeTxns: 175, totalVolume: 1950000 },
-  { id: "comilla", name: "Cumilla Corridor", bnName: "কুমিল্লা", x: 540, y: 290, role: "Eastern Highway Agent Transit Hub", riskTier: "High", tps: 140, activeTxns: 190, totalVolume: 2300000 },
-  { id: "coxsbazar", name: "Cox's Bazar", bnName: "কক্সবাজার", x: 680, y: 450, role: "Border Transit & High-Anomalous SIM Swap Hub", riskTier: "Critical", tps: 85, activeTxns: 115, totalVolume: 1620000 },
-  { id: "bogura", name: "Bogura Node", bnName: "বগুড়া", x: 350, y: 170, role: "North Bengal Commercial Transit Conduit", riskTier: "Normal", tps: 105, activeTxns: 150, totalVolume: 1800000 },
+export const BANGLADESH_HUBS: GeoHub[] = [
+  { id: "dhaka",      name: "Dhaka",       bnName: "ঢাকা",       lat: 23.8103, lng: 90.4125, svgX: 500, svgY: 310, role: "National MFS Primary Gateway",           bnRole: "জাতীয় এমএফএস প্রধান সেটেলমেন্ট সুইচ",  riskTier: "Critical", tps: 840, activeTxns: 1240, totalVolume: 14850000 },
+  { id: "chattogram", name: "Chattogram",  bnName: "চট্টগ্রাম",  lat: 22.3569, lng: 91.7832, svgX: 640, svgY: 420, role: "Port Merchant Clearing & Cash-Out",        bnRole: "বাণিজ্যিক পোর্ট মার্চেন্ট ও ক্যাশ আউট", riskTier: "High",     tps: 320, activeTxns: 410,  totalVolume: 6200000  },
+  { id: "sylhet",     name: "Sylhet",      bnName: "সিলেট",      lat: 24.8949, lng: 91.8687, svgX: 640, svgY: 180, role: "Inbound Remittance & Mule Watch",         bnRole: "প্রবাসী রেমিট্যান্স ও মিউল নজরদারি",   riskTier: "Critical", tps: 210, activeTxns: 290,  totalVolume: 4900000  },
+  { id: "rajshahi",   name: "Rajshahi",    bnName: "রাজশাহী",    lat: 24.3745, lng: 88.6042, svgX: 240, svgY: 220, role: "North-West Transit Distribution",         bnRole: "উত্তর-পশ্চিম বাণিজ্যিক লেনদেন নোড",   riskTier: "Normal",   tps: 130, activeTxns: 180,  totalVolume: 2100000  },
+  { id: "khulna",     name: "Khulna",      bnName: "খুলনা",      lat: 22.8456, lng: 89.5403, svgX: 330, svgY: 430, role: "South-West Industrial Merchant Node",     bnRole: "দক্ষিণ-পশ্চিম শিল্পাঞ্চল মার্চেন্ট নোড",riskTier: "Normal",   tps: 160, activeTxns: 220,  totalVolume: 2800000  },
+  { id: "barishal",   name: "Barishal",    bnName: "বরিশাল",     lat: 22.7010, lng: 90.3535, svgX: 460, svgY: 470, role: "Southern Riverine Agent Network",         bnRole: "উপকূলীয় এমএফএস এজেন্ট নেটওয়ার্ক",   riskTier: "Normal",   tps: 95,  activeTxns: 140,  totalVolume: 1450000  },
+  { id: "rangpur",    name: "Rangpur",     bnName: "রংপুর",      lat: 25.7439, lng: 89.2752, svgX: 280, svgY: 110, role: "Northern Frontier Velocity Corridor",     bnRole: "উত্তরাঞ্চলীয় সীমান্ত লেনদেন করিডোর",  riskTier: "High",     tps: 110, activeTxns: 160,  totalVolume: 1750000  },
+  { id: "mymensingh", name: "Mymensingh",  bnName: "ময়মনসিংহ",  lat: 24.7471, lng: 90.4203, svgX: 490, svgY: 200, role: "Central Agricultural Trade Junction",     bnRole: "কৃষি ও বাজার ভিত্তিক লেনদেন জংশন",   riskTier: "Normal",   tps: 125, activeTxns: 175,  totalVolume: 1950000  },
+  { id: "comilla",    name: "Cumilla",     bnName: "কুমিল্লা",   lat: 23.4607, lng: 91.1809, svgX: 570, svgY: 340, role: "Eastern Highway Agent Transit Hub",       bnRole: "পূর্বাঞ্চলীয় মহাসড়ক এজেন্ট ট্রানজিট", riskTier: "High",     tps: 140, activeTxns: 190,  totalVolume: 2300000  },
+  { id: "coxsbazar",  name: "Cox's Bazar", bnName: "কক্সবাজার",  lat: 21.4272, lng: 92.0058, svgX: 680, svgY: 520, role: "Tourist & SIM Swap Watch Hub",           bnRole: "পর্যটন ও সিম সোয়াপ নজরদারি নোড",      riskTier: "Critical", tps: 85,  activeTxns: 115,  totalVolume: 1620000  },
+  { id: "bogura",     name: "Bogura",      bnName: "বগুড়া",      lat: 24.8465, lng: 89.3720, svgX: 350, svgY: 185, role: "North Bengal Commercial Conduit",         bnRole: "উত্তরবঙ্গ বাণিজ্যিক সংযোগ করিডোর",    riskTier: "Normal",   tps: 105, activeTxns: 150,  totalVolume: 1800000  },
 ];
 
-const INITIAL_FLOWS: TransactionFlow[] = [
-  { id: "FL-101", fromId: "dhaka", toId: "sylhet", amount: 48500, sender: "U-1042", recipient: "U-8831", type: "Mule Structuring", riskScore: 94, riskLevel: "Critical", isSyndicate: true, time: "Just now" },
-  { id: "FL-102", fromId: "chattogram", toId: "dhaka", amount: 98000, sender: "U-7721", recipient: "U-1042", type: "SIM Swap Drain", riskScore: 98, riskLevel: "Critical", isSyndicate: true, time: "1m ago" },
-  { id: "FL-103", fromId: "dhaka", toId: "rajshahi", amount: 24000, sender: "U-3321", recipient: "U-4412", type: "Velocity Burst", riskScore: 78, riskLevel: "High", isSyndicate: false, time: "2m ago" },
-  { id: "FL-104", fromId: "sylhet", toId: "comilla", amount: 15000, sender: "U-8831", recipient: "U-9921", type: "Smurfing Hop", riskScore: 86, riskLevel: "High", isSyndicate: true, time: "3m ago" },
-  { id: "FL-105", fromId: "khulna", toId: "dhaka", amount: 35000, sender: "U-5512", recipient: "U-2211", type: "Agent Cash-out", riskScore: 42, riskLevel: "Normal", isSyndicate: false, time: "4m ago" },
-  { id: "FL-106", fromId: "rangpur", toId: "bogura", amount: 19500, sender: "U-6619", recipient: "U-3512", type: "Merchant Pay", riskScore: 28, riskLevel: "Normal", isSyndicate: false, time: "5m ago" },
-  { id: "FL-107", fromId: "coxsbazar", toId: "chattogram", amount: 42000, sender: "U-9182", recipient: "U-7721", type: "Nocturnal Mule Transfer", riskScore: 91, riskLevel: "Critical", isSyndicate: true, time: "6m ago" },
-  { id: "FL-108", fromId: "dhaka", toId: "barishal", amount: 12000, sender: "U-1192", recipient: "U-6120", type: "Wallet Transfer", riskScore: 22, riskLevel: "Normal", isSyndicate: false, time: "7m ago" },
+const FLOWS: TransactionFlow[] = [
+  { id: "f1", fromId: "sylhet",     toId: "dhaka",      amount: 480000, sender: "U-4421", recipient: "U-0087", type: "Remittance",     bnType: "রেমিট্যান্স",  riskScore: 81, riskLevel: "Critical", isSyndicate: true,  time: "09:14" },
+  { id: "f2", fromId: "dhaka",      toId: "chattogram", amount: 210000, sender: "U-1193", recipient: "U-2247", type: "Merchant Pay",   bnType: "মার্চেন্ট পে", riskScore: 55, riskLevel: "High",     isSyndicate: false, time: "09:11" },
+  { id: "f3", fromId: "comilla",    toId: "dhaka",      amount: 95000,  sender: "U-8831", recipient: "U-0087", type: "Wallet Transfer",bnType: "ওয়ালেট ট্রান্সফার", riskScore: 72, riskLevel: "High",  isSyndicate: true,  time: "09:08" },
+  { id: "f4", fromId: "rangpur",    toId: "dhaka",      amount: 62000,  sender: "U-3310", recipient: "U-1190", type: "Cash Out",       bnType: "ক্যাশ আউট",    riskScore: 48, riskLevel: "Normal",   isSyndicate: false, time: "09:05" },
+  { id: "f5", fromId: "coxsbazar",  toId: "chattogram", amount: 340000, sender: "U-9921", recipient: "U-6640", type: "SIM Swap Probe", bnType: "সিম সোয়াপ",   riskScore: 88, riskLevel: "Critical", isSyndicate: true,  time: "09:03" },
+  { id: "f6", fromId: "khulna",     toId: "dhaka",      amount: 77000,  sender: "U-5512", recipient: "U-1190", type: "Add Money",      bnType: "অ্যাড মানি",    riskScore: 32, riskLevel: "Normal",   isSyndicate: false, time: "09:00" },
 ];
 
-interface BangladeshTransactionMapProps {
-  onSelectNode?: (hub: GeoHub) => void;
-  onOpenCase?: (caseId: string) => void;
-}
+/* ──────────────────────────────────────────────────────────
+   COLOUR HELPERS
+────────────────────────────────────────────────────────── */
+const TIER_COLOR = {
+  Critical: { dot: "#DC2626", ring: "#FEE2E2", flow: "#DC2626", text: "#DC2626" },
+  High:     { dot: "#EA580C", ring: "#FFF7ED", flow: "#F59E0B", text: "#EA580C" },
+  Normal:   { dot: "#059669", ring: "#ECFDF5", flow: "#0284C7", text: "#059669" },
+};
 
-export const BangladeshTransactionMap: React.FC<BangladeshTransactionMapProps> = ({
-  onSelectNode,
-  onOpenCase,
-}) => {
-  const [selectedHub, setSelectedHub] = useState<GeoHub>(BANGLADESH_HUBS[0]);
-  const [hoveredHub, setHoveredHub] = useState<GeoHub | null>(null);
-  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
-  const [filterRisk, setFilterRisk] = useState<"all" | "critical" | "syndicate">("all");
-  const [activeFlowIndex, setActiveFlowIndex] = useState<number>(0);
+/* ──────────────────────────────────────────────────────────
+   GOOGLE MAP COMPONENT (loads only when API key present)
+────────────────────────────────────────────────────────── */
+const GoogleMapOverlay: React.FC<{
+  selectedHub: GeoHub | null;
+  onSelectHub: (h: GeoHub) => void;
+  isBn: boolean;
+}> = ({ selectedHub, onSelectHub, isBn }) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const [mapReady, setMapReady] = useState(false);
 
-  // Auto-cycle through active transaction flows for demonstration
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveFlowIndex((prev) => (prev + 1) % INITIAL_FLOWS.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, []);
+    if (!mapRef.current || !window.google?.maps) return;
 
-  const activeFlow = INITIAL_FLOWS[activeFlowIndex];
+    const map = new window.google.maps.Map(mapRef.current, {
+      center: { lat: 23.685, lng: 90.3563 },
+      zoom: 7,
+      mapId: "bd_sentinel_map",
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      restriction: {
+        latLngBounds: { north: 26.8, south: 20.5, east: 93.0, west: 87.8 },
+        strictBounds: false,
+      },
+      styles: [
+        { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+        { featureType: "transit", stylers: [{ visibility: "off" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#dbeafe" }] },
+        { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#f8fafc" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#e2e8f0" }] },
+        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#cbd5e1" }] },
+        { featureType: "administrative.country", elementType: "geometry.stroke", stylers: [{ color: "#94a3b8", weight: "2" }] },
+        { featureType: "administrative.province", elementType: "geometry.stroke", stylers: [{ color: "#cbd5e1" }] },
+      ],
+    });
+    mapInstanceRef.current = map;
 
-  const filteredFlows = INITIAL_FLOWS.filter((flow) => {
-    if (filterRisk === "critical") return flow.riskLevel === "Critical";
-    if (filterRisk === "syndicate") return flow.isSyndicate;
-    return true;
-  });
+    // Add advanced markers
+    BANGLADESH_HUBS.forEach((hub) => {
+      const colors = TIER_COLOR[hub.riskTier];
+      const el = document.createElement("div");
+      el.style.cssText = `
+        width:36px;height:36px;border-radius:50%;
+        background:${colors.ring};border:2.5px solid ${colors.dot};
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;transition:transform 0.15s;
+        font-size:10px;font-weight:700;color:${colors.text};
+        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      `;
+      el.textContent = hub.tps > 200 ? "●" : "●";
+
+      const inner = document.createElement("div");
+      inner.style.cssText = `width:10px;height:10px;border-radius:50%;background:${colors.dot}`;
+      el.appendChild(inner);
+
+      const marker = new window.google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: { lat: hub.lat, lng: hub.lng },
+        content: el,
+        title: hub.name,
+      });
+
+      el.addEventListener("click", () => onSelectHub(hub));
+      el.addEventListener("mouseenter", () => { el.style.transform = "scale(1.2)"; });
+      el.addEventListener("mouseleave", () => { el.style.transform = "scale(1)"; });
+
+      markersRef.current.push(marker);
+    });
+
+    setMapReady(true);
+    return () => {
+      markersRef.current.forEach((m) => { m.map = null; });
+      markersRef.current = [];
+    };
+  }, [onSelectHub]);
 
   return (
-    <div className="relative w-full h-full min-h-[520px] bg-brand-surface rounded-xl overflow-hidden border border-brand-border flex flex-col justify-between select-none">
-      {/* Top Overlay: Flow Status Bar */}
-      <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        <div className="flex items-center gap-2 bg-brand-surface/90 border border-brand-border p-1.5 px-3 rounded-lg backdrop-blur-md shadow-card pointer-events-auto">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs font-bold text-brand-text">
-            Bangladesh Domestic MFS Telemetry Map
-          </span>
-          <span className="text-[10px] font-mono text-upay-gold px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/20">
-            LIVE 11 HUBS
-          </span>
-        </div>
-
-        {/* Filter pills */}
-        <div className="flex items-center gap-1 bg-brand-surface/90 border border-brand-border p-1 rounded-lg backdrop-blur-md pointer-events-auto text-xs">
-          <button
-            onClick={() => setFilterRisk("all")}
-            className={`px-2 py-0.5 rounded font-medium transition-colors ${
-              filterRisk === "all" ? "bg-brand-elevated text-brand-text font-bold" : "text-brand-muted hover:text-brand-text"
-            }`}
-          >
-            All Transfers
-          </button>
-          <button
-            onClick={() => setFilterRisk("critical")}
-            className={`px-2 py-0.5 rounded font-medium transition-colors ${
-              filterRisk === "critical" ? "bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30" : "text-brand-muted hover:text-brand-text"
-            }`}
-          >
-            Critical Anomalies
-          </button>
-          <button
-            onClick={() => setFilterRisk("syndicate")}
-            className={`px-2 py-0.5 rounded font-medium transition-colors ${
-              filterRisk === "syndicate" ? "bg-amber-500/20 text-upay-gold font-bold border border-amber-500/30" : "text-brand-muted hover:text-brand-text"
-            }`}
-          >
-            Cluster #17 Conduit
-          </button>
-        </div>
-      </div>
-
-      {/* SVG Map Canvas */}
-      <div className="relative w-full h-[520px] bg-[#080D14] flex items-center justify-center overflow-hidden">
-        {/* Subtle geographic grid lines */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#252D37_1px,transparent_1px)] [background-size:24px_24px]" />
-
-        <svg
-          viewBox="0 0 920 540"
-          className="w-full h-full max-w-[920px] max-h-[540px]"
-        >
-          <defs>
-            {/* Glowing filter */}
-            <filter id="glow-red" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-            <filter id="glow-gold" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="2.5" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-          </defs>
-
-          {/* Bangladesh Boundary Silhouette (Clean stylized contour) */}
-          <path
-            d="M 280,75 L 340,65 L 420,80 L 480,95 L 530,120 L 590,110 L 670,120 L 685,180 L 640,240 L 620,290 L 660,330 L 710,400 L 700,470 L 640,430 L 580,390 L 540,410 L 490,445 L 440,455 L 390,440 L 330,420 L 290,370 L 250,300 L 220,240 L 230,170 L 250,110 Z"
-            fill="#0F1622"
-            stroke="#1F2A38"
-            strokeWidth="1.5"
-            strokeDasharray="4 2"
-          />
-
-          {/* Major Division Border Guidelines */}
-          <path
-            d="M 370,140 Q 420,220 470,270 T 570,360"
-            fill="none"
-            stroke="#192330"
-            strokeWidth="1"
-            strokeDasharray="2 3"
-          />
-          <path
-            d="M 470,270 L 340,380 M 470,270 L 630,160 M 470,270 L 260,190"
-            fill="none"
-            stroke="#192330"
-            strokeWidth="1"
-            strokeDasharray="2 3"
-          />
-
-          {/* Bay of Bengal label */}
-          <text
-            x="480"
-            y="500"
-            fill="#233245"
-            fontSize="12"
-            fontFamily="monospace"
-            letterSpacing="6"
-            textAnchor="middle"
-            fontWeight="bold"
-          >
-            BAY OF BENGAL
-          </text>
-
-          {/* Active Transaction Arcs (Curved pathways) */}
-          <g>
-            {filteredFlows.map((flow) => {
-              const src = BANGLADESH_HUBS.find((h) => h.id === flow.fromId);
-              const dst = BANGLADESH_HUBS.find((h) => h.id === flow.toId);
-              if (!src || !dst) return null;
-
-              const isHighlighted = flow.id === activeFlow.id;
-              // Curved midpoint
-              const mx = (src.x + dst.x) / 2 + (src.y > dst.y ? -25 : 25);
-              const my = (src.y + dst.y) / 2 - 30;
-              const pathD = `M ${src.x},${src.y} Q ${mx},${my} ${dst.x},${dst.y}`;
-
-              const strokeColor =
-                flow.riskLevel === "Critical"
-                  ? "#EF4444"
-                  : flow.riskLevel === "High"
-                  ? "#F97316"
-                  : "#10B981";
-
-              return (
-                <g key={flow.id}>
-                  {/* Base Track */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke={strokeColor}
-                    strokeWidth={isHighlighted ? 2.5 : 1.2}
-                    strokeOpacity={isHighlighted ? 0.9 : 0.35}
-                    strokeDasharray={isHighlighted ? undefined : "4 3"}
-                    filter={isHighlighted && flow.riskLevel === "Critical" ? "url(#glow-red)" : undefined}
-                  />
-
-                  {/* Flow Direction Indicator & Label */}
-                  {isHighlighted && (
-                    <g>
-                      <circle
-                        cx={mx}
-                        cy={my}
-                        r="3.5"
-                        fill={strokeColor}
-                        filter="url(#glow-red)"
-                      >
-                        <animate
-                          attributeName="opacity"
-                          values="0.3;1;0.3"
-                          dur="1.2s"
-                          repeatCount="indefinite"
-                        />
-                      </circle>
-                      <rect
-                        x={mx - 48}
-                        y={my - 18}
-                        width="96"
-                        height="14"
-                        rx="3"
-                        fill="#0B0F14"
-                        stroke={strokeColor}
-                        strokeWidth="1"
-                        opacity="0.9"
-                      />
-                      <text
-                        x={mx}
-                        y={my - 8}
-                        fill="#F4F7FA"
-                        fontSize="8.5"
-                        fontFamily="monospace"
-                        fontWeight="bold"
-                        textAnchor="middle"
-                      >
-                        ৳{flow.amount.toLocaleString()} &middot; {flow.riskScore}/100
-                      </text>
-                    </g>
-                  )}
-                </g>
-              );
-            })}
-          </g>
-
-          {/* Bangladesh Division Hub Markers */}
-          {BANGLADESH_HUBS.map((hub) => {
-            const isSelected = selectedHub.id === hub.id;
-            const isHovered = hoveredHub?.id === hub.id;
-            const isSrc = activeFlow.fromId === hub.id;
-            const isDst = activeFlow.toId === hub.id;
-
-            const markerColor =
-              hub.riskTier === "Critical"
-                ? "#EF4444"
-                : hub.riskTier === "High"
-                ? "#F59E0B"
-                : "#10B981";
-
-            return (
-              <g
-                key={hub.id}
-                className="cursor-pointer"
-                onClick={() => {
-                  setSelectedHub(hub);
-                  onSelectNode?.(hub);
-                }}
-                onMouseEnter={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setHoveredHub(hub);
-                  setHoverPos({ x: hub.x, y: hub.y });
-                }}
-                onMouseLeave={() => {
-                  setHoveredHub(null);
-                  setHoverPos(null);
-                }}
-              >
-                {/* Outer animated ping ring for active hubs */}
-                {(isSrc || isDst || isSelected) && (
-                  <circle
-                    cx={hub.x}
-                    cy={hub.y}
-                    r={isSelected ? 18 : 14}
-                    fill="none"
-                    stroke={markerColor}
-                    strokeWidth="1.5"
-                    opacity="0.8"
-                  >
-                    <animate
-                      attributeName="r"
-                      values="10;24;10"
-                      dur="2.5s"
-                      repeatCount="indefinite"
-                    />
-                    <animate
-                      attributeName="opacity"
-                      values="0.8;0;0.8"
-                      dur="2.5s"
-                      repeatCount="indefinite"
-                    />
-                  </circle>
-                )}
-
-                {/* Core City Marker Dot */}
-                <circle
-                  cx={hub.x}
-                  cy={hub.y}
-                  r={isSelected ? 7 : isHovered ? 6 : 5}
-                  fill={markerColor}
-                  stroke="#0B0F14"
-                  strokeWidth="2"
-                  filter={hub.riskTier === "Critical" ? "url(#glow-red)" : "url(#glow-gold)"}
-                />
-
-                {/* City Name Label */}
-                <text
-                  x={hub.x}
-                  y={hub.y + 14}
-                  fill={isSelected ? "#F59E0B" : "#F4F7FA"}
-                  fontSize={isSelected ? "11" : "10"}
-                  fontWeight="bold"
-                  fontFamily="sans-serif"
-                  textAnchor="middle"
-                  style={{ textShadow: "0 2px 4px rgba(0,0,0,0.9)" }}
-                >
-                  {hub.name.replace(" Central", "").replace(" Hub", "").replace(" Corridor", "").replace(" Gateway", "").replace(" Node", "").replace(" Delta", "").replace(" North", "")}
-                </text>
-
-                {/* Bengali Sub-label */}
-                <text
-                  x={hub.x}
-                  y={hub.y + 24}
-                  fill="#9AA6B2"
-                  fontSize="8.5"
-                  fontFamily="sans-serif"
-                  textAnchor="middle"
-                  style={{ textShadow: "0 1px 3px rgba(0,0,0,0.9)" }}
-                >
-                  {hub.bnName}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-
-        {/* Stable Non-blinking Tooltip anchored above hovered hub */}
-        {hoveredHub && hoverPos && (
-          <div
-            className="absolute z-30 pointer-events-none bg-brand-surface/95 border border-brand-border p-2.5 rounded-lg shadow-modal text-brand-text text-xs min-w-[190px] -translate-x-1/2 -translate-y-full mb-3"
-            style={{
-              left: `${(hoverPos.x / 920) * 100}%`,
-              top: `${(hoverPos.y / 540) * 100}%`,
-            }}
-          >
-            <div className="flex items-center justify-between pb-1 mb-1 border-b border-brand-border">
-              <b className="font-semibold text-brand-text flex items-center gap-1">
-                <MapPin size={12} className="text-upay-gold" />
-                {hoveredHub.name}
-              </b>
-              <span className={`text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                hoveredHub.riskTier === "Critical"
-                  ? "bg-rose-500/15 text-rose-400"
-                  : hoveredHub.riskTier === "High"
-                  ? "bg-amber-500/15 text-amber-400"
-                  : "bg-emerald-500/15 text-emerald-400"
-              }`}>
-                {hoveredHub.riskTier}
-              </span>
-            </div>
-            <p className="text-[10.5px] text-brand-muted leading-tight mb-2">
-              {hoveredHub.role}
-            </p>
-            <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
-              <div className="p-1 rounded bg-brand-elevated">
-                <span className="text-brand-subtle block">LIVE TPS</span>
-                <b className="text-brand-text">{hoveredHub.tps} txns/s</b>
-              </div>
-              <div className="p-1 rounded bg-brand-elevated">
-                <span className="text-brand-subtle block">ACTIVE VOLUME</span>
-                <b className="text-upay-gold">৳{(hoveredHub.totalVolume / 1000000).toFixed(1)}M</b>
-              </div>
-            </div>
+    <div ref={mapRef} className="w-full h-full" style={{ minHeight: 380 }}>
+      {!mapReady && (
+        <div className="w-full h-full flex items-center justify-center bg-slate-50">
+          <div className="flex items-center gap-2 text-slate-400 text-xs">
+            <RefreshCw size={14} className="animate-spin" />
+            <span>{isBn ? "মানচিত্র লোড হচ্ছে..." : "Loading map…"}</span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-      {/* Bottom Information Dock: Active In-Transit Transaction Dossier */}
-      <div className="p-3 bg-brand-surface border-t border-brand-border flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-        {/* Active Flow Indicator */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded bg-brand-elevated text-rose-500 border border-brand-border flex items-center justify-center shrink-0">
-            <Radio size={16} className="animate-pulse" />
+/* ──────────────────────────────────────────────────────────
+   SVG FALLBACK MAP (no API key / SSR safe)
+────────────────────────────────────────────────────────── */
+
+// Bangladesh approximate border path (simplified for SVG 800×600 viewport)
+const BD_BORDER = `M 235 105 L 200 115 L 178 142 L 172 168 L 185 185
+  L 195 200 L 210 210 L 218 228 L 220 252 L 215 275
+  L 210 298 L 218 318 L 225 340 L 235 358 L 248 375
+  L 265 390 L 278 405 L 300 418 L 320 428 L 340 435
+  L 362 442 L 385 450 L 405 465 L 420 478 L 440 488
+  L 460 498 L 480 504 L 500 510 L 518 508 L 538 502
+  L 555 490 L 572 475 L 588 460 L 598 448 L 608 436
+  L 620 420 L 635 402 L 648 388 L 658 372 L 665 355
+  L 668 338 L 665 322 L 660 308 L 658 290 L 652 272
+  L 645 255 L 640 238 L 638 218 L 635 198 L 630 178
+  L 622 162 L 612 148 L 600 140 L 585 132 L 570 126
+  L 555 120 L 538 114 L 520 110 L 502 108 L 482 108
+  L 462 108 L 442 108 L 422 106 L 402 104 L 382 103
+  L 362 102 L 342 102 L 322 103 L 302 104 L 280 106
+  L 260 107 Z`;
+
+const SvgMap: React.FC<{
+  hubs: GeoHub[];
+  flows: TransactionFlow[];
+  selectedHub: GeoHub | null;
+  onSelectHub: (h: GeoHub) => void;
+  activeFlowIdx: number;
+  isBn: boolean;
+}> = ({ hubs, flows, selectedHub, onSelectHub, activeFlowIdx, isBn }) => {
+  const W = 800, H = 560;
+
+  // Map lat/lng to SVG coords
+  const project = (lat: number, lng: number) => {
+    // Bangladesh bounding box approx: lat 20.5–26.8, lng 87.8–93.0
+    const xNorm = (lng - 87.8) / (93.0 - 87.8);
+    const yNorm = 1 - (lat - 20.5) / (26.8 - 20.5);
+    return { x: 160 + xNorm * 530, y: 80 + yNorm * 430 };
+  };
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full" style={{ maxHeight: 380 }}>
+      <defs>
+        {/* Flow animation gradients */}
+        {flows.map((f, i) => {
+          const from = hubs.find((h) => h.id === f.fromId)!;
+          const to   = hubs.find((h) => h.id === f.toId)!;
+          if (!from || !to) return null;
+          const pFrom = project(from.lat, from.lng);
+          const pTo   = project(to.lat, to.lng);
+          const colors = TIER_COLOR[f.riskLevel];
+          return (
+            <linearGradient key={f.id} id={`lg-${f.id}`}
+              x1={pFrom.x} y1={pFrom.y} x2={pTo.x} y2={pTo.y}
+              gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stopColor={colors.flow} stopOpacity="0.9" />
+              <stop offset="100%" stopColor={colors.flow} stopOpacity="0.2" />
+            </linearGradient>
+          );
+        })}
+        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {/* Background */}
+      <rect width={W} height={H} fill="#f8fafc" rx="10" />
+
+      {/* Water body hints */}
+      <ellipse cx={720} cy={420} rx={90} ry={60} fill="#dbeafe" opacity={0.5} />
+      <ellipse cx={730} cy={300} rx={50} ry={30} fill="#dbeafe" opacity={0.4} />
+
+      {/* Bangladesh border fill */}
+      <path d={BD_BORDER} fill="#eff6ff" stroke="#94a3b8" strokeWidth="1.5" opacity="0.7" />
+
+      {/* Flow arcs */}
+      {flows.map((f, idx) => {
+        const from = hubs.find((h) => h.id === f.fromId);
+        const to   = hubs.find((h) => h.id === f.toId);
+        if (!from || !to) return null;
+        const pFrom = project(from.lat, from.lng);
+        const pTo   = project(to.lat, to.lng);
+        const isActive = idx === activeFlowIdx;
+        const mx = (pFrom.x + pTo.x) / 2;
+        const my = (pFrom.y + pTo.y) / 2 - 55;
+        const colors = TIER_COLOR[f.riskLevel];
+        return (
+          <g key={f.id}>
+            <path
+              d={`M ${pFrom.x} ${pFrom.y} Q ${mx} ${my} ${pTo.x} ${pTo.y}`}
+              fill="none"
+              stroke={`url(#lg-${f.id})`}
+              strokeWidth={isActive ? 2.5 : 1.5}
+              strokeDasharray={isActive ? "none" : "4 4"}
+              opacity={isActive ? 1 : 0.5}
+            />
+            {isActive && (
+              <circle r="5" fill={colors.dot} filter="url(#glow)">
+                <animateMotion dur="1.8s" repeatCount="indefinite">
+                  <mpath href={`#flow-path-${idx}`} />
+                </animateMotion>
+              </circle>
+            )}
+          </g>
+        );
+      })}
+      {/* Hidden paths for animateMotion */}
+      {flows.map((f, idx) => {
+        const from = hubs.find((h) => h.id === f.fromId);
+        const to   = hubs.find((h) => h.id === f.toId);
+        if (!from || !to) return null;
+        const pFrom = project(from.lat, from.lng);
+        const pTo   = project(to.lat, to.lng);
+        const mx = (pFrom.x + pTo.x) / 2;
+        const my = (pFrom.y + pTo.y) / 2 - 55;
+        return (
+          <path key={`mp-${idx}`} id={`flow-path-${idx}`}
+            d={`M ${pFrom.x} ${pFrom.y} Q ${mx} ${my} ${pTo.x} ${pTo.y}`}
+            fill="none" stroke="none" />
+        );
+      })}
+
+      {/* Hub nodes */}
+      {hubs.map((hub) => {
+        const p = project(hub.lat, hub.lng);
+        const colors = TIER_COLOR[hub.riskTier];
+        const isSelected = selectedHub?.id === hub.id;
+        const r = hub.tps > 500 ? 14 : hub.tps > 200 ? 11 : 9;
+        return (
+          <g key={hub.id} style={{ cursor: "pointer" }} onClick={() => onSelectHub(hub)}>
+            {isSelected && (
+              <circle cx={p.x} cy={p.y} r={r + 8} fill={colors.ring}
+                stroke={colors.dot} strokeWidth="1.5" opacity="0.8">
+                <animate attributeName="r" values={`${r+6};${r+11};${r+6}`} dur="1.4s" repeatCount="indefinite" />
+              </circle>
+            )}
+            <circle cx={p.x} cy={p.y} r={r} fill={colors.ring}
+              stroke={colors.dot} strokeWidth="2" />
+            <circle cx={p.x} cy={p.y} r={r * 0.45} fill={colors.dot} />
+            <text x={p.x} y={p.y + r + 11} textAnchor="middle"
+              fontSize="9" fontWeight="600" fill="#334155"
+              style={{ pointerEvents: "none" }}>
+              {isBn ? hub.bnName.split("")[0] + hub.bnName.split("")[1] : hub.name.split(" ")[0]}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* Compass rose */}
+      <text x={W - 30} y={H - 20} fontSize="10" fill="#94a3b8" textAnchor="middle">N ↑</text>
+    </svg>
+  );
+};
+
+/* ──────────────────────────────────────────────────────────
+   MAIN EXPORT
+────────────────────────────────────────────────────────── */
+export const BangladeshTransactionMap: React.FC = () => {
+  const { language, t } = useSentinel();
+  const isBn = language === "bn";
+
+  const [selectedHub, setSelectedHub] = useState<GeoHub | null>(BANGLADESH_HUBS[0]);
+  const [activeFlowIdx, setActiveFlowIdx] = useState(0);
+  const [tick, setTick] = useState(0);
+  const [useGoogleMaps, setUseGoogleMaps] = useState(false);
+  const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
+
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? "";
+
+  // Try to load Google Maps SDK
+  useEffect(() => {
+    if (!apiKey) return;
+    if (window.google?.maps) { setGoogleMapsLoaded(true); setUseGoogleMaps(true); return; }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=marker&loading=async`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => { setGoogleMapsLoaded(true); setUseGoogleMaps(true); };
+    document.head.appendChild(script);
+  }, [apiKey]);
+
+  // Cycle animated flows
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveFlowIdx((i) => (i + 1) % FLOWS.length);
+      setTick((t) => t + 1);
+    }, 2800);
+    return () => clearInterval(id);
+  }, []);
+
+  // Rotate selected hub every 6 s if none manually selected
+  const activeFlow = FLOWS[activeFlowIdx];
+
+  const criticalCount = BANGLADESH_HUBS.filter((h) => h.riskTier === "Critical").length;
+  const highCount     = BANGLADESH_HUBS.filter((h) => h.riskTier === "High").length;
+
+  return (
+    <div className="card-base border border-slate-200 bg-white overflow-hidden">
+      {/* ── Header ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-4 py-3 border-b border-slate-200">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 rounded bg-blue-50 border border-blue-200">
+            <MapPin size={15} className="text-blue-600" />
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-mono font-bold text-brand-text">
-                IN-TRANSIT TRANSACTION #{activeFlow.id}
-              </span>
-              <span className={`px-1.5 py-0.2 rounded text-[9.5px] font-mono font-bold ${
-                activeFlow.riskLevel === "Critical"
-                  ? "bg-rose-500/15 text-rose-400 border border-rose-500/25"
-                  : "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-              }`}>
-                SCORE {activeFlow.riskScore}/100
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                {isBn ? "বাংলাদেশ এমএফএস নেটওয়ার্ক হিটম্যাপ" : "Bangladesh MFS Network Heatmap"}
+              </h2>
+              <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <Wifi size={9} />
+                {isBn ? "লাইভ" : "LIVE"}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-brand-muted mt-0.5">
-              <span className="capitalize font-semibold text-brand-text">
-                {activeFlow.fromId}
-              </span>
-              <ArrowRight size={11} className="text-upay-gold" />
-              <span className="capitalize font-semibold text-brand-text">
-                {activeFlow.toId}
-              </span>
-              <span>&bull;</span>
-              <b className="text-upay-gold font-mono">৳{activeFlow.amount.toLocaleString()} BDT</b>
-              <span>&bull;</span>
-              <span className="text-brand-subtle">{activeFlow.type}</span>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              {isBn
+                ? `${BANGLADESH_HUBS.length}টি এমএফএস হাব · ${criticalCount}টি সংকটজনক · ${highCount}টি উচ্চ ঝুঁকি`
+                : `${BANGLADESH_HUBS.length} MFS hubs · ${criticalCount} critical · ${highCount} elevated risk`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Legend */}
+          {(["Critical", "High", "Normal"] as const).map((tier) => (
+            <span key={tier} className="flex items-center gap-1 text-[10px] font-medium text-slate-600">
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: TIER_COLOR[tier].dot }} />
+              {isBn ? tier === "Critical" ? "সংকট" : tier === "High" ? "উচ্চ" : "স্বাভাবিক" : tier}
+            </span>
+          ))}
+          {apiKey && (
+            <span className="text-[9px] font-mono text-slate-400">
+              {useGoogleMaps ? "Google Maps" : "SVG Mode"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Body: Map + Sidebar ── */}
+      <div className="flex flex-col lg:flex-row min-h-0">
+        {/* Map Area */}
+        <div className="flex-1 relative bg-slate-50 border-b lg:border-b-0 lg:border-r border-slate-200"
+          style={{ minHeight: 340 }}>
+          {useGoogleMaps && googleMapsLoaded ? (
+            <GoogleMapOverlay
+              selectedHub={selectedHub}
+              onSelectHub={setSelectedHub}
+              isBn={isBn}
+            />
+          ) : (
+            <SvgMap
+              hubs={BANGLADESH_HUBS}
+              flows={FLOWS}
+              selectedHub={selectedHub}
+              onSelectHub={setSelectedHub}
+              activeFlowIdx={activeFlowIdx}
+              isBn={isBn}
+            />
+          )}
+
+          {/* Floating active flow badge */}
+          <div className="absolute bottom-3 left-3 right-3 md:right-auto md:max-w-xs">
+            <div className="bg-white border border-slate-200 rounded px-3 py-2 flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full flex-shrink-0 animate-pulse"
+                style={{ background: TIER_COLOR[activeFlow.riskLevel].dot }} />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-mono font-bold text-slate-700">
+                    {activeFlow.sender} → {activeFlow.recipient}
+                  </span>
+                  <span className="text-[10px] font-mono font-bold px-1.5 rounded"
+                    style={{
+                      color: TIER_COLOR[activeFlow.riskLevel].text,
+                      background: TIER_COLOR[activeFlow.riskLevel].ring,
+                    }}>
+                    ৳{(activeFlow.amount / 1000).toFixed(0)}K
+                  </span>
+                </div>
+                <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                  {isBn ? activeFlow.bnType : activeFlow.type} · Score: {activeFlow.riskScore}/100 · {activeFlow.time}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onOpenCase?.("INV-1042")}
-            className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
-          >
-            <ShieldAlert size={12} />
-            <span>Intercept Corridor</span>
-          </button>
+        {/* Right Panel: Hub Detail + Flow Log */}
+        <div className="w-full lg:w-64 xl:w-72 flex flex-col overflow-hidden">
+          {/* Selected Hub Detail */}
+          {selectedHub ? (
+            <div className="p-3 border-b border-slate-200 flex-shrink-0">
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ background: TIER_COLOR[selectedHub.riskTier].dot }} />
+                  <span className="text-xs font-bold text-slate-900">
+                    {isBn ? selectedHub.bnName : selectedHub.name}
+                  </span>
+                </div>
+                <button onClick={() => setSelectedHub(null)} className="text-slate-400 hover:text-slate-600">
+                  <X size={13} />
+                </button>
+              </div>
+              <p className="text-[10.5px] text-slate-500 leading-snug mb-2.5">
+                {isBn ? selectedHub.bnRole : selectedHub.role}
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { label: isBn ? "টিপিএস" : "TPS",   value: selectedHub.tps.toLocaleString() },
+                  { label: isBn ? "সক্রিয়" : "Active", value: selectedHub.activeTxns.toLocaleString() },
+                  { label: isBn ? "ভলিউম" : "Volume",  value: `৳${(selectedHub.totalVolume / 1000000).toFixed(1)}M` },
+                ].map((m) => (
+                  <div key={m.label} className="bg-slate-50 border border-slate-200 rounded p-1.5 text-center">
+                    <div className="text-[11px] font-mono font-bold text-slate-800">{m.value}</div>
+                    <div className="text-[9px] text-slate-500 mt-0.5">{m.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 flex items-center gap-1.5">
+                {selectedHub.riskTier === "Critical" && <ShieldAlert size={11} className="text-red-600" />}
+                {selectedHub.riskTier === "High" && <AlertTriangle size={11} className="text-amber-600" />}
+                {selectedHub.riskTier === "Normal" && <CheckCircle2 size={11} className="text-emerald-600" />}
+                <span className="text-[10px] font-semibold"
+                  style={{ color: TIER_COLOR[selectedHub.riskTier].text }}>
+                  {isBn
+                    ? selectedHub.riskTier === "Critical" ? "সংকটজনক ঝুঁকি"
+                    : selectedHub.riskTier === "High" ? "উচ্চ ঝুঁকি" : "স্বাভাবিক"
+                    : selectedHub.riskTier + " Risk Tier"}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 border-b border-slate-200 flex-shrink-0 flex items-center gap-2 text-slate-400">
+              <MapPin size={12} />
+              <span className="text-[11px]">{isBn ? "হাবে ক্লিক করুন" : "Click a hub to inspect"}</span>
+            </div>
+          )}
+
+          {/* Live Flow Log */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-2">
+              <Activity size={11} className="text-slate-500" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                {isBn ? "লাইভ ফ্লো লগ" : "Live Flow Log"}
+              </span>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {FLOWS.map((f, idx) => {
+                const fromHub = BANGLADESH_HUBS.find((h) => h.id === f.fromId);
+                const toHub   = BANGLADESH_HUBS.find((h) => h.id === f.toId);
+                const isActive = idx === activeFlowIdx;
+                const colors = TIER_COLOR[f.riskLevel];
+                return (
+                  <div key={f.id}
+                    className="px-3 py-2 transition-colors"
+                    style={{ background: isActive ? colors.ring : undefined }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5"
+                          style={{ background: colors.dot }} />
+                        <span className="text-[10px] font-mono font-semibold text-slate-700 truncate">
+                          {isBn ? fromHub?.bnName?.slice(0,4) : fromHub?.name?.split(" ")[0]}
+                          {" "}→{" "}
+                          {isBn ? toHub?.bnName?.slice(0,4) : toHub?.name?.split(" ")[0]}
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-mono font-bold flex-shrink-0"
+                        style={{ color: colors.text }}>
+                        {f.riskScore}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-[9.5px] text-slate-500 truncate">
+                        ৳{(f.amount / 1000).toFixed(0)}K · {isBn ? f.bnType : f.type}
+                      </span>
+                      {f.isSyndicate && (
+                        <span className="text-[9px] font-bold text-rose-600 ml-1 flex-shrink-0">SYND</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Footer Stats */}
+          <div className="border-t border-slate-200 px-3 py-2.5 bg-slate-50 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <BarChart2 size={11} className="text-blue-600" />
+              <span className="text-[10px] text-slate-500 font-medium">
+                {isBn ? "মোট ভলিউম" : "Total Volume"}
+              </span>
+            </div>
+            <span className="text-[11px] font-mono font-bold text-slate-800">
+              ৳{(BANGLADESH_HUBS.reduce((a, h) => a + h.totalVolume, 0) / 1000000).toFixed(1)}M
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Hub Grid ── */}
+      <div className="border-t border-slate-200 px-4 py-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-2">
+          {BANGLADESH_HUBS.map((hub) => {
+            const colors = TIER_COLOR[hub.riskTier];
+            const isSelected = selectedHub?.id === hub.id;
+            return (
+              <button
+                key={hub.id}
+                onClick={() => setSelectedHub(isSelected ? null : hub)}
+                className="p-2 rounded text-left transition-all border"
+                style={{
+                  background: isSelected ? colors.ring : "#F8FAFC",
+                  borderColor: isSelected ? colors.dot : "#E2E8F0",
+                }}>
+                <div className="flex items-center gap-1 mb-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: colors.dot }} />
+                  <span className="text-[9.5px] font-bold text-slate-800 truncate">
+                    {isBn ? hub.bnName.slice(0, 5) : hub.name.split(" ")[0]}
+                  </span>
+                </div>
+                <div className="text-[9px] font-mono text-slate-500">{hub.tps} tps</div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

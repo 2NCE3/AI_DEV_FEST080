@@ -23,6 +23,7 @@ import {
   ModelMetrics,
 } from "@/lib/risk-engine";
 import { fraudMLInstance } from "@/lib/ml-engine";
+import { Language, translations, Translations } from "@/lib/i18n";
 
 export interface SentinelContextType {
   transactions: Transaction[];
@@ -37,6 +38,10 @@ export interface SentinelContextType {
   isStreaming: boolean;
   aiTrained: boolean;
   unreadAlertsCount: number;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  toggleLanguage: () => void;
+  t: (key: keyof Translations) => string;
   setSelectedCase: (c: InvestigationCase) => void;
   setSelectedTransaction: (t: Transaction | null) => void;
   toggleStreaming: () => void;
@@ -54,6 +59,7 @@ export interface SentinelContextType {
 const SentinelContext = createContext<SentinelContextType | undefined>(undefined);
 
 export const SentinelProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [language, setLanguageState] = useState<Language>("en");
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [alerts, setAlerts] = useState<AlertItem[]>(initialAlerts);
   const [cases, setCases] = useState<InvestigationCase[]>(initialCases);
@@ -65,6 +71,46 @@ export const SentinelProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
   const [aiTrained, setAiTrained] = useState<boolean>(false);
+
+  // Load stored language preference
+  useEffect(() => {
+    try {
+      const savedLang = localStorage.getItem("sentinel_lang") as Language;
+      if (savedLang === "en" || savedLang === "bn") {
+        setLanguageState(savedLang);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    try {
+      localStorage.setItem("sentinel_lang", lang);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const toggleLanguage = useCallback(() => {
+    setLanguageState((prev) => {
+      const next = prev === "en" ? "bn" : "en";
+      try {
+        localStorage.setItem("sentinel_lang", next);
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
+
+  const t = useCallback(
+    (key: keyof Translations) => {
+      return translations[language][key] || key;
+    },
+    [language]
+  );
 
   // Train local Neural Network on mount and initialize benchmark metrics
   useEffect(() => {
@@ -159,7 +205,7 @@ export const SentinelProvider: React.FC<{ children: ReactNode }> = ({ children }
           flags: [
             "Sim swap detected",
             "Max limit transfer",
-            "Unrecognized IP address",
+            "Unregistered SIM & device pairing",
           ],
         };
       } else if (scenario === "velocity") {
@@ -457,6 +503,10 @@ export const SentinelProvider: React.FC<{ children: ReactNode }> = ({ children }
         isStreaming,
         aiTrained,
         unreadAlertsCount,
+        language,
+        setLanguage,
+        toggleLanguage,
+        t,
         setSelectedCase,
         setSelectedTransaction,
         toggleStreaming,

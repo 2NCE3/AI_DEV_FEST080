@@ -57,15 +57,16 @@ export const CustomerIntelligenceView: React.FC<CustomerIntelligenceViewProps> =
           </p>
         </div>
         <div className="flex items-center gap-2.5">
-          <span className="badge badge-high text-xs px-2.5 py-0.5">
-            {language === "bn" ? "উচ্চ ঝুঁকি প্রোফাইল" : "HIGH RISK PROFILE"}
-          </span>
+          <div className="h-9 px-3.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-800 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-none select-none">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span>{language === "bn" ? "উচ্চ ঝুঁকি প্রোফাইল" : "HIGH RISK PROFILE"}</span>
+          </div>
           <button
             onClick={() => onNavigate("investigation")}
-            className="btn btn-primary text-xs flex items-center gap-1.5"
+            className="h-9 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-none"
           >
             <span>{language === "bn" ? "INV-1042 কেস খুলুন" : "Open Case INV-1042"}</span>
-            <ArrowRight size={13} />
+            <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -99,45 +100,45 @@ export const CustomerIntelligenceView: React.FC<CustomerIntelligenceViewProps> =
             <span className="text-[9.5px] text-slate-400 uppercase font-mono font-semibold">
               {language === "bn" ? "ঝুঁকি স্কোর" : "Risk Score"}
             </span>
-            <b className="text-xl text-rose-600 block mt-0.5 font-mono">{customer.riskScore}</b>
+            <b className="text-2xl text-rose-600 block mt-0.5 font-mono font-black">{customer.riskScore}</b>
             <span className="text-[9.5px] text-slate-400 font-mono">/ 100</span>
           </div>
         </div>
 
-        {/* 5 Stats Grid */}
-        <div className="lg:col-span-7 card-base p-3 grid grid-cols-5 divide-x divide-slate-200 text-center border border-slate-200 bg-white">
-          <div className="px-2">
+        {/* 5 Stats Grid - Numbers Big and Bold */}
+        <div className="lg:col-span-7 card-base p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-5 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 text-center border border-slate-200 bg-white items-center">
+          <div className="p-2 sm:px-2">
             <span className="text-[10.5px] text-slate-500 font-medium block">
               {language === "bn" ? "অ্যাকাউন্ট বয়স" : "Account Age"}
             </span>
-            <b className="text-xs font-bold text-slate-900 block mt-1 font-mono">{customer.accountAge}</b>
+            <b className="text-base sm:text-lg font-black text-slate-900 block mt-1 font-mono tracking-tight">{customer.accountAge}</b>
           </div>
-          <div className="px-2">
+          <div className="p-2 sm:px-2">
             <span className="text-[10.5px] text-slate-500 font-medium block">
               {language === "bn" ? "৩০ দিনের লেনদেন" : "30d Volume"}
             </span>
-            <b className="text-xs font-bold text-slate-900 block mt-1 font-mono">৳1.42M</b>
+            <b className="text-base sm:text-lg font-black text-slate-900 block mt-1 font-mono tracking-tight">৳1.42M</b>
           </div>
-          <div className="px-2">
+          <div className="p-2 sm:px-2">
             <span className="text-[10.5px] text-slate-500 font-medium block">
               {language === "bn" ? "গড় লেনদেন" : "Avg Transfer"}
             </span>
-            <b className="text-xs font-bold text-slate-900 block mt-1 font-mono">৳6,800</b>
+            <b className="text-base sm:text-lg font-black text-slate-900 block mt-1 font-mono tracking-tight">৳6,800</b>
           </div>
-          <div className="px-2">
+          <div className="p-2 sm:px-2">
             <span className="text-[10.5px] text-slate-500 font-medium block">
               {language === "bn" ? "পরিচিত ডিভাইস" : "Known Devices"}
             </span>
-            <b className="text-xs font-bold text-slate-900 block mt-1 font-mono">
-              2 {language === "bn" ? "টি" : "Devices"}
+            <b className="text-base sm:text-lg font-black text-slate-900 block mt-1 font-mono tracking-tight">
+              2 <span className="text-xs font-bold text-slate-500">{language === "bn" ? "টি" : "Devices"}</span>
             </b>
           </div>
-          <div className="px-2">
+          <div className="p-2 sm:px-2">
             <span className="text-[10.5px] text-slate-500 font-medium block">
               {language === "bn" ? "পরিচিত এলাকা" : "Known Hubs"}
             </span>
-            <b className="text-xs font-bold text-slate-900 block mt-1 font-mono">
-              3 {language === "bn" ? "টি" : "Locations"}
+            <b className="text-base sm:text-lg font-black text-slate-900 block mt-1 font-mono tracking-tight">
+              3 <span className="text-xs font-bold text-slate-500">{language === "bn" ? "টি" : "Locations"}</span>
             </b>
           </div>
         </div>

@@ -112,6 +112,14 @@ export const SentinelProvider: React.FC<{ children: ReactNode }> = ({ children }
     [language]
   );
 
+  // Synchronize documentElement lang and data-lang attributes for CSS font selectors
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = language;
+      document.documentElement.setAttribute("data-lang", language);
+    }
+  }, [language]);
+
   // Train local Neural Network on mount and initialize benchmark metrics
   useEffect(() => {
     fraudMLInstance.trainModel(initialTransactions).then(() => {

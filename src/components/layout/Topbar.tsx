@@ -78,20 +78,25 @@ export const Topbar: React.FC<TopbarProps> = ({
       </div>
 
       {/* Operational Indicators & Actions */}
-      <div className="top-actions">
+      <div className="top-actions shrink-0">
         {/* Real-time Telemetry Status Badges */}
         <div
-          className="telemetry-badge hidden xl:flex items-center gap-1.5"
+          className="telemetry-badge hidden xl:inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
           title={t("realtimeEngine")}
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-semibold text-emerald-700">{t("latencyOptimal")}</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <span className="font-semibold text-emerald-700 whitespace-nowrap hidden 2xl:inline">
+            {t("latencyOptimal")}
+          </span>
+          <span className="font-semibold text-emerald-700 whitespace-nowrap 2xl:hidden">
+            {language === "bn" ? "< ২ms লেটেন্সি" : "< 2ms Latency"}
+          </span>
         </div>
 
         {/* Bangladesh Bank Compliance Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
-          <ShieldCheck size={13} className="text-amber-600" />
-          <span>{t("bangladeshBankCompliance")}</span>
+        <div className="hidden 2xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold whitespace-nowrap shrink-0">
+          <ShieldCheck size={13} className="text-amber-600 shrink-0" />
+          <span className="whitespace-nowrap">{t("bangladeshBankCompliance")}</span>
         </div>
 
         {/* English / বাংলা Language Switcher */}
@@ -114,7 +119,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         {/* Simulate Attack — Primary Testing CTA */}
         <button
           onClick={onOpenSimulation}
-          className="btn btn-primary text-xs"
+          className="btn btn-primary btn-simulate text-xs"
           aria-label="Open attack simulation workbench"
         >
           <Zap size={13} className="shrink-0" aria-hidden="true" />

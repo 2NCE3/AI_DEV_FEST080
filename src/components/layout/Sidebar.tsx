@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       key={item.id}
                       onClick={() => handleNav(item.id)}
-                      className={`nav-item w-full text-left transition-colors ${
+                      className={`nav-item nav-${item.id} w-full text-left transition-colors ${
                         isActive ? "active" : ""
                       }`}
                       aria-current={isActive ? "page" : undefined}

@@ -71,44 +71,52 @@ export const InvestigationsView: React.FC<InvestigationsViewProps> = ({
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="tabs">
+      {/* Tabs / Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         {[
           { id: "all", label: language === "bn" ? `সকল কেস (${cases.length})` : `All Open Cases (${cases.length})` },
           { id: "critical", label: language === "bn" ? `মারাত্মক অগ্রাধিকার (${cases.filter(c => c.riskLevel === "Critical").length})` : `Critical Priority (${cases.filter(c => c.riskLevel === "Critical").length})` },
           { id: "high", label: language === "bn" ? `উচ্চ ঝুঁকি (${cases.filter(c => c.riskLevel === "High").length})` : `High Risk (${cases.filter(c => c.riskLevel === "High").length})` },
           { id: "assigned", label: language === "bn" ? "আমার দায়িত্বে" : "Assigned to Me" },
           { id: "resolved", label: language === "bn" ? "নিষ্পত্তি / নিরাপদ" : "Resolved / Safe" },
-        ].map((tab) => (
-          <div
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={activeTab === tab.id ? "active" : ""}
-          >
-            {tab.label}
-          </div>
-        ))}
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all border whitespace-nowrap flex items-center gap-1.5 ${
+                isActive
+                  ? "bg-blue-50 text-blue-700 border-blue-200 font-bold"
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+              }`}
+            >
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Table Card */}
-      <div className="card-base table-card bg-white border border-slate-200">
+      <div className="card-base table-card bg-white border border-slate-200 rounded-lg overflow-hidden">
         {/* Meta & Filters */}
-        <div className="table-meta">
-          <div className="field w-80">
-            <Search size={13} className="text-slate-400 shrink-0" />
+        <div className="table-meta flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 border-b border-slate-200 bg-white">
+          <div className="field w-full sm:w-80 flex items-center gap-2 px-3 py-1.5 rounded-md border border-slate-200 bg-white focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+            <Search size={14} className="text-slate-400 shrink-0" />
             <input
               type="text"
               placeholder={language === "bn" ? "কেস আইডি, ওয়ালেট, কারণ বা বিশ্লেষক খুঁজুন..." : "Search case ID, wallet, reason, or analyst..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="outline-none bg-transparent w-full text-xs text-slate-800"
+              className="outline-none bg-transparent w-full text-xs text-slate-800 placeholder-slate-400"
             />
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-slate-500 font-mono bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
               {language === "bn" ? `${filteredCases.length} টি কেস রেকর্ড প্রদর্শিত` : `Showing ${filteredCases.length} case records`}
-            </div>
+            </span>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Zap,
+  X,
 } from "lucide-react";
 import { useSentinel } from "@/context/SentinelContext";
 
@@ -34,7 +35,7 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
   const [selectedType, setSelectedType] = useState<string>("All");
   const [selectedLocation, setSelectedLocation] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const isBn = language === "bn";
 
   // Filter transactions
@@ -112,19 +113,34 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
       {/* Filter Toolbar */}
       <div className="card-base p-3 border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex flex-wrap items-center gap-2 flex-1">
-          {/* Search box */}
-          <div className="relative min-w-[220px]">
-            <Search
-              size={14}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
-            />
+          {/* Search box with crisp icon and border */}
+          <div className="relative min-w-[250px] sm:min-w-[280px] flex items-center">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none flex items-center justify-center">
+              <Search size={15} className="text-slate-500" />
+            </div>
             <input
               type="text"
               placeholder={isBn ? "ওয়ালেট, আইডি বা প্রাপক খুঁজুন..." : "Search wallet, TXN, recipient..."}
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="field w-full pl-8 text-xs"
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full h-9 pl-9 pr-8 text-xs font-medium rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all shadow-none"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setCurrentPage(1);
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded"
+                title="Clear"
+              >
+                <X size={13} />
+              </button>
+            )}
           </div>
 
           {/* Risk Level Filter */}
@@ -263,27 +279,56 @@ export const TransactionMonitorView: React.FC<TransactionMonitorViewProps> = ({
         </div>
 
         {/* Pagination Controls */}
-        <div className="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-600">
-          <div>
-            {isBn
-              ? `পৃষ্ঠা ${currentPage} / ${totalPages}`
-              : `Page ${currentPage} of ${totalPages}`}
+        <div className="p-3 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+          <div className="flex items-center gap-2">
+            <span>
+              {isBn
+                ? `মোট ${filtered.length} টির মধ্যে ${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filtered.length)} টি প্রদর্শিত`
+                : `Showing ${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filtered.length)} of ${filtered.length} records`}
+            </span>
+            <span className="text-slate-300">|</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500">{isBn ? "প্রতি পৃষ্ঠায়:" : "Per page:"}</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="h-7 px-1.5 text-xs rounded border border-slate-300 bg-white font-medium cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40"
-            >
-              <ChevronRight size={14} />
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-slate-500">
+              {isBn
+                ? `পৃষ্ঠা ${currentPage} / ${totalPages}`
+                : `Page ${currentPage} of ${totalPages}`}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40"
+                title="Previous Page"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-1.5 rounded border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40"
+                title="Next Page"
+              >
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@ import { Toast } from "@/components/ui/Toast";
 import { AppTour } from "@/components/ui/AppTour";
 import { LoginPage, UserProfile } from "@/components/auth/LoginPage";
 import { HelpModal } from "@/components/ui/HelpModal";
+import { GlassAiChatbot } from "@/components/chat/GlassAiChatbot";
 
 function SentinelAppShell() {
   const {
@@ -409,6 +410,12 @@ function SentinelAppShell() {
           </div>
         </div>
       )}
+      
+      {/* Right-Side Glass Bubble AI Chatbot Demo */}
+      <GlassAiChatbot
+        onNavigate={setCurrentPage}
+        onNotify={showNotification}
+      />
     </div>
   );
 }

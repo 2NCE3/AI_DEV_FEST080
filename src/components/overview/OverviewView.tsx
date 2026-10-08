@@ -113,6 +113,113 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
     { name: isBn ? "জেমিনাই কোপাইলট সিন্থেসিস" : "Gemini Copilot Reasoning", status: isBn ? "প্রস্তুত" : "Active", latency: "160ms" },
   ];
 
+  const pipelineStages: {
+    titleEn: string;
+    titleBn: string;
+    descEn: string;
+    descBn: string;
+    page: NavigationPage;
+    step: string;
+    icon: React.ReactNode;
+    bgClass: string;
+    borderClass: string;
+    hoverBorderClass: string;
+    badgeClass: string;
+    iconBgClass: string;
+    iconColorClass: string;
+  }[] = [
+    {
+      titleEn: "Stream Ingestion",
+      titleBn: "স্ট্রিম ইনজেশন",
+      descEn: "Kafka Telemetry & Events",
+      descBn: "লাইভ ট্রানজ্যাকশন স্ট্রিম",
+      page: "transactions",
+      step: "01 · INGEST",
+      icon: <Zap size={13} />,
+      bgClass: "bg-sky-50/80",
+      borderClass: "border-sky-200",
+      hoverBorderClass: "hover:border-sky-400 hover:bg-sky-50",
+      badgeClass: "bg-sky-100 text-sky-800 border-sky-300",
+      iconBgClass: "bg-sky-100",
+      iconColorClass: "text-sky-700",
+    },
+    {
+      titleEn: "Behavioral Baselines",
+      titleBn: "বিহেভিয়ারাল বেসলাইন",
+      descEn: "30-Day Velocity & Profiling",
+      descBn: "ব্যবহারকারী প্রোফাইল ও ব্যত্যয়",
+      page: "customers",
+      step: "02 · BASELINE",
+      icon: <TrendingUp size={13} />,
+      bgClass: "bg-indigo-50/80",
+      borderClass: "border-indigo-200",
+      hoverBorderClass: "hover:border-indigo-400 hover:bg-indigo-50",
+      badgeClass: "bg-indigo-100 text-indigo-800 border-indigo-300",
+      iconBgClass: "bg-indigo-100",
+      iconColorClass: "text-indigo-700",
+    },
+    {
+      titleEn: "BB Compliance Rules",
+      titleBn: "বাংলাদেশ ব্যাংক রুলস",
+      descEn: "BFIU Limits & SIM-Swap",
+      descBn: "সার্কুলার ও লেনদেন সীমা",
+      page: "risk",
+      step: "03 · RULES",
+      icon: <Scale size={13} />,
+      bgClass: "bg-amber-50/80",
+      borderClass: "border-amber-200",
+      hoverBorderClass: "hover:border-amber-400 hover:bg-amber-50",
+      badgeClass: "bg-amber-100 text-amber-800 border-amber-300",
+      iconBgClass: "bg-amber-100",
+      iconColorClass: "text-amber-700",
+    },
+    {
+      titleEn: "Explainable XAI",
+      titleBn: "ব্যাখ্যাযোগ্য এআই (XAI)",
+      descEn: "SHAP Factors & LLM",
+      descBn: "ঝুঁকির মূল ফ্যাক্টর ও কারণ",
+      page: "analytics",
+      step: "04 · AI / XAI",
+      icon: <Sparkles size={13} />,
+      bgClass: "bg-rose-50/80",
+      borderClass: "border-rose-200",
+      hoverBorderClass: "hover:border-rose-400 hover:bg-rose-50",
+      badgeClass: "bg-rose-100 text-rose-800 border-rose-300",
+      iconBgClass: "bg-rose-100",
+      iconColorClass: "text-rose-700",
+    },
+    {
+      titleEn: "Case Dossier",
+      titleBn: "তদন্ত ডসিয়ার কেস",
+      descEn: "Mule Graph & Evidence",
+      descBn: "নেটওয়ার্ক মানচিত্র ও প্রমাণ",
+      page: "investigations",
+      step: "05 · DOSSIER",
+      icon: <Briefcase size={13} />,
+      bgClass: "bg-teal-50/80",
+      borderClass: "border-teal-200",
+      hoverBorderClass: "hover:border-teal-400 hover:bg-teal-50",
+      badgeClass: "bg-teal-100 text-teal-800 border-teal-300",
+      iconBgClass: "bg-teal-100",
+      iconColorClass: "text-teal-700",
+    },
+    {
+      titleEn: "Human Oversight Audit",
+      titleBn: "মানব তদারকি ও অডিট",
+      descEn: "Analyst Sign-off & BFIU",
+      descBn: "এসওসি অনুমোদন ও বিএফআইইউ",
+      page: "investigations",
+      step: "06 · AUDIT",
+      icon: <CheckCircle2 size={13} />,
+      bgClass: "bg-emerald-50/80",
+      borderClass: "border-emerald-200",
+      hoverBorderClass: "hover:border-emerald-400 hover:bg-emerald-50",
+      badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-300",
+      iconBgClass: "bg-emerald-100",
+      iconColorClass: "text-emerald-700",
+    },
+  ];
+
   return (
     <div className="space-y-4 animate-fadeIn">
       {/* Page Header */}
@@ -127,8 +234,8 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </h1>
           <p className="page-subtitle text-slate-600">
             {isBn
-              ? "রিয়েল-টাইম এমএফএস লেনদেন স্ক্যানিং → বিহেভিয়ারাল বেসলাইন → বাংলাদেশ ব্যাংক কমপ্লায়েন্স → জেমিনাই তদন্ত কোপাইলট → মানব অনুমোদন ও বিএফআইইউ রিপোর্টিং।"
-              : "End-to-end MFS fraud pipeline: Stream Ingestion → Behavioral Baselines → Bangladesh Bank Rules → Explainable XAI → Case Dossier → Human Oversight Audit."}
+              ? "স্বয়ংক্রিয় লেনদেন স্ক্রিনিং, সমন্বিত এআই রিস্ক স্কোরিং এবং বিএফআইইউ কমপ্লায়েন্স সুরক্ষা প্ল্যাটফর্ম।"
+              : "Autonomous MFS transaction screening, composite AI risk evaluation, and regulatory BFIU compliance."}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -146,6 +253,71 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
             <span>{isBn ? "লাইভ মনিটর" : "Live Monitor"}</span>
             <ArrowRight size={13} />
           </button>
+        </div>
+      </div>
+
+      {/* ─── End-to-End MFS Fraud Pipeline: Colorful Grid Boxy Row with Connected Flow ─── */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-3.5 shadow-none">
+        <div className="flex items-center justify-between mb-2.5 px-0.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#0052FF] animate-pulse" />
+            <span className="text-[11px] font-black tracking-wider uppercase text-slate-800">
+              {isBn ? "এন্ড-টু-এন্ড এমএফএস জালিয়াতি প্রতিরোধ পাইপলাইন" : "End-to-End MFS Fraud Pipeline"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-block text-[10px] text-slate-400 font-medium">
+              {isBn ? "স্বয়ংক্রিয় শৃঙ্খল প্রবাহ" : "Sequential Intelligence Pipeline"}
+            </span>
+            <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+              6 {isBn ? "ধাপ" : "STAGES"}
+            </span>
+          </div>
+        </div>
+
+        {/* 6-Column Boxy Responsive Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {pipelineStages.map((stage, idx) => (
+            <div
+              key={idx}
+              onClick={() => onNavigate(stage.page)}
+              className={`group relative rounded-xl p-2.5 sm:p-3 border transition-all cursor-pointer flex flex-col justify-between ${stage.bgClass} ${stage.borderClass} ${stage.hoverBorderClass}`}
+              title={isBn ? `${stage.titleBn} মডিউল খুলুন` : `Open ${stage.titleEn}`}
+            >
+              {/* Top Pill Row + Step + Connected Arrow */}
+              <div className="flex items-center justify-between mb-2">
+                <span className={`text-[9.5px] font-mono font-black px-1.5 py-0.5 rounded border uppercase leading-none ${stage.badgeClass}`}>
+                  {stage.step}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-5 h-5 rounded-md flex items-center justify-center ${stage.iconBgClass} ${stage.iconColorClass}`}>
+                    {stage.icon}
+                  </div>
+                  {idx < 5 && (
+                    <span className="hidden lg:inline-block text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all font-black text-xs">
+                      →
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Title & Subtitle */}
+              <div className="my-0.5">
+                <h4 className="text-xs font-black text-slate-900 leading-snug group-hover:text-blue-600 transition-colors">
+                  {isBn ? stage.titleBn : stage.titleEn}
+                </h4>
+                <p className="text-[10.5px] text-slate-600 mt-0.5 leading-tight line-clamp-1 font-medium">
+                  {isBn ? stage.descBn : stage.descEn}
+                </p>
+              </div>
+
+              {/* Action Hint */}
+              <div className="mt-2 pt-1.5 border-t border-black/[0.06] flex items-center justify-between text-[10px] font-semibold text-slate-400 group-hover:text-slate-800">
+                <span>{isBn ? "মডিউল দেখুন" : "View Stage"}</span>
+                <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
